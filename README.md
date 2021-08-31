@@ -4,19 +4,36 @@ Minimum working example for spiral reconstruction with GIRF correction
 
 ## Getting Started!
 
-To get started, make sure you have Julia installed. At least v1.5 is preferable (v1.6 is optimal).
+1. To get started, make sure you have Julia installed. At least v1.5 is preferable (v1.6 is optimal).
 
-Then, open the GIRFReco folder in the text editor of your choice (we use Atom) after configuring the text editor to use Julia. 
+2. Open the GIRFReco folder in the text editor of your choice (we use Atom with the Julia extension *Juno*) after configuring the text editor to use Julia. 
 
-Once your editor is prepared, and the GIRFReco folder is opened, open the package cmd line (by typing "]") and type the following:
-
-"activate ."
-
-This activates the Julia environment for the GIRFReco code. 
-
-After typing this, wait for a while until the command line finishes setting up the Julia environment. If there is an error, you might have to instantiate the environment (follow the prompts in the command line)
-
-After instantiation (successful or not), you have to add MRIReco.jl to the package list
+3. Once your editor is prepared, and the GIRFReco folder is opened, open the package cmd line by typing 
+   ```
+   ]
+   ```
+   - Your prompt should now say `pkg>` instead of `julia>`
+   - If you have to get back to the julia prompt later, press `CTRL+C`
+5. Within the package cmd line, activate the project environment:
+    ```
+    activate .
+    ```
+    - This activates the Julia environment for the GIRFReco code. 
+    - After typing this, wait for a while until the command line finishes setting up the Julia environment. 
+4. If this is your first timing activating this environment, you have to instantiate it after activating it via
+    ```
+    instantiate
+    ```
+    - Some packages might fail to install, but they are usually not needed by our code.
+5. Add MRIReco.jl to your environment's package list via
+    ```
+    add MRIReco
+    ```
+6. We have to make some small changes to MRIReco to make it compatible with GIRFReco. To make packages editable add them as development packages via
+    ```
+    dev MRIReco
+    ```
+    - *Note*: If you have installed MRIReco as a dev package for other projects earlier, it might not have been updated to the latest version. In this case, go to you local package folder (usually `C:\Users\<username>\.julia\dev\MRIReco`) and `git pull` to update to the current master
 
 ## Examples
 1.  GIRF.jl in action: Predicting an actual gradient waveform from a nominal one using the GIRF
