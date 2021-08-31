@@ -2,7 +2,7 @@ using DelimitedFiles, MRIReco, PyPlot, Dierckx, MAT, DSP
 
 export GirfEssential, convertDomain!, time2freq, loadGirf, formatGirf, setIdentifier!
 
-include("Util.jl")
+include("GIRFReco/girf/Util.jl")
 
 ## GirfEssential
 #  Struct definition as per Johanna's GirfEssential class in GIRF MATLAB repo
@@ -230,9 +230,9 @@ end
 # Store the GIRF Fourier Representation in an Nx3 matrix, with second dimension indices 1,2,3 corresponding to directions x,y,z respectively
 function buildGIRF()
 
-    girf_filename_x = "C:\\Users\\ajaff\\UHN\\Brain-TO - MRP-GIRF - MRP-GIRF\\results\\GIRF_5usDwellTime\\GIRFGx_CoilCombined_Dwell5us.mat"
-    girf_filename_y = "C:\\Users\\ajaff\\UHN\\Brain-TO - MRP-GIRF - MRP-GIRF\\results\\GIRF_5usDwellTime\\GIRFGy_CoilCombined_Dwell5us.mat"
-    girf_filename_z = "C:\\Users\\ajaff\\UHN\\Brain-TO - MRP-GIRF - MRP-GIRF\\results\\GIRF_5usDwellTime\\GIRFGz_CoilCombined_Dwell5us.mat"
+    girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"
+    girf_filename_y = "GIRFReco/data/GIRF/GIRF_Y.mat"
+    girf_filename_z = "GIRFReco/data/GIRF/GIRF_Z.mat"
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)
@@ -258,9 +258,9 @@ end
 
 function buildGIRF_PN(doPlot = true, doFiltering = true)
 
-    girf_filename_x = "E:\\MRP_GIRF\\results\\GIRF_X.mat"
-    girf_filename_y = "E:\\MRP_GIRF\\results\\GIRF_Y.mat"
-    girf_filename_z = "E:\\MRP_GIRF\\results\\GIRF_Z.mat"
+    girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"
+    girf_filename_y = "GIRFReco/data/GIRF/GIRF_Y.mat"
+    girf_filename_z = "GIRFReco/data/GIRF/GIRF_Z.mat"
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)
@@ -345,9 +345,9 @@ end
 
 function buildGIRF_K0(doPlot = true, doFiltering = true)
 
-    girf_filename_x = "E:\\MRP_GIRF\\results\\GIRF_X.mat"
-    girf_filename_y = "E:\\MRP_GIRF\\results\\GIRF_Y.mat"
-    girf_filename_z = "E:\\MRP_GIRF\\results\\GIRF_Z.mat"
+    girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"
+    girf_filename_y = "GIRFReco/data/GIRF/GIRF_Y.mat"
+    girf_filename_z = "GIRFReco/data/GIRF/GIRF_Z.mat"
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)

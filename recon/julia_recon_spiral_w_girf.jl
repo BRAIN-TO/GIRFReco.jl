@@ -31,10 +31,10 @@ adjustmentDict[:delay] = 0.00000 # naive delay correction
 
 # adjustmentDict[:interleaveDataFileNames] = ["C:/Users/ajaff/Documents/BrainTO/SPIDI_004_ISMRMRD_FILES/523_92_1_1.h5", "C:/Users/ajaff/Documents/BrainTO/SPIDI_004_ISMRMRD_FILES/523_94_2_1.h5", "C:/Users/ajaff/Documents/BrainTO/SPIDI_004_ISMRMRD_FILES/523_96_3_1.h5", "C:/Users/ajaff/Documents/BrainTO/SPIDI_004_ISMRMRD_FILES/523_98_4_1.h5"]
 
-adjustmentDict[:interleaveDataFileNames] = ["C:/Users/ajaff/Documents/BrainTO/SPIDI_004_ISMRMRD_FILES/523_21_1_2.h5", "C:/Users/ajaff/Documents/BrainTO/SPIDI_004_ISMRMRD_FILES/523_23_2_2.h5", "C:/Users/ajaff/Documents/BrainTO/SPIDI_004_ISMRMRD_FILES/523_25_3_2.h5", "C:/Users/ajaff/Documents/BrainTO/SPIDI_004_ISMRMRD_FILES/523_27_4_2.h5"]
+adjustmentDict[:interleaveDataFileNames] = ["GIRFReco/data/Spirals/523_21_1_2.h5", "GIRFReco/data/Spirals/523_23_2_2.h5", "GIRFReco/data/Spirals/523_25_3_2.h5", "GIRFReco/data/Spirals/523_27_4_2.h5"]
 
 
-adjustmentDict[:trajFilename] = "C:\\Users\\ajaff\\Documents\\BrainTO\\Brain-TO - MRP-SPIDI - SPIDI\\data\\SPIDI_0003\\gradients\\gradients523.txt"
+adjustmentDict[:trajFilename] = "GIRFReco/data/Gradients/gradients523.txt"
 adjustmentDict[:excitations] = sliceSelection
 
 adjustmentDict[:doMultiInterleave] = true

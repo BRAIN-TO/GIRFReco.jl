@@ -8,9 +8,9 @@ export read_gradient_txt_file, buildGIRF, predictGrad_port, time2freq, buildGIRF
 # Store the GIRF Fourier Representation in an Nx3 matrix, with second dimension indices 1,2,3 corresponding to directions x,y,z respectively
 function buildGIRF()
 
-    girf_filename_x = "C:\\Users\\ajaff\\UHN\\Brain-TO - MRP-GIRF - MRP-GIRF\\results\\GIRF_5usDwellTime\\GIRFGx_CoilCombined_Dwell5us.mat"
-    girf_filename_y = "C:\\Users\\ajaff\\UHN\\Brain-TO - MRP-GIRF - MRP-GIRF\\results\\GIRF_5usDwellTime\\GIRFGy_CoilCombined_Dwell5us.mat"
-    girf_filename_z = "C:\\Users\\ajaff\\UHN\\Brain-TO - MRP-GIRF - MRP-GIRF\\results\\GIRF_5usDwellTime\\GIRFGz_CoilCombined_Dwell5us.mat"
+    girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"
+    girf_filename_y = "GIRFReco/data/GIRF/GIRF_Y.mat"
+    girf_filename_z = "GIRFReco/data/GIRF/GIRF_Z.mat"
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)
@@ -37,11 +37,11 @@ end
 function buildGIRF_PN(doPlot = true, doFiltering = true)
 
     # SUPPRESS PLOTTING
-    doPlot = false 
+    doPlot = false
 
-    girf_filename_x = "E:\\MRP_GIRF\\results\\GIRF_X.mat"
-    girf_filename_y = "E:\\MRP_GIRF\\results\\GIRF_Y.mat"
-    girf_filename_z = "E:\\MRP_GIRF\\results\\GIRF_Z.mat"
+    girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"
+    girf_filename_y = "GIRFReco/data/GIRF/GIRF_Y.mat"
+    girf_filename_z = "GIRFReco/data/GIRF/GIRF_Z.mat"
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)
@@ -129,9 +129,9 @@ function buildGIRF_K0(doPlot = true, doFiltering = true)
     # SUPPRESS PLOTTING
     doPlot = false
 
-    girf_filename_x = "E:\\MRP_GIRF\\results\\GIRF_X.mat"
-    girf_filename_y = "E:\\MRP_GIRF\\results\\GIRF_Y.mat"
-    girf_filename_z = "E:\\MRP_GIRF\\results\\GIRF_Z.mat"
+    girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"
+    girf_filename_y = "GIRFReco/data/GIRF/GIRF_Y.mat"
+    girf_filename_z = "GIRFReco/data/GIRF/GIRF_Z.mat"
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)
@@ -565,7 +565,7 @@ function read_gradient_txt_file(fileName, reconSize, delay, doGIRF)
 end
 
 ## Testing
-gradFile = "C:/Users//ajaff/Documents/BrainTO/Brain-TO - MRP-SPIDI - SPIDI/data/SPIDI_0003/gradients/gradients523.txt"
+gradFile = "GIRFReco/data/Gradients/gradients523.txt"
 
 ##
 kSpaceTrajectory, k0_phase = read_gradient_txt_file(gradFile, (200,200), 0.00000, true)
@@ -589,12 +589,3 @@ title("K-space Center")
 xlim((-0.05,0.05))
 ylim((-0.05,0.05))
 legend()
-
-
-
-
-#ax.plot(pulledTrajectory31[1:3100],pulledTrajectory32[1:3100])
-#ax.scatter(pulledTrajectory21[1:3100],pulledTrajectory22[1:3100])
-#ax.scatter(pulledTrajectory41[1:3100],pulledTrajectory42[1:3100])
-
-# ax.set_aspect(aspect=1.0)

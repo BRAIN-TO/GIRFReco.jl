@@ -105,11 +105,9 @@ predictGrad_port(freq_GIRF,GIRF,time_in,gradient_in,time_out)
 ##
 function buildGIRF()
 
-
-
-    girf_filename_x = "C:\\Users\\ajaff\\UHN\\Brain-TO - MRP-GIRF - MRP-GIRF\\results\\GIRF_5usDwellTime\\GIRFGx_CoilCombined_Dwell5us.mat"
-    girf_filename_y = "C:\\Users\\ajaff\\UHN\\Brain-TO - MRP-GIRF - MRP-GIRF\\results\\GIRF_5usDwellTime\\GIRFGy_CoilCombined_Dwell5us.mat"
-    girf_filename_z = "C:\\Users\\ajaff\\UHN\\Brain-TO - MRP-GIRF - MRP-GIRF\\results\\GIRF_5usDwellTime\\GIRFGz_CoilCombined_Dwell5us.mat"
+    girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"
+    girf_filename_y = "GIRFReco/data/GIRF/GIRF_Y.mat"
+    girf_filename_z = "GIRFReco/data/GIRF/GIRF_Z.mat"
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)
