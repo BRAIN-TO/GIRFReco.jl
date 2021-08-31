@@ -18,5 +18,13 @@ After typing this, wait for a while until the command line finishes setting up t
 
 After instantiation (successful or not), you have to add MRIReco.jl to the package list
 
-
+## Examples
+1.  GIRF.jl in action: Predicting an actual gradient waveform from a nominal one using the GIRF
+    ```
+    girf/GIRFDemo.jl
+    ```
+2.  Interplay of GIRF.jl and MRIReco.jl: Using the julia recon package to reconstruct a spiral image with a GIRF-predicted trajectory
+    ```
+    recon/julia_recon_spiral_w_girf.jl
+    ```
 
