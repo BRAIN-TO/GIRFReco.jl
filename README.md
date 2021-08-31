@@ -13,6 +13,7 @@ Minimum working example for spiral reconstruction with GIRF correction
    ]
    ```
    - Your prompt should now say `pkg>` instead of `julia>`
+   - All the following commands are within the `pkg>` prompt.
    - If you have to get back to the julia prompt later, press `CTRL+C`
 5. Within the package cmd line, activate the project environment:
     ```
@@ -34,6 +35,11 @@ Minimum working example for spiral reconstruction with GIRF correction
     dev MRIReco
     ```
     - *Note*: If you have installed MRIReco as a dev package for other projects earlier, it might not have been updated to the latest version. In this case, go to you local package folder (usually `C:\Users\<username>\.julia\dev\MRIReco`) and `git pull` to update to the current master
+7. Update your packages and restart Julia. You might have to repeat sthis several times until the update command finishes without errors:
+   ```
+   update
+   ```
+   - *Note*: The `dev` package of MRIReco might have a local path from a different computer saved in the `Manifest.toml` file (main folder of `GIRFReco`). If you get a related error message, use a text editor to change it in that file to `C:\Users\<username>\.julia\dev\MRIReco` and redo the update.
 
 ## Examples
 1.  GIRF.jl in action: Predicting an actual gradient waveform from a nominal one using the GIRF
