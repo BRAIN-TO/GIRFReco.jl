@@ -85,24 +85,6 @@ function time2freq(t)
 end
 
 ##
-#Testing
-# NEEDS: freq_GIRF, GIRF, time_in, gradient_in
-time_in = collect(0.009*(0:100000-1))
-gradient_in = sin.(time_in.*60000)
-time_out = time_in
-
-gx_filename = "C:\\Users\\ajaff\\UHN\\Brain-TO - MRP-GIRF - MRP-GIRF\\results\\GIRF_5usDwellTime\\GIRFGx_CoilCombined_Dwell5us.mat"
-
-dataFile = matread(gx_filename)
-
-df = 20 #Hz
-freq_GIRF = df.*(2:length(dataFile["GIRF_FT"])) .- 100000
-
-GIRF = dataFile["GIRF_FT"][2:end]
-
-predictGrad_port(freq_GIRF,GIRF,time_in,gradient_in,time_out)
-
-##
 function buildGIRF()
 
     girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"

@@ -1,8 +1,8 @@
 using DelimitedFiles, MRIReco, PyPlot, Dierckx, MAT, DSP
 
-export GirfEssential, convertDomain!, time2freq, loadGirf, formatGirf, setIdentifier!
+export GirfEssential, convertDomain!, time2freq, loadGirf, setIdentifier!
 
-include("GIRFReco/girf/Util.jl")
+include("Util.jl")
 
 ## GirfEssential
 #  Struct definition as per Johanna's GirfEssential class in GIRF MATLAB repo
@@ -25,7 +25,7 @@ mutable struct GirfEssential
     # [nSamples x nOutBasis x nInChannels] Calculated GIRF (self and cross-terms)
     girf::AbstractVecOrMat
 
-    # [nSamples] frequency vector
+    # [nSamples] frequency vector [units Hz]
     freq::AbstractVector
 
     # [nSamples x nOutBasis x nInChannels] if GIRF is in the time domain
@@ -218,6 +218,9 @@ function loadGirf(degree = 1)
         @error "Tried to load unexpected GIRF degree"
     end
 
+    @info "Converted GIRF from kHz to Hz"
+    gFreq = gFreq.*1000
+
     @info "Loaded GIRF data\n"
 
     return GirfEssential(gData, gFreq, true, ["X", "Y", "Z"], [3])
@@ -289,42 +292,42 @@ function buildGIRF_PN(doPlot = true, doFiltering = true)
 
     if doPlot
 
-        figure("Gx GIRF Magnitude")
+        figure("Gx GIRF Magnitude (k1)")
         plot(GIRF_freq, abs.(GIRF_data[:,1]))
         xlim([-30,30])
         ylim([0.0, 1.05])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Magnitude")
 
-        figure("Gy GIRF Magnitude")
+        figure("Gy GIRF Magnitude (k1)")
         plot(GIRF_freq, abs.(GIRF_data[:,2]))
         xlim([-30,30])
         ylim([0.0, 1.05])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Magnitude")
 
-        figure("Gz GIRF Magnitude")
+        figure("Gz GIRF Magnitude (k1)")
         plot(GIRF_freq, abs.(GIRF_data[:,3]))
         xlim([-30,30])
         ylim([0.0, 1.05])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Magnitude")
 
-        figure("Gx GIRF Phase")
+        figure("Gx GIRF Phase (k1)")
         plot(GIRF_freq, angle.(GIRF_data[:,1]))
         xlim([-30,30])
         ylim([-pi, pi])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Phase")
 
-        figure("Gy GIRF Phase")
+        figure("Gy GIRF Phase (k1)")
         plot(GIRF_freq, angle.(GIRF_data[:,2]))
         xlim([-30,30])
         ylim([-pi, pi])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Phase")
 
-        figure("Gz GIRF Phase")
+        figure("Gz GIRF Phase (k1)")
         plot(GIRF_freq, angle.(GIRF_data[:,3]))
         xlim([-30,30])
         ylim([-pi,pi])
@@ -378,28 +381,28 @@ function buildGIRF_K0(doPlot = true, doFiltering = true)
 
     if doPlot
 
-        figure("Gx GIRF Magnitude")
+        figure("Gx GIRF Magnitude (k0)")
         plot(GIRF_freq, abs.(GIRF_data[:,1]))
         xlim([-3,3])
         ylim([0.0, 80])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Magnitude")
 
-        figure("Gy GIRF Magnitude")
+        figure("Gy GIRF Magnitude (k0)")
         plot(GIRF_freq, abs.(GIRF_data[:,2]))
         xlim([-3,3])
         ylim([0.0, 80])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Magnitude")
 
-        figure("Gz GIRF Magnitude")
+        figure("Gz GIRF Magnitude (k0)")
         plot(GIRF_freq, abs.(GIRF_data[:,3]))
         xlim([-3,3])
         ylim([0.0, 80])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Magnitude")
 
-        figure("Gx GIRF Phase")
+        figure("Gx GIRF Phase (k0)")
         plot(GIRF_freq, angle.(GIRF_data[:,1]))
         xlim([-3,3])
         ylim([-pi, pi])
@@ -407,14 +410,14 @@ function buildGIRF_K0(doPlot = true, doFiltering = true)
         ylabel("GIRF Phase")
 
 
-        figure("Gy GIRF Phase")
+        figure("Gy GIRF Phase (k0)")
         plot(GIRF_freq, angle.(GIRF_data[:,2]))
         xlim([-3,3])
         ylim([-pi, pi])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Phase")
 
-        figure("Gz GIRF Phase")
+        figure("Gz GIRF Phase (k0)")
         plot(GIRF_freq, angle.(GIRF_data[:,3]))
         xlim([-3,3])
         ylim([-pi,pi])
@@ -433,109 +436,6 @@ end
 function setSelfBasis(g::GirfEssential)
 
     #Implement the method selfBasis written in lines 84 to 99 of GirfEssential.m in Johanna's GIRF code
-
-end
-
-## Function for predicting the gradient by applying the GIRF
-# This is done in one dimension only. Repeat this function for multiple dimensions
-# Inputs:
-#   freq_GIRF: Vector (sampling frequencies for the GIRF data)
-#   GIRF: Vector (GIRF data in the frequency domain)
-#   time_in: Vector (Sampling times for the time domain gradient data)
-#   gradient_in: Vector (time domain gradient data sampled at times in time_in)
-#   time_out: Vector (desired sampling times for the output gradient)
-
-# Outputs:
-#   grad_OUT_resampled: Vector (filtered gradient data sampled at time_out)
-
-function applyGIRF(g::GirfEssential, gradient_in, time_in, time_out)
-
-    # Input variables
-    # time_in: input time vector
-    # gradient_in: input gradient
-    # directions: gradient correction directions
-    # convolution_type: type of convolution
-
-    # Output variables
-    # gradient_out: output gradient vector (sampled on time_out)
-    # time_out: output time vector
-
-    # GET GIRF DATA FROM THE GIRF DATATYPE
-    freq_GIRF = g.freq
-    GIRF = g.girf
-
-
-    # check dimensions
-    ns_GIRF = length(GIRF)
-    df_GIRF = abs.(freq_GIRF[2] - freq_GIRF[1])
-    #@info df_GIRF
-
-    # make copies so that original variables and objects are not mutated
-    gradient_in_original = deepcopy(gradient_in)
-    time_in_original = deepcopy(time_in)
-
-    t_or1, t_or2, t_or3 = time2freq(time_in_original)
-
-    figure("RAW FFT")
-    plot(t_or1, abs.(fftshift(fft(gradient_in_original))))
-    semilogy()
-
-    # Set length of prediction
-    T_GIRF = 1 ./df_GIRF # Signal Length for nyquist fs = 2B and T = 1/2B
-    T_O = max(time_in[end], time_out[end]) - min(time_in[1], time_out[1])
-    T_ZF = min(T_GIRF, T_O) # Zero pad to the shortest time of the two
-    #@info T_GIRF
-    #@info T_ZF
-
-    # prepare input in time
-    dt_in = abs.(time_in[2] - time_in[1])
-    nZF = Int(ceil(T_ZF./dt_in)) # test this out
-    #@info nZF
-
-    # Do Zero filling
-    gradient_in = vcat(zeros(nZF),  gradient_in, zeros(nZF))
-    time_in = vcat(time_in[1] .+ dt_in*(-nZF:-1), time_in, time_in[end] .+ dt_in*(1:nZF))
-
-    # WRITE GRADIENTS TO MATLAB FILE FOR EXTERNAL TESTING
-    # testDictionary = Dict{String,Any}()
-    # testDictionary["grads"] = gradient_in
-    #
-    # matwrite("grad_in.mat",testDictionary)
-
-    # get updated frequency vector corresponding to Zero padded time vector
-    f_in, df, f_max = time2freq(time_in)
-
-    # Get frequency domain gradient
-    IN = fftshift(fft(gradient_in)).*dt_in
-    ns_in = length(time_in)
-
-    # interpolate GIRF onto the input grid
-    GIRF_real_spline = Spline1D(freq_GIRF,real.(GIRF), w=ones(length(freq_GIRF)), k=3, bc = "zero")
-    GIRF_imaginary_spline = Spline1D(freq_GIRF, imag.(GIRF), w=ones(length(freq_GIRF)), k=3, bc = "zero")
-
-    # recombine interpolated reals and imaginary parts
-    GIRF_ip = GIRF_real_spline(f_in) .+ 1im.*GIRF_imaginary_spline(f_in)
-
-    ## filter the output to avoid aliasing
-    figure("Response")
-    windowFunction = fftshift(tukey(length(GIRF_ip), 0.5;zerophase = true))
-    plot(windowFunction)
-    plot(GIRF_ip)
-    GIRF_ip = windowFunction .* GIRF_ip
-    plot(GIRF_ip)
-
-    # Convolution in Time (mult in freq) to get output Gradient train in frequency domain
-    OUT = GIRF_ip.*IN
-
-    grad_OUT = real.(ifft(ifftshift(OUT))./dt_in)
-
-    grad_OUT_spline = Spline1D(time_in,grad_OUT, w=ones(length(time_in)), k=3, bc = "zero")
-    grad_OUT_resampled = grad_OUT_spline(time_out)
-
-    figure("Difference between corrected and uncorrected gradients")
-    plot(grad_OUT_resampled .- gradient_in_original)
-
-    return grad_OUT_resampled
 
 end
 
