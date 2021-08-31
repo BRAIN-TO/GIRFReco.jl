@@ -42,6 +42,14 @@ Minimum working example for spiral reconstruction with GIRF correction
    - *Note*: The `dev` package of MRIReco might have a local path from a different computer saved in the `Manifest.toml` file (main folder of `GIRFReco`). If you get a related error message, use a text editor to change it in that file to `C:\Users\<username>\.julia\dev\MRIReco` and redo the update.
 
 ## Examples
+
+- To run the following examples, open the listed files in your editor. 
+- Make sure your current folder is `GIRFReco` and its environment is activated.
+- For Atom/Juno:
+     - right-click on the folder, then `Juno -> Work in Folder` and `Juno -> Activate Environment in Folder` (or activate via the `pkg>` prompt as above)
+     - Juno shortcut for running an open file: `CTRL+SHIFT+ENTER`
+     - Juno shortcut for running a block (separated by a line startin with `## ` in the file): `ALT+ENTER`
+    
 1.  GIRF.jl in action: Predicting an actual gradient waveform from a nominal one using the GIRF
     ```
     girf/GIRFDemo.jl
