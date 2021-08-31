@@ -5,19 +5,21 @@ using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, Images, FourierTools, 
 include("../io/grad_reader.jl")
 include("../utils/utils.jl")
 
-## Load reconstructed data files (can be undersampled) THIS SHOULD BE THE ONLY SECTION NEEDED TO EDIT TO ADJUST FOR DIFFERENT SCANS
+## Load ISMRMRD data files (can be undersampled) THIS SHOULD BE THE ONLY SECTION NEEDED TO EDIT TO ADJUST FOR DIFFERENT SCANS
 @info "Loading Data Files"
 
 # selectedSlice = 3
 
 selectedSlice = 1
 
-# excitationList = 20:2:36
+# excitationList = 20:2:36 # for MULTISLICE
 
 excitationList = [4]
 
 sliceSelection = excitationList[selectedSlice]
 
+
+# adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
 adjustmentDict[:reconSize] = (200,200)
 adjustmentDict[:interleave] = 1
@@ -25,12 +27,6 @@ adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 20
 adjustmentDict[:numSamples] = 15475
 adjustmentDict[:delay] = 0.00000 # naive delay correction
-# adjustmentDict[:interleaveDataFileNames] = ["C:/Users/ajaff/Documents/BrainTO/test_ismrmrd/523_96_2.h5", "C:/Users/ajaff/Documents/BrainTO/test_ismrmrd/523_98_2.h5", "C:/Users/ajaff/Documents/BrainTO/test_ismrmrd/523_100_2.h5", "C:/Users/ajaff/Documents/BrainTO/test_ismrmrd/523_102_2.h5"]
-
-#adjustmentDict[:interleaveDataFileNames] = ["C:/Users/ajaff/Documents/BrainTO/test_ismrmrd/523_35_0_2.h5", "C:/Users/ajaff/Documents/BrainTO/test_ismrmrd/523_35_1_2.h5", "C:/Users/ajaff/Documents/BrainTO/test_ismrmrd/523_35_2_2.h5", "C:/Users/ajaff/Documents/BrainTO/test_ismrmrd/523_35_3_2.h5"]
-
-# adjustmentDict[:interleaveDataFileNames] = ["C:/Users/ajaff/Documents/BrainTO/SPIDI_004_ISMRMRD_FILES/523_92_1_1.h5", "C:/Users/ajaff/Documents/BrainTO/SPIDI_004_ISMRMRD_FILES/523_94_2_1.h5", "C:/Users/ajaff/Documents/BrainTO/SPIDI_004_ISMRMRD_FILES/523_96_3_1.h5", "C:/Users/ajaff/Documents/BrainTO/SPIDI_004_ISMRMRD_FILES/523_98_4_1.h5"]
-
 adjustmentDict[:interleaveDataFileNames] = ["GIRFReco/data/Spirals/523_21_1_2.h5", "GIRFReco/data/Spirals/523_23_2_2.h5", "GIRFReco/data/Spirals/523_25_3_2.h5", "GIRFReco/data/Spirals/523_27_4_2.h5"]
 
 
