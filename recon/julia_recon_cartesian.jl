@@ -93,7 +93,7 @@ reconSize = (400,200)
 
 @info "Loading Data Files"
 # Set the data file name (Change this for your own system)
-dataFileCartesian = ISMRMRDFile("GIRFReco/data/Fieldmaps/fieldMap_30_2.h5")
+dataFileCartesian = ISMRMRDFile("data/Fieldmaps/fieldMap_30_2.h5")
 
 # read in the raw data from the ISMRMRD file into a RawAcquisitionData object
 rawDataCartesian = RawAcquisitionData(dataFileCartesian)

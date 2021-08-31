@@ -2,8 +2,8 @@ using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, Images, FourierTools, 
 
 ## Preparation
 
-include("../io/grad_reader.jl")
-include("../utils/utils.jl")
+include("io/grad_reader.jl")
+include("utils/utils.jl")
 
 ## Load ISMRMRD data files (can be undersampled) THIS SHOULD BE THE ONLY SECTION NEEDED TO EDIT TO ADJUST FOR DIFFERENT SCANS
 @info "Loading Data Files"
@@ -27,10 +27,10 @@ adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 20
 adjustmentDict[:numSamples] = 15475
 adjustmentDict[:delay] = 0.00000 # naive delay correction
-adjustmentDict[:interleaveDataFileNames] = ["GIRFReco/data/Spirals/523_21_1_2.h5", "GIRFReco/data/Spirals/523_23_2_2.h5", "GIRFReco/data/Spirals/523_25_3_2.h5", "GIRFReco/data/Spirals/523_27_4_2.h5"]
+adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_21_1_2.h5", "data/Spirals/523_23_2_2.h5", "data/Spirals/523_25_3_2.h5", "data/Spirals/523_27_4_2.h5"]
 
 
-adjustmentDict[:trajFilename] = "GIRFReco/data/Gradients/gradients523.txt"
+adjustmentDict[:trajFilename] = "data/Gradients/gradients523.txt"
 adjustmentDict[:excitations] = sliceSelection
 
 adjustmentDict[:doMultiInterleave] = true
