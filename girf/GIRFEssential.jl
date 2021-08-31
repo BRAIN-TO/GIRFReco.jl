@@ -233,9 +233,9 @@ end
 # Store the GIRF Fourier Representation in an Nx3 matrix, with second dimension indices 1,2,3 corresponding to directions x,y,z respectively
 function buildGIRF()
 
-    girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"
-    girf_filename_y = "GIRFReco/data/GIRF/GIRF_Y.mat"
-    girf_filename_z = "GIRFReco/data/GIRF/GIRF_Z.mat"
+    girf_filename_x = "data/GIRF/GIRF_X.mat"
+    girf_filename_y = "data/GIRF/GIRF_Y.mat"
+    girf_filename_z = "data/GIRF/GIRF_Z.mat"
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)
@@ -261,9 +261,9 @@ end
 
 function buildGIRF_PN(doPlot = true, doFiltering = true)
 
-    girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"
-    girf_filename_y = "GIRFReco/data/GIRF/GIRF_Y.mat"
-    girf_filename_z = "GIRFReco/data/GIRF/GIRF_Z.mat"
+    girf_filename_x = "data/GIRF/GIRF_X.mat"
+    girf_filename_y = "data/GIRF/GIRF_Y.mat"
+    girf_filename_z = "data/GIRF/GIRF_Z.mat"
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)
@@ -348,9 +348,9 @@ end
 
 function buildGIRF_K0(doPlot = true, doFiltering = true)
 
-    girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"
-    girf_filename_y = "GIRFReco/data/GIRF/GIRF_Y.mat"
-    girf_filename_z = "GIRFReco/data/GIRF/GIRF_Z.mat"
+    girf_filename_x = "../data/GIRF/GIRF_X.mat"
+    girf_filename_y = "../data/GIRF/GIRF_Y.mat"
+    girf_filename_z = "../data/GIRF/GIRF_Z.mat"
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)
