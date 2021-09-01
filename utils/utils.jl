@@ -4,10 +4,10 @@ using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, Images, FourierTools, 
 
 function plotSenseMaps(sense,n_channels)
 
-    figure(3); clf(); for ch in 1:n_channels; subplot(8,4,ch); imshow((abs.(sense[:,:,1,ch]))); end;
+    figure(3); clf(); for ch in 1:n_channels; subplot(8,4,ch); PyPlot.imshow((abs.(sense[:,:,1,ch]))); end;
     subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
     gcf()
-    figure(4); clf(); for ch in 1:n_channels; subplot(8,4,ch); imshow(ROMEO.unwrap(angle.(sense[:,:,1,ch]))); end;
+    figure(4); clf(); for ch in 1:n_channels; subplot(8,4,ch); PyPlot.imshow(ROMEO.unwrap(angle.(sense[:,:,1,ch]))); end;
     subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
     gcf()
 
@@ -33,7 +33,7 @@ function plotReconstruction(reco, slices)
     absData = 2 .*mapslices(x->abs.(x),reco.data[:,:,slices,1,1],dims=(1,2))
     absMosaic = mosaicview(absData, nrow=Int(floor(sqrt(length(slices)))),npad=5,rowmajor=true, fillvalue=0)
 
-    imshow(absMosaic,cmap="gray", vmax = 0.5e-5, vmin = 0)
+    PyPlot.imshow(absMosaic,cmap="gray", vmax = 0.5e-5, vmin = 0)
     colorbar()
 
     gcf().suptitle("|Images|")
@@ -43,7 +43,7 @@ function plotReconstruction(reco, slices)
     phaseData = mapslices(x -> ROMEO.unwrap(x),angle.(reco.data[:,:,slices,1,1]),dims=(1,2))
     phaseMosaic = mosaicview(phaseData,nrow=Int(floor(sqrt(length(slices)))),npad=5,rowmajor=true, fillvalue=0)
 
-    imshow(phaseMosaic, cmap="inferno",vmax = 4*pi,vmin=-4*pi)
+    PyPlot.imshow(phaseMosaic, cmap="inferno",vmax = 4*pi,vmin=-4*pi)
     colorbar()
 
     gcf().suptitle("∠Images")
