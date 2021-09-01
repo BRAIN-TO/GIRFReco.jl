@@ -1,18 +1,77 @@
 using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, Images, FourierTools, ImageView, ImageBinarization, ImageEdgeDetection
 
-## Plotting Functions
+## General Plotting function for the reconstruction
 
+# Mosaic-plots reconstruction for selected slices and corresponding B0 map
+function plotReconstruction(images, slices, b0)
+
+    # Slice ordering check (show the correct order of slices as the images are read in not in geometrically sequential order)
+    indexArray = slices
+
+    # Plot magnitude images (normalize)
+    figure("Magnitude Images")
+    absData = abs.(images[:,:,slices,1,1])./maximum(abs.(images[:,:,slices,1,1]))
+    absMosaic = mosaicview(absData, nrow=Int(floor(sqrt(length(slices)))),npad=5,rowmajor=true, fillvalue=0)
+
+    PyPlot.imshow(absMosaic,cmap="gray")
+    colorbar()
+
+    gcf().suptitle("|Images|")
+
+    # Plot phase images
+    figure("Phase Images")
+
+    phaseData = mapslices(x ->ROMEO.unwrap(x),angle.(images[:,:,slices,1,1]),dims=(1,2))
+    phaseMosaic = mosaicview(phaseData,nrow=Int(floor(sqrt(length(slices)))),npad=5,rowmajor=true, fillvalue=0)
+
+    PyPlot.imshow(phaseMosaic, cmap="inferno",vmax = 3*pi,vmin=-3*pi)
+    colorbar()
+
+    gcf().suptitle("∠Images")
+
+    # Plot B0 maps
+    figure("B₀ Map Images")
+
+    b0Mosaic = mosaicview(b0[:,:,slices],nrow=Int(floor(sqrt(length(slices)))),npad = 5, rowmajor=true, fillvalue=0)
+
+    PyPlot.imshow(b0Mosaic, cmap="inferno",vmax=500,vmin=-500)
+    colorbar()
+
+    gcf().suptitle("B₀ Maps")
+
+end
+
+# Function plots all profiles in the acquisition to check consistency with ISMRMRD file
+function checkProfiles(rawData)
+
+    numProfiles2 = 128 # Set to the number of profiles that you would like to see
+
+    for l = 1:numProfiles2
+        figure("Profile $l")
+        subplot(2,1,1)
+        plot(abs.(rawData.profiles[l].data[:,1]))
+        subplot(2,1,2)
+        plot(angle.(rawData.profiles[l].data[:,1]))
+    end
+
+end
+
+
+# Create figure and plot the sensitivity maps for each coil composed as a collage
 function plotSenseMaps(sense,n_channels)
-
-    figure(3); clf(); for ch in 1:n_channels; subplot(8,4,ch); PyPlot.imshow((abs.(sense[:,:,1,ch]))); end;
+    # Magnitude maps
+    figure("Sensitivity Map Magnitude"); clf(); for ch in 1:n_channels; subplot(8,4,ch); PyPlot.imshow((abs.(sense[:,:,1,ch]))); end;
     subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
     gcf()
-    figure(4); clf(); for ch in 1:n_channels; subplot(8,4,ch); PyPlot.imshow(ROMEO.unwrap(angle.(sense[:,:,1,ch]))); end;
+
+    # Phase maps
+    figure("Sensitivity Map Phase"); clf(); for ch in 1:n_channels; subplot(8,4,ch); PyPlot.imshow(ROMEO.unwrap(angle.(sense[:,:,1,ch]))); end;
     subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
     gcf()
 
 end
 
+# TODO?
 function plotTrajAndData(acq)
 
     for l in 1:length(acq.traj)
@@ -25,6 +84,7 @@ function plotTrajAndData(acq)
 
 end
 
+# Mosaic-plots reconstruction resuls (abs and phase) for selected slices
 function plotReconstruction(reco, slices)
 
     indexArray = slices
