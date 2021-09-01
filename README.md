@@ -15,31 +15,35 @@ Minimum working example for spiral reconstruction with GIRF correction
    - Your prompt should now say `pkg>` instead of `julia>`
    - All the following commands are within the `pkg>` prompt.
    - If you have to get back to the julia prompt later, press `CTRL+C`
-5. Within the package cmd line, activate the project environment:
+4. Within the package cmd line, activate the project environment:
     ```
     activate .
     ```
     - This activates the Julia environment for the GIRFReco code. 
     - After typing this, wait for a while until the command line finishes setting up the Julia environment. 
-4. If this is your first timing activating this environment, you have to instantiate it after activating it via
+5. If this is your first timing activating this environment, you have to instantiate it after activating it via
     ```
     instantiate
     ```
     - Some packages might fail to install, but they are usually not needed by our code.
-5. Add MRIReco.jl to your environment's package list via
+6. Add MRIReco.jl to your environment's package list via
     ```
     add MRIReco
     ```
-6. We have to make some small changes to MRIReco to make it compatible with GIRFReco. To make packages editable add them as development packages via
+7. We have to make some small changes to MRIReco to make it compatible with GIRFReco. To make packages editable add them as development packages via
     ```
     dev MRIReco
     ```
     - *Note*: If you have installed MRIReco as a dev package for other projects earlier, it might not have been updated to the latest version. In this case, go to you local package folder (usually `C:\Users\<username>\.julia\dev\MRIReco`) and `git pull` to update to the current master
-7. Update your packages and restart Julia. You might have to repeat sthis several times until the update command finishes without errors:
+8. Update your packages and restart Julia. You might have to repeat sthis several times until the update command finishes without errors:
    ```
    update
    ```
    - *Note*: The `dev` package of MRIReco might have a local path from a different computer saved in the `Manifest.toml` file (main folder of `GIRFReco`). If you get a related error message, use a text editor to change it in that file to `C:\Users\<username>\.julia\dev\MRIReco` and redo the update.
+9. In order to run our non-Cartesian spiral reconstruction examples, you will have to edit one file in the MRIReco.jl package (which therefore has to be added via `dev`, see (7), to enable editing of Julia package source code). This change relates to the header data structure. 
+    - In line 6 of `RawAcqData.jl` change: `Base.@kwdef struct EncodingCounters` to `Base.@kwdef mutable struct EncodingCounters`
+    - In line 22 of `RawAcqData.jl`  change: `Base.@kwdef struct AcquisitionHeader` to `Base.@kwdef mutable struct AcquisitionHeader`
+  
 
 ## Examples
 
@@ -58,4 +62,4 @@ Minimum working example for spiral reconstruction with GIRF correction
     ```
     recon/julia_recon_spiral_w_girf.jl
     ```
-
+    
