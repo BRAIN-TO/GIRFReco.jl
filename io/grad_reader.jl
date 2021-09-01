@@ -8,9 +8,9 @@ export read_gradient_txt_file, buildGIRF, predictGrad_port, time2freq, buildGIRF
 # Store the GIRF Fourier Representation in an Nx3 matrix, with second dimension indices 1,2,3 corresponding to directions x,y,z respectively
 function buildGIRF()
 
-    girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"
-    girf_filename_y = "GIRFReco/data/GIRF/GIRF_Y.mat"
-    girf_filename_z = "GIRFReco/data/GIRF/GIRF_Z.mat"
+    girf_filename_x = "data/GIRF/GIRF_X.mat"
+    girf_filename_y = "data/GIRF/GIRF_Y.mat"
+    girf_filename_z = "data/GIRF/GIRF_Z.mat"
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)
@@ -39,9 +39,9 @@ function buildGIRF_PN(doPlot = true, doFiltering = true)
     # SUPPRESS PLOTTING
     doPlot = false
 
-    girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"
-    girf_filename_y = "GIRFReco/data/GIRF/GIRF_Y.mat"
-    girf_filename_z = "GIRFReco/data/GIRF/GIRF_Z.mat"
+    girf_filename_x = "data/GIRF/GIRF_X.mat"
+    girf_filename_y = "data/GIRF/GIRF_Y.mat"
+    girf_filename_z = "data/GIRF/GIRF_Z.mat"
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)
@@ -129,9 +129,9 @@ function buildGIRF_K0(doPlot = true, doFiltering = true)
     # SUPPRESS PLOTTING
     doPlot = false
 
-    girf_filename_x = "GIRFReco/data/GIRF/GIRF_X.mat"
-    girf_filename_y = "GIRFReco/data/GIRF/GIRF_Y.mat"
-    girf_filename_z = "GIRFReco/data/GIRF/GIRF_Z.mat"
+    girf_filename_x = "data/GIRF/GIRF_X.mat"
+    girf_filename_y = "data/GIRF/GIRF_Y.mat"
+    girf_filename_z = "data/GIRF/GIRF_Z.mat"
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)
@@ -325,7 +325,8 @@ function time2freq(t)
 end
 
 function read_gradient_txt_file(fileName, reconSize, delay)
-
+    display(pwd())
+    display(fileName)
     gradientData = readdlm(fileName,'\n')
 
     ## Read in the header data of the gradient text file (lines 1 to 21)
@@ -565,7 +566,7 @@ function read_gradient_txt_file(fileName, reconSize, delay, doGIRF)
 end
 
 ## Testing
-gradFile = "GIRFReco/data/Gradients/gradients523.txt"
+gradFile = "data/Gradients/gradients523.txt"
 
 ##
 kSpaceTrajectory, k0_phase = read_gradient_txt_file(gradFile, (200,200), 0.00000, true)
