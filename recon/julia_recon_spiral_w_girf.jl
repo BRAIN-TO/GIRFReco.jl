@@ -117,12 +117,12 @@ slice2 = abs.(reco.data[:,:,1,1,1])
 #slice2 = slice2./maximum(slice2)
 
 figure("Reference Recon")
-imshow(slice1,cmap="gray")
+PyPlot.imshow(slice1,cmap="gray")
 colorbar()
 gcf().suptitle("|Image|")
 
 figure("Spiral Recon")
-imshow(slice2,cmap="gray")
+PyPlot.imshow(slice2,cmap="gray")
 colorbar()
 gcf().suptitle("|Image|")
 
