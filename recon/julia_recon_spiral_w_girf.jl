@@ -2,8 +2,8 @@ using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, Images, FourierTools, 
 
 ## Preparation
 
-include("io/grad_reader.jl")
-include("utils/utils.jl")
+include("../io/grad_reader.jl")
+include("../utils/utils.jl")
 
 ## Load ISMRMRD data files (can be undersampled) THIS SHOULD BE THE ONLY SECTION NEEDED TO EDIT TO ADJUST FOR DIFFERENT SCANS
 @info "Loading Data Files"

@@ -311,9 +311,10 @@ uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
 version = "0.11.9"
 
 [[FixedPointNumbers]]
-git-tree-sha1 = "d14a6fa5890ea3a7e5dcab6811114f132fec2b4b"
+deps = ["Statistics"]
+git-tree-sha1 = "335bfdceacc84c5cdf16aadc768aa5ddfc5383cc"
 uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
-version = "0.6.1"
+version = "0.8.4"
 
 [[Fontconfig_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Expat_jll", "FreeType2_jll", "JLLWrappers", "Libdl", "Libuuid_jll", "Pkg", "Zlib_jll"]
@@ -776,7 +777,7 @@ version = "2021.1.1+1"
 
 [[MRIReco]]
 deps = ["Distributed", "Distributions", "FFTW", "FileIO", "Graphics", "HDF5", "ImageUtils", "LightXML", "LinearAlgebra", "LinearOperators", "LowRankApprox", "NFFT", "NIfTI", "ProgressMeter", "Random", "Reexport", "RegularizedLeastSquares", "SparsityOperators", "StatsBase", "ThreadPools", "Unitful", "Wavelets"]
-git-tree-sha1 = "8738bda1afc97570125e7af95c97be7cd05e09ba"
+path = "C:\\Users\\kasperla\\.julia\\dev\\MRIReco"
 uuid = "bdf86e05-2d2b-5731-a332-f3fe1f9e047f"
 version = "0.3.5"
 
@@ -1018,10 +1019,9 @@ uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 version = "1.1.2"
 
 [[Reexport]]
-deps = ["Pkg"]
-git-tree-sha1 = "7b1d07f411bc8ddb7977ec7f377b97b158514fe0"
+git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
-version = "0.2.0"
+version = "1.2.2"
 
 [[RegularizedLeastSquares]]
 deps = ["IterativeSolvers", "LinearAlgebra", "ProgressMeter", "Random", "SparseArrays", "SparsityOperators", "VectorizationBase"]
@@ -1157,10 +1157,10 @@ uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 version = "0.33.10"
 
 [[StatsFuns]]
-deps = ["Rmath", "SpecialFunctions"]
-git-tree-sha1 = "ced55fd4bae008a8ea12508314e725df61f0ba45"
+deps = ["ChainRulesCore", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
+git-tree-sha1 = "46d7ccc7104860c38b11966dd1f72ff042f382e4"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
-version = "0.9.7"
+version = "0.9.10"
 
 [[StringDistances]]
 deps = ["Distances"]
