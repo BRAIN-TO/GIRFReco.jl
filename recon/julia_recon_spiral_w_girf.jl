@@ -134,4 +134,4 @@ img_edges₂ = detect_edges(slice2,Canny(spatial_scale = 2.7))
 imEdges = cat(img_edges₁,img_edges₂,zeros(size(img_edges₁)),dims=3)
 
 figure("Edge Differences")
-imshow(imEdges)
+PyPlot.imshow(imEdges)
