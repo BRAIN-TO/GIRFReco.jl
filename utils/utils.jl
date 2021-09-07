@@ -338,7 +338,7 @@ function mergeInterleaves(params)
     end
 
     # converting rawData to AcquisitionData
-    @info "Converting rawAcquisitionData to AcquisitionData"
+    @info "Converting RawAcquisitionData to AcquisitionData"
     acqData = AcquisitionData(rawData,estimateProfileCenter=true)
 
     ## Assume all of the slices share a trajectory
