@@ -2,8 +2,14 @@ using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, Images, FourierTools, 
 
 ## Preparation
 
+# Note: the files are found relative of the location of the folder, not the
+# environment current folder
 include("../io/grad_reader.jl")
 include("../utils/utils.jl")
+
+## Executing Cartesian recon from which B0/sensitivity maps have been computed
+@info "Running julia_recon_cartesian to retrieve maps (senseCartesian and b0)"
+include("./julia_recon_cartesian.jl")
 
 ## Load ISMRMRD data files (can be undersampled) THIS SHOULD BE THE ONLY SECTION NEEDED TO EDIT TO ADJUST FOR DIFFERENT SCANS
 @info "Loading Data Files"
