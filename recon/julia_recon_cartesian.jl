@@ -1,7 +1,6 @@
-using PyPlot, HDF5, MRIReco, LinearAlgebra, DSP, Images, FourierTools, ROMEO
+using PyPlot, HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO
 
 include("../utils/utils.jl")
-
 
 ## function to calculate the B0 maps from the two images with different echo times
 # TODO have the b0 map calculation be capable of handling variable echo times
@@ -28,21 +27,18 @@ reconSize = (400,200)
 dataFileCartesian = ISMRMRDFile("data/Fieldmaps/fieldMap_30_2.h5")
 
 # read in the raw data from the ISMRMRD file into a RawAcquisitionData object
-rawDataCartesian = RawAcquisitionData(dataFileCartesian)
+r = RawAcquisitionData(dataFileCartesian)
 
-# Convert rawAcquisitionData object to an AcquisitionData object (these can be reconstructed)
-acqDataCartesian = AcquisitionData(rawDataCartesian,estimateProfileCenter=true)
+# Set filename for preprocessed data 
+fname = "data/testFile.h5"
 
-## Properly arrange data from the converted siemens file
+# Preprocess Data and save!
+preprocessCartesianData(r::RawAcquisitionData, fname)
 
-@info "Correcting conversion errors"
-acqDataCartesian.fov = acqDataCartesian.fov/1000 # Units... MRIReco.jl takes units of [m] and siemens gives in [mm]
-
-# Fix the FOV (can be set incorrectly)
-acqDataCartesian.fov[1] = 0.22
-
-# Need to permute the dimensions of kdata to match the convention of MRIReco.jl
-permutedims(acqDataCartesian.kdata,[3,2,1])
+# Load preprocessed data!
+dataFileNew = ISMRMRDFile("/home/ajaffray/Documents/testFile.h5")
+rawDataNew = RawAcquisitionData(dataFileNew)
+acqDataCartesian= AcquisitionData(rawDataNew, estimateProfileCenter=true)
 
 # Define coils and slices
 nCoils = size(acqDataCartesian.kdata[1],2)
@@ -53,17 +49,16 @@ nSlices = numSlices(acqDataCartesian)
 
 @info "Calculating Sense Maps"
 @time senseCartesian = espirit(acqDataCartesian,(6,6),30,eigThresh_1=0.05, eigThresh_2=0.98)
-sensitivity = senseCartesian;
+sensitivity = senseCartesian
 
 ## Resize sense maps to match encoding size of data matrix
-sensitivity = imresize(senseCartesian,(acqDataCartesian.encodingSize[1],acqDataCartesian.encodingSize[2],nSlices,nCoils));
+sensitivity = imresize(senseCartesian,(acqDataCartesian.encodingSize[1],acqDataCartesian.encodingSize[2],nSlices,nCoils))
 #sensitivity = mapslices(rotl90,sensitivity,dims=[1,2])
 
 ## Visualization
 
 @info "Plotting Sense Maps"
 plotSenseMaps(sensitivity,nCoils)
-
 
 ## Parameter dictionary definition for reconstruction
 

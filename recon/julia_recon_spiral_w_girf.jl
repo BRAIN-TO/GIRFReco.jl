@@ -1,6 +1,7 @@
-using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, Images, FourierTools, ImageView, ImageBinarization, ImageEdgeDetection
+using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection
 
 ## Preparation
+pygui(true)
 
 # Note: the files are found relative of the location of the folder, not the
 # environment current folder
@@ -33,15 +34,14 @@ adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 20
 adjustmentDict[:numSamples] = 15475
 adjustmentDict[:delay] = 0.00000 # naive delay correction
+
 adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_21_1_2.h5", "data/Spirals/523_23_2_2.h5", "data/Spirals/523_25_3_2.h5", "data/Spirals/523_27_4_2.h5"]
-
-
 adjustmentDict[:trajFilename] = "data/Gradients/gradients523.txt"
 adjustmentDict[:excitations] = sliceSelection
 
 adjustmentDict[:doMultiInterleave] = true
 adjustmentDict[:doOddInterleave] = true
-adjustmentDict[:numInterleaves] = 4
+adjustmentDict[:numInterleaves] = 2
 
 adjustmentDict[:singleSlice] = true
 
@@ -53,8 +53,26 @@ print(" reconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDi
 ## Convert raw to AcquisitionData
 
 @info "Merging interleaves and reading data"
-acqDataImaging = mergeInterleaves(adjustmentDict)
+acqDataImaging = mergeRawInterleaves(adjustmentDict)
+acqData2 = mergeInterleaves(adjustmentDict)
 
+@info "Reading GIRF"
+(GIRF_freq, GIRF_data) = buildGIRF_PN()
+GIRF_freq = GIRF_freq .*1000
+
+@info "Reading K0 Modulation Data"
+(k0_freq, k0_data) = buildGIRF_K0()
+k0_freq = k0_freq .*1000
+
+@info "Correcting For GIRF"
+applyGIRF!(acqDataImaging,GIRF_freq,GIRF_data)
+
+@info "Correcting For k₀"
+applyK0!(acqDataImaging,k0_freq, k0_data)
+
+#acqDataRaw = mergeInterleavesButNoGIRF(adjustmentDict)
+
+checkAcquisitionNodes!(acqDataImaging)
 
 ## Sense Map Calculation
 
@@ -79,12 +97,13 @@ sensitivity = mapslices(rotl90,sensitivity,dims=[1,2])
 
 plotSenseMaps(sensitivity,adjustmentDict[:coils])
 
-## B0 Maps (Assumes have a B0 map from gradient echo scan)
+## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Resizing B0 Maps"
 
 resizedB0 = mapslices(x->imresize(x,(acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0, dims=[1,2])
 
 ## Define Parameter Dictionary for use with reconstruction
+# CAST TO ComplexF32 if you're using current MRIReco.jl
 
 @info "Setting Parameters"
 params = Dict{Symbol,Any}()
@@ -93,14 +112,14 @@ params[:reconSize] = adjustmentDict[:reconSize]
 params[:regularization] = "L2"
 params[:λ] = 1.e-2
 params[:iterations] = 20
-params[:solver] = "cgnr"
-params[:solverInfo] = SolverInfo(ComplexF64,store_solutions=false)
-params[:senseMaps] = sensitivity[:,:,[selectedSlice],:]
-params[:correctionMap] = -1im.*resizedB0[:,:,selectedSlice]
+params[:solver] = "admm"
+params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
+params[:senseMaps] = ComplexF32.(sensitivity[:,:,[selectedSlice],:])
+params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 
 ##
 @info "Performing Reconstruction"
-reco = reconstruction(acqDataImaging,params)
+reco2 = reconstruction(acqData2,params)
 
 ## Plotting reconstruction
 @info "Plotting Reconstruction"
@@ -119,8 +138,8 @@ plotReconstruction(reco,1)
 slice1 = abs.(resampledRecon[:,:,selectedSlice,1,1])
 slice2 = abs.(reco.data[:,:,1,1,1])
 
-#slice1 = slice1./maximum(slice1)
-#slice2 = slice2./maximum(slice2)
+slice1 = slice1./maximum(slice1)
+slice2 = slice2./maximum(slice2)
 
 figure("Reference Recon")
 PyPlot.imshow(slice1,cmap="gray")

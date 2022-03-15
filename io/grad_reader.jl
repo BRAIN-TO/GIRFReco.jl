@@ -280,8 +280,8 @@ function predictGrad_port(freq_GIRF, GIRF, time_in, gradient_in, time_out)
     ns_in = length(time_in)
 
     # interpolate GIRF onto the input grid
-    GIRF_real_spline = Spline1D(freq_GIRF,real.(GIRF), w=ones(length(freq_GIRF)), k=3, bc = "zero")
-    GIRF_imaginary_spline = Spline1D(freq_GIRF, imag.(GIRF), w=ones(length(freq_GIRF)), k=3, bc = "zero")
+    GIRF_real_spline = Spline1D(freq_GIRF,real.(GIRF), w=ones(length(freq_GIRF)), k=2, bc = "zero")
+    GIRF_imaginary_spline = Spline1D(freq_GIRF, imag.(GIRF), w=ones(length(freq_GIRF)), k=2, bc = "zero")
 
     # recombine interpolated reals and imaginary parts
     GIRF_ip = GIRF_real_spline(f_in) .+ 1im.*GIRF_imaginary_spline(f_in)
@@ -299,7 +299,7 @@ function predictGrad_port(freq_GIRF, GIRF, time_in, gradient_in, time_out)
 
     grad_OUT = real.(ifft(ifftshift(OUT))./dt_in)
 
-    grad_OUT_spline = Spline1D(time_in,grad_OUT, w=ones(length(time_in)), k=3, bc = "zero")
+    grad_OUT_spline = Spline1D(time_in,grad_OUT, w=ones(length(time_in)), k=2, bc = "zero")
     grad_OUT_resampled = grad_OUT_spline(time_out)
 
     figure("Difference between corrected and uncorrected gradients")
@@ -325,8 +325,7 @@ function time2freq(t)
 end
 
 function read_gradient_txt_file(fileName, reconSize, delay)
-    display(pwd())
-    display(fileName)
+    
     gradientData = readdlm(fileName,'\n')
 
     ## Read in the header data of the gradient text file (lines 1 to 21)
@@ -371,7 +370,7 @@ function read_gradient_txt_file(fileName, reconSize, delay)
 
             #print((dim,l),"\n")
 
-            sp = Spline1D(plannedTimes,interleaveGradArray[:,l,dim],w=ones(length(plannedTimes)), k=3, bc="zero", s=0.0)
+            sp = Spline1D(plannedTimes,interleaveGradArray[:,l,dim],w=ones(length(plannedTimes)), k=2, bc="zero", s=0.0)
 
             # evaluate the interpolant at the sampling times of the kspace data
             interleaveGradArrayFlexible[:,l,dim] = sp(delayedTimes)
@@ -382,17 +381,14 @@ function read_gradient_txt_file(fileName, reconSize, delay)
 
     end
 
-
     ## cumulative summation and numerical integration of the gradient data, resulting in the kspace trajectory
     kSpaceTrajArrayFlexible = dataDict[:gamma]*dataDict[:dwellTime]*cumsum(interleaveGradArrayFlexible,dims=1) # [rad/m]
 
     ## Conversion to the trajectory scaling convention in MRIReco.jl
     #  Currently only 2d Trajectories
     convertedKSpaceArrayFlexible = kSpaceTrajArrayFlexible
-
-    ## This is hardcoded until I can fix the header data mutability :)
-    convertedKSpaceArrayFlexible[:,:,1] *= 0.22/reconSize[1]
-    convertedKSpaceArrayFlexible[:,:,2] *= 0.22/reconSize[2]
+    convertedKSpaceArrayFlexible[:,:,1] *= dataDict[:FOV][1] ./ reconSize[1]
+    convertedKSpaceArrayFlexible[:,:,2] *= dataDict[:FOV][2] ./ reconSize[2]
 
     ## Construction of the trajectory object ##
 
@@ -404,6 +400,8 @@ function read_gradient_txt_file(fileName, reconSize, delay)
     ## Construction of the trajectory
     # - Note: timing vectors are automatically generated - seems to be consistent with the dwell time
     trajectoryObject = Trajectory(permutedTrajectory,dataDict[:numInterleaves],dataDict[:samplesPerInterleave],TE=dataDict[:echoTimeShiftSamples],AQ=dataDict[:acqDuration], numSlices=9, cartesian=false,circular=false)
+
+    return trajectoryObject
 
 end
 
@@ -434,8 +432,6 @@ function read_gradient_txt_file(fileName, reconSize, delay, doGIRF)
     dataDict[:gamma] = 42577.478 # [Hz/mT]
     dataDict[:fieldStrength] = 3.0 # [T]
 
-    #print(dataDict)
-
     ## reading and data scaling of gradient data
     dataDict[:gradData] = gradientData[22:end]
     interleaveGradArray = dataDict[:gradientStrengthFactor]*reshape(dataDict[:gradData],dataDict[:samplesPerInterleave],dataDict[:numInterleaves],dataDict[:numDims]) #[mT/m]
@@ -455,7 +451,7 @@ function read_gradient_txt_file(fileName, reconSize, delay, doGIRF)
 
         frequencyVec, GIRF = buildGIRF_PN()
 
-        frequencyVec = frequencyVec .*1000
+        frequencyVec = frequencyVec .*1000 # Conversion to rad/m from rad/mm
 
         figure("RAW GIRF")
         plot(frequencyVec, abs.(GIRF[:,2]))
@@ -487,7 +483,7 @@ function read_gradient_txt_file(fileName, reconSize, delay, doGIRF)
 
             #print((dim,l),"\n")
 
-            sp = Spline1D(plannedTimes,interleaveGradArrayUpdated[:,l,dim],w=ones(length(plannedTimes)), k=3, bc="zero", s=0.0)
+            sp = Spline1D(plannedTimes,interleaveGradArrayUpdated[:,l,dim],w=ones(length(plannedTimes)), k=2, bc="zero", s=0.0)
 
             # evaluate the interpolant at the sampling times of the kspace data
             interleaveGradArrayFlexible[:,l,dim] = sp(delayedTimes)
@@ -547,8 +543,8 @@ function read_gradient_txt_file(fileName, reconSize, delay, doGIRF)
     convertedKSpaceArrayFlexible = kSpaceTrajArrayFlexible
 
     ## This is hardcoded until I can fix the header data mutability :)
-    convertedKSpaceArrayFlexible[:,:,1] *= 0.22/reconSize[1]
-    convertedKSpaceArrayFlexible[:,:,2] *= 0.22/reconSize[2]
+    convertedKSpaceArrayFlexible[:,:,1] *= dataDict[:FOV][1] ./ reconSize[1]
+    convertedKSpaceArrayFlexible[:,:,2] *= dataDict[:FOV][2] ./ reconSize[2]
 
     ## Construction of the trajectory object ##
 
@@ -565,6 +561,91 @@ function read_gradient_txt_file(fileName, reconSize, delay, doGIRF)
 
 end
 
+##
+function read_gradient_txt_file_grads(fileName, reconSize, delay)
+
+    gradientData = readdlm(fileName,'\n')
+
+    ## Read in the header data of the gradient text file (lines 1 to 21)
+    dataDict = Dict{Symbol,Any}()
+    dataDict[:versionNr] = gradientData[1]
+    dataDict[:numSamples] = gradientData[2]
+    dataDict[:dwellTime] = gradientData[3] # [seconds]
+    dataDict[:samplesPerInterleave] = gradientData[4]
+    dataDict[:numInterleaves] = gradientData[5]
+    dataDict[:numDims] = gradientData[6]
+    dataDict[:timeToCenterKSpace] = gradientData[7] # [seconds]
+    dataDict[:acqDuration] = gradientData[8]
+    dataDict[:samplesPerAcq] = gradientData[9]
+    dataDict[:numAcquisitions] = gradientData[10]
+    dataDict[:acqTR] = gradientData[11]
+    dataDict[:gradientAcqStartDelay] = gradientData[12]
+    dataDict[:echoTimeShiftSamples] = gradientData[13]
+    dataDict[:FOV] = gradientData[14:16] # [m]
+    dataDict[:voxelDims] = gradientData[17:19] # [m]
+    dataDict[:gradientStrengthFactor] = gradientData[20] # [mT/m]
+    dataDict[:isBinary] = gradientData[21]
+    dataDict[:gamma] = 42577.478 # [Hz/mT]
+    dataDict[:fieldStrength] = 3.0 # [T]
+
+    ## reading and data scaling of gradient data
+    dataDict[:gradData] = gradientData[22:end]
+    interleaveGradArray = dataDict[:gradientStrengthFactor]*reshape(dataDict[:gradData],dataDict[:samplesPerInterleave],dataDict[:numInterleaves],dataDict[:numDims]) #[mT/m]
+
+    #print(size(interleaveGradArray))
+
+    ## Set timings to allow for delay compensation
+    plannedTimes = dataDict[:dwellTime].*(0:(dataDict[:samplesPerInterleave]-1))
+    delayedTimes = plannedTimes .- delay .- dataDict[:dwellTime]./2 # seconds
+
+    interleaveGradArrayFlexible = Array{Float64,3}(undef,size(interleaveGradArray))
+
+    ## Loop over all of the unique excitation trajectories and create an interpolant of the gradient
+    for dim in 1:dataDict[:numDims]
+
+        for l in 1:dataDict[:numInterleaves]
+
+            #print((dim,l),"\n")
+
+            sp = Spline1D(plannedTimes,interleaveGradArrayUpdated[:,l,dim],w=ones(length(plannedTimes)), k=2, bc="zero", s=0.0)
+
+            # evaluate the interpolant at the sampling times of the kspace data
+            interleaveGradArrayFlexible[:,l,dim] = sp(delayedTimes)
+
+            #print(interleaveGradArrayFlexible[:,l,dim][end],"\n")
+
+
+
+        end
+
+    end
+
+    ## cumulative summation and numerical integration of the gradient data, resulting in the kspace trajectory
+    kSpaceTrajArrayFlexible = dataDict[:gamma]*dataDict[:dwellTime]*cumsum(interleaveGradArrayFlexible,dims=1) # [rad/m]
+
+    ## Conversion to the trajectory scaling convention in MRIReco.jl
+    #  Currently only 2d Trajectories
+    convertedKSpaceArrayFlexible = kSpaceTrajArrayFlexible
+
+    ## This is hardcoded until I can fix the header data mutability :)
+    convertedKSpaceArrayFlexible[:,:,1] *= dataDict[:FOV][1] ./ reconSize[1]
+    convertedKSpaceArrayFlexible[:,:,2] *= dataDict[:FOV][2] ./ reconSize[2]
+
+    ## Construction of the trajectory object ##
+
+    ## Reshaping of the array to the format expected by the Trajectory constructor in MRIReco.jl
+    # - dim 1 = kspace dimension
+    # - dim 2 = kspace position (with interleaves/profiles arranged consecutively)
+    permutedTrajectory = permutedims(reshape(convertedKSpaceArrayFlexible,dataDict[:samplesPerInterleave]*dataDict[:numInterleaves],dataDict[:numDims]),[2,1])
+
+    ## Construction of the trajectory
+    # - Note: timing vectors are automatically generated - seems to be consistent with the dwell time
+    trajectoryObject = Trajectory(permutedTrajectory,dataDict[:numInterleaves],dataDict[:samplesPerInterleave],TE=dataDict[:echoTimeShiftSamples],AQ=dataDict[:acqDuration], numSlices=9, cartesian=false,circular=false)
+
+    return trajectoryObject
+
+end
+
 ## Testing
 gradFile = "data/Gradients/gradients523.txt"
 
@@ -573,11 +654,11 @@ kSpaceTrajectory, k0_phase = read_gradient_txt_file(gradFile, (200,200), 0.00000
 kSpaceTrajectory_2 = read_gradient_txt_file(gradFile,(200,200),0.00000)
 
 ##
-pulledTrajectory11 = kspaceNodes(kSpaceTrajectory)[1,1:3100]
-pulledTrajectory12 = kspaceNodes(kSpaceTrajectory)[2,1:3100]
+pulledTrajectory11 = kspaceNodes(kSpaceTrajectory)[1,:]
+pulledTrajectory12 = kspaceNodes(kSpaceTrajectory)[2,:]
 
-pulledTrajectory21 = kspaceNodes(kSpaceTrajectory_2)[1,1:3100]
-pulledTrajectory22 = kspaceNodes(kSpaceTrajectory_2)[2,1:3100]
+pulledTrajectory21 = kspaceNodes(kSpaceTrajectory_2)[1,:]
+pulledTrajectory22 = kspaceNodes(kSpaceTrajectory_2)[2,:]
 
 #
 fig = figure(234, figsize=(10,10))
