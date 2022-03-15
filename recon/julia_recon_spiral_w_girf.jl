@@ -119,7 +119,7 @@ params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 
 ##
 @info "Performing Reconstruction"
-reco2 = reconstruction(acqData2,params)
+reco = reconstruction(acqDataImaging,params)
 
 ## Plotting reconstruction
 @info "Plotting Reconstruction"
@@ -146,7 +146,7 @@ PyPlot.imshow(slice1,cmap="gray")
 colorbar()
 gcf().suptitle("|Image|")
 
-figure("Spiral Recon")
+figure("Spiral Recon2")
 PyPlot.imshow(slice2,cmap="gray")
 colorbar()
 gcf().suptitle("|Image|")

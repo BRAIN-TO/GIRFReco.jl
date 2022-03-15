@@ -647,7 +647,7 @@ function applyK0!(a::AcquisitionData, freq::AbstractVector, k0_data::AbstractMat
             a.kdata[l][ilExtractor,:] = a.kdata[l][ilExtractor,:] .* exp.(1im .*finalCorrection')
 
             # Visualization of Phase Modulation
-            figure("Phase Modulation")
+            figure("Phase Modulation 2")
             plot(vec(ilTimes), vec(angle.(exp.(1im .* finalCorrection))))
             xlabel("Time [s]")
             ylabel("k₀ [rad]")
