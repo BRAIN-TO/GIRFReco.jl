@@ -420,24 +420,46 @@ end
 # OUTPUT IS AN ISMRMRD FILE READY FOR READING WITHOUT FURTHER PROCESSING 
 function preprocessCartesianData(r::RawAcquisitionData, fname)
 
+    removeOversampling!(r)
+    # headerCopy = deepcopy(r.params)
+
     # Convert rawAcquisitionData object to an AcquisitionData object (these can be reconstructed)
     acqDataCartesian = AcquisitionData(r,estimateProfileCenter=true)
 
     ## Properly arrange data from the converted siemens file
-
     validateAcqData!(acqDataCartesian)
-
-    # Fix the FOV (can be set incorrectly)
-    #acqDataCartesian.fov[1] = 0.22
 
     # Need to permute the dimensions of kdata to match the convention of MRIReco.jl
     permutedims(acqDataCartesian.kdata,[3,2,1])
-
     raw = RawAcquisitionData(acqDataCartesian)
-
+    # raw.params = headerCopy
     fout = ISMRMRDFile(fname)
-
     save(fout, raw)
+
+end
+
+"""
+removeOversampling!(raw::RawAcquisitionData; dims = 1)
+removes 2x readout oversampling in specified raw data dimensions by iFFT, cropping FOV and FFT
+# Arguments
+* `raw::RawAcquisitionData{T}`          - RawAcquisitionData object
+* `dims`                                - dimension alongside which oversampling is removed (default: 1)
+"""
+function removeOversampling!(raw::RawAcquisitionData; dims = [1])
+    idxDim = dims[1]
+    Ns = raw.params["encodedSize"][idxDim]
+    idxCropFov = convert(Vector{Int64}, [1:floor(Ns/4); ceil(3/4*Ns+1):Ns])
+    # For every profile in the acquisition
+    for iProfile = 1:length(raw.profiles)
+        # IFFT to image space, crop, FFT back to k-space
+        ifft!(raw.profiles[iProfile].data, idxDim)
+        raw.profiles[iProfile].data = fft!(raw.profiles[iProfile].data[idxCropFov,:], idxDim)
+
+    end
+
+    # halve encoding size of first dimension
+    raw.params["encodedSize"][idxDim] /= 2
+    raw.params["encodedFOV"][idxDim] /= 2
 
 end
 

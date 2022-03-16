@@ -9,7 +9,7 @@ include("../io/grad_reader.jl")
 include("../utils/utils.jl")
 
 ## Executing Cartesian recon from which B0/sensitivity maps have been computed
-@info "Running julia_recon_cartesian to retrieve maps (senseCartesian and b0)"
+@info "Running julia_recon_cartesian to retrieve maps (senseCartesian and b0Maps)"
 include("./julia_recon_cartesian.jl")
 
 ## Load ISMRMRD data files (can be undersampled) THIS SHOULD BE THE ONLY SECTION NEEDED TO EDIT TO ADJUST FOR DIFFERENT SCANS
@@ -19,7 +19,7 @@ include("./julia_recon_cartesian.jl")
 
 selectedSlice = 1
 
-excitationList = [14]
+excitationList = [4]
 
 # excitationList = 20:2:36 # for MULTISLICE
 
@@ -30,7 +30,7 @@ sliceSelection = excitationList[selectedSlice]
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] = (256,256)
+adjustmentDict[:reconSize] = (200,200)
 adjustmentDict[:interleave] = 1
 adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 20
@@ -43,7 +43,7 @@ adjustmentDict[:excitations] = sliceSelection
 
 adjustmentDict[:doMultiInterleave] = true
 adjustmentDict[:doOddInterleave] = true
-adjustmentDict[:numInterleaves] = 4
+adjustmentDict[:numInterleaves] = 2
 
 adjustmentDict[:singleSlice] = true
 
@@ -56,7 +56,6 @@ print(" reconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDi
 
 @info "Merging interleaves and reading data"
 acqDataImaging = mergeRawInterleaves(adjustmentDict)
-# acqData2 = mergeInterleaves(adjustmentDict)
 
 @info "Reading GIRF"
 (GIRF_freq, GIRF_data) = buildGIRF_PN()
@@ -73,9 +72,7 @@ k0_freq = k0_freq .*1000
 applyGIRF!(acqDataImaging,GIRF_freq,GIRF_data)
 
 @info "Correcting For k₀"
-applyK0!(acqDataImaging,k0_freq, k0_data)
-
-#acqDataRaw = mergeInterleavesButNoGIRF(adjustmentDict)
+#applyK0!(acqDataImaging,k0_freq, k0_data)
 
 checkAcquisitionNodes!(acqDataImaging)
 
@@ -94,7 +91,7 @@ checkAcquisitionNodes!(acqDataImaging)
 ## Assumes have a sense map from gradient echo scan
 
 # Resize sense maps to match encoding size of data matrix
-sensitivity = mapslices(x ->imresize(x, (acqDataImaging.encodingSize[1],acqDataImaging.encodingSize[2])), senseCartesian[33:96,:,:,:], dims=[1,2])
+sensitivity = mapslices(x ->imresize(x, (acqDataImaging.encodingSize[1],acqDataImaging.encodingSize[2])), senseCartesian, dims=[1,2])
 sensitivity = mapslices(rotl90,sensitivity,dims=[1,2])
 
 ## Plot the sensitivity maps of each coil
@@ -105,7 +102,7 @@ plotSenseMaps(sensitivity,adjustmentDict[:coils])
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Resizing B0 Maps"
 
-resizedB0 = mapslices(x->imresize(x,(acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0, dims=[1,2])
+resizedB0 = mapslices(x->imresize(x,(acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0Maps, dims=[1,2])
 
 ## Define Parameter Dictionary for use with reconstruction
 # CAST TO ComplexF32 if you're using current MRIReco.jl

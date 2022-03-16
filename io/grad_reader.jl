@@ -646,28 +646,32 @@ function read_gradient_txt_file_grads(fileName, reconSize, delay)
 
 end
 
-## Testing
-gradFile = "data/Gradients/gradients523.txt"
+function testGradReader()
 
-##
-kSpaceTrajectory, k0_phase = read_gradient_txt_file(gradFile, (200,200), 0.00000, true)
-kSpaceTrajectory_2 = read_gradient_txt_file(gradFile,(200,200),0.00000)
+    ## Testing
+    gradFile = "data/Gradients/gradients523.txt"
 
-##
-pulledTrajectory11 = kspaceNodes(kSpaceTrajectory)[1,:]
-pulledTrajectory12 = kspaceNodes(kSpaceTrajectory)[2,:]
+    ##
+    kSpaceTrajectory, k0_phase = read_gradient_txt_file(gradFile, (200,200), 0.00000, true)
+    kSpaceTrajectory_2 = read_gradient_txt_file(gradFile,(200,200),0.00000)
 
-pulledTrajectory21 = kspaceNodes(kSpaceTrajectory_2)[1,:]
-pulledTrajectory22 = kspaceNodes(kSpaceTrajectory_2)[2,:]
+    ##
+    pulledTrajectory11 = kspaceNodes(kSpaceTrajectory)[1,:]
+    pulledTrajectory12 = kspaceNodes(kSpaceTrajectory)[2,:]
 
-#
-fig = figure(234, figsize=(10,10))
-ax = fig.gca()
-ax.scatter(pulledTrajectory11,pulledTrajectory12, label="GIRF Corrected")
-ax.scatter(pulledTrajectory21,pulledTrajectory22, label="Nominal")
-xlabel("kx")
-ylabel("ky")
-title("K-space Center")
-xlim((-0.05,0.05))
-ylim((-0.05,0.05))
-legend()
+    pulledTrajectory21 = kspaceNodes(kSpaceTrajectory_2)[1,:]
+    pulledTrajectory22 = kspaceNodes(kSpaceTrajectory_2)[2,:]
+
+    #
+    fig = figure(234, figsize=(10,10))
+    ax = fig.gca()
+    ax.scatter(pulledTrajectory11,pulledTrajectory12, label="GIRF Corrected")
+    ax.scatter(pulledTrajectory21,pulledTrajectory22, label="Nominal")
+    xlabel("kx")
+    ylabel("ky")
+    title("K-space Center")
+    xlim((-0.05,0.05))
+    ylim((-0.05,0.05))
+    legend()
+
+end
