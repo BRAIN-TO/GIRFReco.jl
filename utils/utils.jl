@@ -659,6 +659,35 @@ function applyK0!(a::AcquisitionData, freq::AbstractVector, k0_data::AbstractMat
 
 end
 
+## Calibrate the phase from individual interleaves
+function calibrateAcquisitionPhase!(a::AcquisitionData)
+
+    for l = 1:length(a.traj)
+        
+        nProfiles = a.traj[l].numProfiles
+        nSamples = a.traj[l].numSamplingPerProfile
+        nodes = a.traj[l].nodes
+        times = a.traj[l].times
+        oldNodes = a.traj[l].nodes
+
+        initialInterleavePhase = angle.(a.kdata[l][1,:])'
+
+        for profile = 2:nProfiles
+            
+            ilExtractor = nSamples*(profile-1) .+ (1:nSamples)
+
+            initialProfilePhase = angle.(a.kdata[l][ilExtractor[1],:])'
+
+            @info size(initialInterleavePhase)
+            @info size(a.kdata[l][ilExtractor,:])
+            
+            a.kdata[l][ilExtractor,:] .*= exp.(-1im * (initialInterleavePhase - initialProfilePhase))
+            
+        end    
+    end
+
+end
+
 function testConversion()
 
     gamma = 42577478

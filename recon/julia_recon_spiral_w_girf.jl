@@ -19,16 +19,18 @@ include("./julia_recon_cartesian.jl")
 
 selectedSlice = 1
 
+excitationList = [14]
+
 # excitationList = 20:2:36 # for MULTISLICE
 
-excitationList = [4]
+#excitationList = [4]
 
 sliceSelection = excitationList[selectedSlice]
 
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] = (200,200)
+adjustmentDict[:reconSize] = (256,256)
 adjustmentDict[:interleave] = 1
 adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 20
@@ -41,7 +43,7 @@ adjustmentDict[:excitations] = sliceSelection
 
 adjustmentDict[:doMultiInterleave] = true
 adjustmentDict[:doOddInterleave] = true
-adjustmentDict[:numInterleaves] = 2
+adjustmentDict[:numInterleaves] = 4
 
 adjustmentDict[:singleSlice] = true
 
@@ -54,7 +56,7 @@ print(" reconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDi
 
 @info "Merging interleaves and reading data"
 acqDataImaging = mergeRawInterleaves(adjustmentDict)
-acqData2 = mergeInterleaves(adjustmentDict)
+# acqData2 = mergeInterleaves(adjustmentDict)
 
 @info "Reading GIRF"
 (GIRF_freq, GIRF_data) = buildGIRF_PN()
@@ -63,6 +65,9 @@ GIRF_freq = GIRF_freq .*1000
 @info "Reading K0 Modulation Data"
 (k0_freq, k0_data) = buildGIRF_K0()
 k0_freq = k0_freq .*1000
+
+# @info "Correcting Coil Phase"
+# calibrateAcquisitionPhase!(acqDataImaging)
 
 @info "Correcting For GIRF"
 applyGIRF!(acqDataImaging,GIRF_freq,GIRF_data)
@@ -110,9 +115,9 @@ params = Dict{Symbol,Any}()
 params[:reco] = "multiCoil"
 params[:reconSize] = adjustmentDict[:reconSize]
 params[:regularization] = "L2"
-params[:λ] = 1.e-2
+params[:λ] = 1.e-3
 params[:iterations] = 20
-params[:solver] = "admm"
+params[:solver] = "cgnr"
 params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
 params[:senseMaps] = ComplexF32.(sensitivity[:,:,[selectedSlice],:])
 params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
@@ -156,7 +161,7 @@ gcf().suptitle("|Image|")
 img_edges₁ = detect_edges(slice1,Canny(spatial_scale = 2.6))
 img_edges₂ = detect_edges(slice2,Canny(spatial_scale = 2.7))
 
-imEdges = cat(img_edges₁,img_edges₂,zeros(size(img_edges₁)),dims=3)
+##imEdges = cat(img_edges₁,img_edges₂,zeros(size(img_edges₁)),dims=3)
 
-figure("Edge Differences")
-PyPlot.imshow(imEdges)
+#figure("Edge Differences")
+#PyPlot.imshow(imEdges)
