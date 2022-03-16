@@ -10,21 +10,16 @@ include("GIRFApplier.jl")
 
 # 0th degree (k0)
 girf_k0 = loadGirf(0)
-
-# first degree (k1)
-# girf_k1 = loadGirf(1)
-
-## Give the girf variables identifiers
-
 setIdentifier!(girf_k0, "k0 GIRF")
 
-# setIdentifier!(girf_k1, "k1 GIRF")
+# first degree (k1)
+girf_k1 = loadGirf(1)
+setIdentifier!(girf_k1, "k1 GIRF")
 
 ## Create GirfApplier objects
 
-# girfApplier_k0 = GirfApplier(girf_k0, 42577000)
-
-girfApplier_k1 = GirfApplier(girf_k1, 42577000)
+girfApplier_k0 = GirfApplier(girf_k0, 42577478)
+girfApplier_k1 = GirfApplier(girf_k1, 42577478)
 
 ## Generate Test Data
 

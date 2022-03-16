@@ -1348,6 +1348,11 @@ git-tree-sha1 = "e9a35d501b24c127af57ca5228bcfb806eda7507"
 uuid = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
 version = "0.21.24"
 
+[[Waveforms]]
+git-tree-sha1 = "532113cb46e2da7019672f7879b97ada3edd3dc6"
+uuid = "cb13b1c6-351e-5134-b3ad-d6a530956a82"
+version = "0.1.1"
+
 [[Wavelets]]
 deps = ["DSP", "FFTW", "LinearAlgebra", "Reexport", "SpecialFunctions", "Statistics"]
 git-tree-sha1 = "52e87ecea56e02e0672c7f3c9fd9ca03915d7e1b"
