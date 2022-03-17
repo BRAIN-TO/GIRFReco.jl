@@ -22,7 +22,6 @@ pygui(true)
 
 # selectedSlice = 3
 
-
 selectedSlice = 1
 excitationList = [4]
 sliceSelection = excitationList[selectedSlice]
@@ -81,26 +80,14 @@ checkAcquisitionNodes!(acqDataImaging)
 
 ## Sense Map Calculation
 
-@info "Validating Sense Maps \n" # Code commented out as the cartesian reconstruction takes care of this
-# acqDataSense = acqDataImaging
-#
-# # Regrid to Cartesian
-# acqDataCart = regrid2d(acqDataSense,adjustmentDict[:reconSize])
-#
-# # Calculate Sense maps using ESPiRiT
-# sense = espirit(acqDataCart,(6,6),30,eigThresh_1=0.05, eigThresh_2=0.98)
-# sensitivity = sense
-
-## Assumes have a sense map from gradient echo scan
-
+@info "Validating Sense Maps \n"
 # Resize sense maps to match encoding size of data matrix
 sensitivity = mapslices(x ->imresize(x, (acqDataImaging.encodingSize[1],acqDataImaging.encodingSize[2])), senseCartesian, dims=[1,2])
 sensitivity = mapslices(rotl90,sensitivity,dims=[1,2])
 
 # ## Plot the sensitivity maps of each coil
 # @info "Plotting SENSE Maps \n"
-
-# plotSenseMaps(sensitivity,adjustmentDict[:coils])
+plotSenseMaps(sensitivity,adjustmentDict[:coils])
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Validating B0 Maps \n"

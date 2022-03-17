@@ -35,6 +35,7 @@ if makeMaps
     preprocessCartesianData(r::RawAcquisitionData, saveMaps; fname)
 
 end
+
 # removeOversampling!(r)
 
 # Load preprocessed data!
@@ -54,13 +55,13 @@ senseCartesian = espirit(acqDataCartesian,(4,4),10,eigThresh_1=0.01, eigThresh_2
 sensitivity = senseCartesian
 
 ## Resize sense maps to match encoding size of data matrix
-sensitivity = imresize(senseCartesian,(acqDataCartesian.encodingSize[1],acqDataCartesian.encodingSize[2],nSlices,nCoils))
-#sensitivity = mapslices(rotl90,sensitivity,dims=[1,2])
+# sensitivity = imresize(senseCartesian,(acqDataCartesian.encodingSize[1],acqDataCartesian.encodingSize[2],nSlices,nCoils))
+# sensitivity = mapslices(rotl90,sensitivity,dims=[1,2])
 
 ## Visualization
 
-@info "Plotting Sense Maps"
-plotSenseMaps(sensitivity,nCoils)
+# @info "Plotting Sense Maps"
+# plotSenseMaps(sensitivity,nCoils)
 
 ## Parameter dictionary definition for reconstruction
 
@@ -71,7 +72,7 @@ paramsCartesian[:reconSize] = (acqDataCartesian.encodingSize[1],acqDataCartesian
 paramsCartesian[:regularization] = "L2" # choose regularization for the recon algorithm
 paramsCartesian[:λ] = 1.e-2 # recon parameter (there may be more of these, need to dig into code to identify them for solvers other than cgnr)
 paramsCartesian[:iterations] = 20 # number of CG iterations
-paramsCartesian[:solver] = "cgnr" # inverse problem solver method
+paramsCartesian[:solver] = "admm" # inverse problem solver method
 paramsCartesian[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false) # turn on store solutions if you want to see the reconstruction convergence (uses more memory)
 paramsCartesian[:senseMaps] = ComplexF32.(sensitivity) # set sensitivity map array
 # paramsCartesian[:correctionMap] = ComplexF32.(-1im.*b0Maps)
@@ -89,20 +90,20 @@ cartesianReco = reconstruction(acqDataCartesian,paramsCartesian)
 ## If not multi-coil, perform L2 combination of coil images
 # if multi-coil, this doesn't do anything to the data
 
-reconstructed = sum(abs2,cartesianReco.data,dims=5)
+# reconstructed = sum(abs2,cartesianReco.data,dims=5)
 
 ## Calculate B0 maps from the acquired images (if two TEs)
 
 slices = 1:length(indexArray)
 b0Maps = calculateB0Maps(cartesianReco.data,slices)
-# b0 = cropB0Maps(b0Maps)
 
+# b0 = cropB0Maps(b0Maps)
 ## Resize fourier data and replot (Only for comparison purposes with hi-res spiral images)
 
 #resampledRecon = Array{ComplexF64,5}(undef,(reconSize[1], reconSize[2],1,2,1))
 
-resampledRecon = mapslices(x->rotl90(FourierTools.resample(x,(200,200))), cartesianReco.data; dims=[1,2])
-resampledB0 = mapslices(x->FourierTools.resample(x,(200,200)), b0Maps;dims=[1,2])
+# resampledRecon = mapslices(x->rotl90(FourierTools.resample(x,(200,200))), cartesianReco.data; dims=[1,2])
+# resampledB0 = mapslices(x->FourierTools.resample(x,(200,200)), b0Maps;dims=[1,2])
 
 ## Plotting Reconstruction
 
