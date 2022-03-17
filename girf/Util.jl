@@ -231,30 +231,30 @@ function VariableSmoothing(SIRF, f, f2)
 end
 
 
-## Currently only works for spiral trajectories but will have to be extended to cartesian!
-function parseTrajectoryGradients(a::AcquisitionData)
+# ## Currently only works for spiral trajectories but will have to be extended to cartesian!
+# function parseTrajectoryGradients(a::AcquisitionData)
 
-  for l = 1:length(a.traj)
+#   for l = 1:length(a.traj)
       
-      nProfiles = a.traj[l].numProfiles
-      nSamples = a.traj[l].numSamplingPerProfile
-      nodes = a.traj[l].nodes
+#       nProfiles = a.traj[l].numProfiles
+#       nSamples = a.traj[l].numSamplingPerProfile
+#       nodes = a.traj[l].nodes
 
-      for profile = 1:nProfiles
+#       for profile = 1:nProfiles
           
-          ilExtractor = nSamples*(profile-1) .+ (1:nSamples)
-          ilNodes = nodes[:,ilExtractor]
+#           ilExtractor = nSamples*(profile-1) .+ (1:nSamples)
+#           ilNodes = nodes[:,ilExtractor]
 
-          figure()
-          ilGrads = nodes_to_gradients(ilNodes)
+#           figure()
+#           ilGrads = nodes_to_gradients(ilNodes)
 
-          plot(ilGrads')
+#           plot(ilGrads')
 
-      end
+#       end
   
-  end
+#   end
       
-end
+# end
 
 ## Get gradients from the trajectory
 function nodes_to_gradients(nodes::Matrix; gamma=42577478, dwellTime=2e-6, FOV=[220,220,1],reconSize=[200,200,1])

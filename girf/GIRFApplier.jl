@@ -1,4 +1,4 @@
-using DelimitedFiles, MRIReco, PyPlot, Dierckx, MAT, DSP
+using DelimitedFiles, Dierckx, MAT, DSP
 
 export apply_girf, GirfApplier
 

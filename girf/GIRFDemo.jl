@@ -1,6 +1,6 @@
 ## GIRF Demo file showing basic loading of GIRF
 
-using DelimitedFiles, MRIReco, PyPlot, Dierckx, MAT, DSP, Waveforms
+using DelimitedFiles, PyPlot, Dierckx, MAT, DSP, Waveforms
 
 include("GIRFApplier.jl")
 
@@ -31,7 +31,7 @@ testSinusoid[1] = 0
 time_vector = time_vector ./1000
 
 ## Filter test data with GIRF
-correctedGradients = applyGIRF(girfApplier_k1,testSinusoid,time_vector,time_vector,1)
+correctedGradients = apply_girf(girfApplier_k1,testSinusoid,time_vector,time_vector,1)
 
 ## Plot the result
 figure("Corrected vs. Uncorrected Gradients")

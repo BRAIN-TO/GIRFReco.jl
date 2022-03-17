@@ -1,4 +1,4 @@
-using DelimitedFiles, MRIReco, PyPlot, Dierckx, MAT, DSP
+using DelimitedFiles, Dierckx, MAT, DSP
 
 export GirfEssential, convertDomain!, time2freq, loadGirf, setIdentifier!, buildGIRF_K0, buildGIRF_PN
 
