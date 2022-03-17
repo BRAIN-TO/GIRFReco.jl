@@ -1,16 +1,18 @@
 using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection
 
-## Preparation
-pygui(true)
-
 # Note: the files are found relative of the location of the folder, not the
 # environment current folder
 include("../io/grad_reader.jl")
+include("../girf/GIRFApplier.jl")
+
 include("../utils/utils.jl")
 
 ## Executing Cartesian recon from which B0/sensitivity maps have been computed
 @info "Running julia_recon_cartesian to retrieve maps (senseCartesian and b0Maps)"
 include("./julia_recon_cartesian.jl")
+
+## Preparation
+pygui(true)
 
 ## Load ISMRMRD data files (can be undersampled) THIS SHOULD BE THE ONLY SECTION NEEDED TO EDIT TO ADJUST FOR DIFFERENT SCANS
 @info "Loading Data Files"
@@ -43,7 +45,7 @@ adjustmentDict[:excitations] = sliceSelection
 
 adjustmentDict[:doMultiInterleave] = true
 adjustmentDict[:doOddInterleave] = true
-adjustmentDict[:numInterleaves] = 2
+adjustmentDict[:numInterleaves] = 4
 
 adjustmentDict[:singleSlice] = true
 
@@ -57,22 +59,21 @@ print(" reconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDi
 @info "Merging interleaves and reading data"
 acqDataImaging = mergeRawInterleaves(adjustmentDict)
 
-@info "Reading GIRF"
-(GIRF_freq, GIRF_data) = buildGIRF_PN()
-GIRF_freq = GIRF_freq .*1000
+## Load GIRFs!
+gK1 = loadGirf(1)
+gAk1 = GirfApplier(gK1, 42577478)
 
-@info "Reading K0 Modulation Data"
-(k0_freq, k0_data) = buildGIRF_K0()
-k0_freq = k0_freq .*1000
+gK0 = loadGirf(0)
+gAk0 = GirfApplier(gK0, 42577478)
 
 # @info "Correcting Coil Phase"
 # calibrateAcquisitionPhase!(acqDataImaging)
 
 @info "Correcting For GIRF"
-applyGIRF!(acqDataImaging,GIRF_freq,GIRF_data)
+applyGIRF!(acqDataImaging, gAk1)
 
 @info "Correcting For k₀"
-#applyK0!(acqDataImaging,k0_freq, k0_data)
+applyK0!(acqDataImaging, gAk0)
 
 checkAcquisitionNodes!(acqDataImaging)
 
@@ -114,7 +115,7 @@ params[:reconSize] = adjustmentDict[:reconSize]
 params[:regularization] = "L2"
 params[:λ] = 1.e-3
 params[:iterations] = 20
-params[:solver] = "cgnr"
+params[:solver] = "admm"
 params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
 params[:senseMaps] = ComplexF32.(sensitivity[:,:,[selectedSlice],:])
 params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])

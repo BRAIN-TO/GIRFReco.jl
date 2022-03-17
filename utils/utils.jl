@@ -3,41 +3,53 @@ using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBin
 ## General Plotting function for the reconstruction
 
 # Mosaic-plots reconstruction for selected slices and corresponding B0 map
-function plotReconstruction(images, slices, b0)
+function plotReconstruction(images, slices, b0; figHandles = [])
 
     # Slice ordering check (show the correct order of slices as the images are read in not in geometrically sequential order)
     indexArray = slices
 
     # Plot magnitude images (normalize)
-    figure("Magnitude Images")
-    absData = abs.(images[:,:,slices,1,1])./maximum(abs.(images[:,:,slices,1,1]))
-    absMosaic = mosaicview(absData, nrow=Int(floor(sqrt(length(slices)))),npad=5,rowmajor=true, fillvalue=0)
+    if isempty(figHandles)
+        figure("Magnitude Images")
+    else
+        figure(figHandles[1])
+    end
+    absData = abs.(images[:, :, slices, 1, 1]) ./ maximum(abs.(images[:, :, slices, 1, 1]))
+    absMosaic = mosaicview(absData, nrow = Int(floor(sqrt(length(slices)))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    PyPlot.imshow(absMosaic,cmap="gray")
+    PyPlot.imshow(absMosaic, cmap = "gray")
     colorbar()
 
     gcf().suptitle("|Images|")
 
     # Plot phase images
-    figure("Phase Images")
+    if isempty(figHandles)
+        figure("Phase Images")
+    else
+        figure(figHandles[2])
+    end
 
-    phaseData = mapslices(x ->ROMEO.unwrap(x),angle.(images[:,:,slices,1,1]),dims=(1,2))
-    phaseMosaic = mosaicview(phaseData,nrow=Int(floor(sqrt(length(slices)))),npad=5,rowmajor=true, fillvalue=0)
+    phaseData = mapslices(x -> ROMEO.unwrap(x), angle.(images[:, :, slices, 1, 1]), dims = (1, 2))
+    phaseMosaic = mosaicview(phaseData, nrow = Int(floor(sqrt(length(slices)))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    PyPlot.imshow(phaseMosaic, cmap="inferno",vmax = 3*pi,vmin=-3*pi)
+    PyPlot.imshow(phaseMosaic, cmap = "inferno", vmax = 3 * pi, vmin = -3 * pi)
     colorbar()
 
     gcf().suptitle("∠Images")
 
     # Plot B0 maps
-    figure("B₀ Map Images")
+    if isempty(figHandles)
+        figure("B₀ Map Images")
+    else
+        figure(figHandles[3])
+    end
 
-    b0Mosaic = mosaicview(b0[:,:,slices],nrow=Int(floor(sqrt(length(slices)))),npad = 5, rowmajor=true, fillvalue=0)
+    b0Mosaic = mosaicview(b0[:, :, slices], nrow = Int(floor(sqrt(length(slices)))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    PyPlot.imshow(b0Mosaic, cmap="inferno",vmax=500,vmin=-500)
+    PyPlot.imshow(b0Mosaic, cmap = "inferno", vmax = 500, vmin = -500)
     colorbar()
 
-    gcf().suptitle("B₀ Maps")
+    gcf().suptitle("B₀ Maps [rad/s]")
 
 end
 
@@ -217,8 +229,8 @@ function adjustHeader!(raw, reconSize, numSamples, interleaveNumber, singleSlice
         raw.profiles[l].head.discard_pre = 0
 
         # Set the contrast to 0 or raw.profiles[l].head.idx.repetition for diffusion directions
-        raw.profiles[l].head.idx.contrast = 0 #raw.profiles[l].head.idx.repetition
-
+        # raw.profiles[l].head.idx.contrast = raw.profiles[l].head.idx.repetition
+        raw.profiles[l].head.idx.contrast = 0
         # Set the repetition to 0
         raw.profiles[l].head.idx.repetition = 0
 
@@ -360,27 +372,29 @@ function mergeInterleaves(params)
 
 end
 
-## Get gradients from the trajectory
-function nodes_to_gradients(nodes::Matrix)
+# ## Get gradients from the trajectory
+# function nodes_to_gradients(nodes::Matrix; gamma=42577478, dwellTime=2e-6, FOV=[0.22,0.22,0.01],reconSize=[200,200,1])
 
-    ## Normalized Conversion (norm kspace to grads in T/m) is scalingFactor = reconSize/(gamma*dwellTime*FOV)
+#     ## Normalized Conversion (norm kspace to grads in T/m) is scalingFactor = reconSize/(gamma*dwellTime*FOV)
+#     conversionFactor = reconSize./(gamma*dwellTime.*FOV)
 
-    gradients = diff(hcat([0; 0], nodes), dims = 2)
-    gradients = gradients*10.6941176
-    return gradients
+#     gradients = diff(hcat([0; 0], nodes), dims = 2)
+#     gradients = gradients .* conversionFactor[1:2]
+#     return gradients
 
-end
+# end
 
-## Convert gradients to trajectory nodes
-function gradients_to_nodes(gradients::Matrix)
+# ## Convert gradients to trajectory nodes
+# function gradients_to_nodes(gradients::Matrix; gamma=42577478, dwellTime=2e-6, FOV=[0.22,0.22,0.01],reconSize=[200,200,1])
 
-    ## Normalized Conversion (grads in T/m to normalized k-space) is scalingFactor = (gamma*dwellTime*FOV)/reconSize
+#     ## Normalized Conversion (grads in T/m to normalized k-space) is scalingFactor = (gamma*dwellTime*FOV)/reconSize
+#     conversionFactor = (gamma*dwellTime.*FOV) ./ reconSize
 
-    nodes = cumsum(gradients, dims = 2)
-    nodes = nodes/10.6941176
-    return nodes
+#     nodes = cumsum(gradients, dims = 2)
+#     nodes = nodes .* conversionFactor[1:2]
+#     return nodes
 
-end
+# end
 
 function checkAcquisitionNodes!(a::AcquisitionData)
 
@@ -416,9 +430,14 @@ function validateAcqData!(a::AcquisitionData)
 
 end
 
-## Abstraction of the preprocessing of raw MRD data
-# OUTPUT IS AN ISMRMRD FILE READY FOR READING WITHOUT FURTHER PROCESSING 
-function preprocessCartesianData(r::RawAcquisitionData, fname)
+"""
+preprocessCartesianData!(raw::RawAcquisitionData; dims = 1)
+prepares Cartesian for reconstruction
+# Arguments
+* `r::RawAcquisitionData{T}`          - RawAcquisitionData object
+* `fname`                             - filename to save the preprocessed data to
+"""
+function preprocessCartesianData(r::RawAcquisitionData, doSave; fname = "data/testFile.h5")
 
     removeOversampling!(r)
     # headerCopy = deepcopy(r.params)
@@ -429,12 +448,19 @@ function preprocessCartesianData(r::RawAcquisitionData, fname)
     ## Properly arrange data from the converted siemens file
     validateAcqData!(acqDataCartesian)
 
-    # Need to permute the dimensions of kdata to match the convention of MRIReco.jl
-    permutedims(acqDataCartesian.kdata,[3,2,1])
+    # # Need to permute the dimensions of kdata to match the convention of MRIReco.jl
+    # permutedims(acqDataCartesian.kdata,[3,2,1])
     raw = RawAcquisitionData(acqDataCartesian)
-    # raw.params = headerCopy
-    fout = ISMRMRDFile(fname)
-    save(fout, raw)
+
+    if doSave
+
+        # raw.params = headerCopy
+        fout = ISMRMRDFile(fname)
+        save(fout, raw)
+
+    end
+
+    return acqDataCartesian
 
 end
 
@@ -469,7 +495,15 @@ function preprocessNonCartesianData(r::RawAcquisitionData)
 
 end
 
-## PREPROCESSING
+
+"""
+mergeRawInterleaves(params)
+Merges multiple interleave data together from individually acquired interleave scans
+
+# Arguments
+* `params`          - Dictionary
+
+"""
 function mergeRawInterleaves(params)
 
     # Get the other interleave indexes other than the one asked for
@@ -574,33 +608,19 @@ function mergeRawInterleaves(params)
 
 end
 
-## Currently only works for spiral trajectories but will have to be extended to cartesian!
-function parseTrajectoryGradients(a::AcquisitionData)
+"""
+applyGIRF!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
+Applies the GIRF to the trajectories inside of a::AcquisitionData
+# Arguments
+* `a::AcquisitionData{T}`          - AcquisitionData object
+* `freq::AbstractVector`           - Vector containing frequencies of GIRF data
+* `g_data::AbstractMatrix`         - Matrix of size N x length(freq) containing complex GIRF data
+"""
+function applyGIRF!(a::AcquisitionData{T}, g::GirfApplier) where T
 
-    for l = 1:length(a.traj)
-        
-        nProfiles = a.traj[l].numProfiles
-        nSamples = a.traj[l].numSamplingPerProfile
-        nodes = a.traj[l].nodes
-
-        for profile = 1:nProfiles
-            
-            ilExtractor = nSamples*(profile-1) .+ (1:nSamples)
-            ilNodes = nodes[:,ilExtractor]
-
-            figure()
-            ilGrads = nodes_to_gradients(ilNodes)
-
-            plot(ilGrads')
-
-        end
-    
-    end
-        
-end
-
-## ApplyGIRF to AcqData Object
-function applyGIRF!(a::AcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
+    # Read parameters for gradient and node conversion
+    S = a.encodingSize
+    F = a.fov
 
     for l = 1:length(a.traj)
         
@@ -616,16 +636,18 @@ function applyGIRF!(a::AcquisitionData, freq::AbstractVector, g_data::AbstractMa
             ilNodes = nodes[:,ilExtractor]
             ilTimes = times[ilExtractor]
 
-            ilGrads = nodes_to_gradients(ilNodes)
+            DT = ilTimes[1] - ilTimes[2]
+
+            ilGrads = nodes_to_gradients(ilNodes; dwellTime=DT, reconSize=S, FOV = F)
 
             for dim = 1:size(ilGrads,1)
 
-                correctedGrads = predictGrad_port(freq,g_data[:,dim],ilTimes,ilGrads[dim,:], ilTimes) # THESE ARE ALL VECTORS SO INPUT orientation (column/row major ordering) doesn't matter
+                correctedGrads = apply_girf(g,ilGrads[dim,:], ilTimes ,ilTimes, dim) # THESE ARE ALL VECTORS SO INPUT orientation (column/row major ordering) doesn't matter
                 ilGrads[dim,:] = correctedGrads'
 
             end
 
-            ilNodes = gradients_to_nodes(ilGrads)
+            ilNodes = gradients_to_nodes(ilGrads; dwellTime=DT, reconSize=S, FOV = F)
             nodes[:,ilExtractor] = ilNodes
 
         end
@@ -636,8 +658,19 @@ function applyGIRF!(a::AcquisitionData, freq::AbstractVector, g_data::AbstractMa
 
 end
 
-## ApplyGIRF to AcqData Object
-function applyK0!(a::AcquisitionData, freq::AbstractVector, k0_data::AbstractMatrix)
+"""
+applyK0!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
+Applies the K0 modulation due to imaging gradients to the data inside of a::AcquisitionData
+# Arguments
+* `a::AcquisitionData{T}`          - AcquisitionData object
+* `freq::AbstractVector`           - Vector containing frequencies of GIRF data
+* `k0_data::AbstractMatrix`         - Matrix of size N x length(freq) containing complex k0 function data
+"""
+function applyK0!(a::AcquisitionData{T},g::GirfApplier) where T
+
+    # Read parameters for gradient and node conversion
+    S = a.encodingSize
+    F = a.fov
 
     for l = 1:length(a.traj)
         
@@ -653,20 +686,22 @@ function applyK0!(a::AcquisitionData, freq::AbstractVector, k0_data::AbstractMat
             ilNodes = nodes[:,ilExtractor]
             ilTimes = times[ilExtractor]
 
-            ilGrads = nodes_to_gradients(ilNodes)
+            DT = ilTimes[1] - ilTimes[2]
+
+            ilGrads = nodes_to_gradients(ilNodes; dwellTime=DT, reconSize=S, FOV = F)
 
             k0_correction = ones(size(ilGrads))
             @info size(k0_correction)
 
             for dim = 1:size(ilGrads,1)
 
-                k0_correction[dim,:] = predictGrad_port(freq,k0_data[:,dim],ilTimes,ilGrads[dim,:], ilTimes) # THESE ARE ALL VECTORS SO INPUT orientation (column/row major ordering) doesn't matter
+                k0_correction[dim,:] = apply_girf(g,ilGrads[dim,:], ilTimes, ilTimes, dim) # THESE ARE ALL VECTORS SO INPUT orientation (column/row major ordering) doesn't matter
 
             end
 
             finalCorrection = sum(k0_correction,dims=1) #back to radians!
 
-            a.kdata[l][ilExtractor,:] = a.kdata[l][ilExtractor,:] .* exp.(1im .*finalCorrection')
+            a.kdata[l][ilExtractor,:] = a.kdata[l][ilExtractor,:] .* exp.(-1im .*finalCorrection')
 
             # Visualization of Phase Modulation
             figure("Phase Modulation 2")
@@ -681,42 +716,31 @@ function applyK0!(a::AcquisitionData, freq::AbstractVector, k0_data::AbstractMat
 
 end
 
-## Calibrate the phase from individual interleaves
-function calibrateAcquisitionPhase!(a::AcquisitionData)
+# ## Calibrate the phase from individual interleaves
+# function calibrateAcquisitionPhase!(a::AcquisitionData)
 
-    for l = 1:length(a.traj)
+#     for l = 1:length(a.traj)
         
-        nProfiles = a.traj[l].numProfiles
-        nSamples = a.traj[l].numSamplingPerProfile
-        nodes = a.traj[l].nodes
-        times = a.traj[l].times
-        oldNodes = a.traj[l].nodes
+#         nProfiles = a.traj[l].numProfiles
+#         nSamples = a.traj[l].numSamplingPerProfile
+#         nodes = a.traj[l].nodes
+#         times = a.traj[l].times
+#         oldNodes = a.traj[l].nodes
 
-        initialInterleavePhase = angle.(a.kdata[l][1,:])'
+#         initialInterleavePhase = angle.(a.kdata[l][1,:])'
 
-        for profile = 2:nProfiles
+#         for profile = 2:nProfiles
             
-            ilExtractor = nSamples*(profile-1) .+ (1:nSamples)
+#             ilExtractor = nSamples*(profile-1) .+ (1:nSamples)
 
-            initialProfilePhase = angle.(a.kdata[l][ilExtractor[1],:])'
+#             initialProfilePhase = angle.(a.kdata[l][ilExtractor[1],:])'
 
-            @info size(initialInterleavePhase)
-            @info size(a.kdata[l][ilExtractor,:])
+#             @info size(initialInterleavePhase)
+#             @info size(a.kdata[l][ilExtractor,:])
             
-            a.kdata[l][ilExtractor,:] .*= exp.(-1im * (initialInterleavePhase - initialProfilePhase))
+#             a.kdata[l][ilExtractor,:] .*= exp.(-1im * (initialInterleavePhase - initialProfilePhase))
             
-        end    
-    end
+#         end    
+#     end
 
-end
-
-function testConversion()
-
-    gamma = 42577478
-    dt = 2e-6
-
-    # correction to k-space = kspace * fov (m) / reconSize
-
-    0.5*200 / 0.22
-
-end
+# end

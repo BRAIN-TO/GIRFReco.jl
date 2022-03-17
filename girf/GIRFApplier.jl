@@ -1,6 +1,6 @@
 using DelimitedFiles, MRIReco, PyPlot, Dierckx, MAT, DSP
 
-export applyGIRF
+export apply_girf, GirfApplier
 
 include("GIRFEssential.jl")
 
@@ -30,7 +30,7 @@ end
 # Outputs:
 #   grad_OUT_resampled: Vector (filtered gradient data sampled at time_out)
 
-function applyGIRF(g::GirfApplier, gradient_in, time_in, time_out, direction)
+function apply_girf(g::GirfApplier, gradient_in, time_in, time_out, direction)
 
     # Input variables
     # time_in: input time vector
@@ -56,9 +56,9 @@ function applyGIRF(g::GirfApplier, gradient_in, time_in, time_out, direction)
 
     t_or1, t_or2, t_or3 = time2freq(time_in_original)
 
-    figure("RAW FFT")
-    plot(t_or1, abs.(fftshift(fft(gradient_in_original))))
-    semilogy()
+    # figure("RAW FFT")
+    # plot(t_or1, abs.(fftshift(fft(gradient_in_original))))
+    # semilogy()
 
     # Set length of prediction
     T_GIRF = 1 ./df_GIRF # Signal Length for nyquist fs = 2B and T = 1/2B
@@ -81,32 +81,32 @@ function applyGIRF(g::GirfApplier, gradient_in, time_in, time_out, direction)
     ns_in = length(time_in)
 
     # interpolate GIRF onto the input grid
-    GIRF_real_spline = Spline1D(freq_GIRF,real.(GIRF), w=ones(length(freq_GIRF)), k=3, bc = "zero")
-    GIRF_imaginary_spline = Spline1D(freq_GIRF, imag.(GIRF), w=ones(length(freq_GIRF)), k=3, bc = "zero")
+    GIRF_real_spline = Spline1D(freq_GIRF,real.(GIRF), w=ones(length(freq_GIRF)), k=2, bc = "zero")
+    GIRF_imaginary_spline = Spline1D(freq_GIRF, imag.(GIRF), w=ones(length(freq_GIRF)), k=2, bc = "zero")
 
     # recombine interpolated reals and imaginary parts
     GIRF_ip = GIRF_real_spline(f_in) .+ 1im.*GIRF_imaginary_spline(f_in)
 
     ## filter the output to avoid aliasing
-    figure("Magnitude FFT of Response")
+    # figure("Magnitude FFT of Response")
     windowFunction = fftshift(tukey(length(GIRF_ip), 0.5;zerophase = true))
-    plot(windowFunction)
-    plot(GIRF_ip)
+    # plot(windowFunction)
+    # plot(GIRF_ip)
     GIRF_ip = windowFunction .* GIRF_ip
-    plot(GIRF_ip)
+    # plot(GIRF_ip)
 
     # Convolution in Time (mult in freq) to get output Gradient train in frequency domain
     OUT = GIRF_ip.*IN
 
     grad_OUT = real.(ifft(ifftshift(OUT))./dt_in)
 
-    grad_OUT_spline = Spline1D(time_in,grad_OUT, w=ones(length(time_in)), k=3, bc = "zero")
+    grad_OUT_spline = Spline1D(time_in,grad_OUT, w=ones(length(time_in)), k=2, bc = "zero")
     grad_OUT_resampled = grad_OUT_spline(time_out)
 
-    figure("Difference between corrected and uncorrected gradients")
-    plot(time_out, grad_OUT_resampled .- gradient_in_original)
-    xlabel("Time [s]")
-    ylabel("Pointwise Gradient Difference [a.u]")
+    # figure("Difference between corrected and uncorrected gradients")
+    # plot(time_out, grad_OUT_resampled .- gradient_in_original)
+    # xlabel("Time [s]")
+    # ylabel("Pointwise Gradient Difference [a.u]")
 
     return grad_OUT_resampled
 

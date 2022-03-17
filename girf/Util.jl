@@ -229,3 +229,53 @@ function VariableSmoothing(SIRF, f, f2)
   @error "NOT IMPLEMENTED YET"
 
 end
+
+
+## Currently only works for spiral trajectories but will have to be extended to cartesian!
+function parseTrajectoryGradients(a::AcquisitionData)
+
+  for l = 1:length(a.traj)
+      
+      nProfiles = a.traj[l].numProfiles
+      nSamples = a.traj[l].numSamplingPerProfile
+      nodes = a.traj[l].nodes
+
+      for profile = 1:nProfiles
+          
+          ilExtractor = nSamples*(profile-1) .+ (1:nSamples)
+          ilNodes = nodes[:,ilExtractor]
+
+          figure()
+          ilGrads = nodes_to_gradients(ilNodes)
+
+          plot(ilGrads')
+
+      end
+  
+  end
+      
+end
+
+## Get gradients from the trajectory
+function nodes_to_gradients(nodes::Matrix; gamma=42577478, dwellTime=2e-6, FOV=[220,220,1],reconSize=[200,200,1])
+
+  ## Normalized Conversion (norm kspace to grads in T/m) is scalingFactor = reconSize/(gamma*dwellTime*FOV)
+  conversionFactor = reconSize./(gamma*dwellTime.*FOV)*1000 # The 1000 factor is the conversion from mm to m
+
+  gradients = diff(hcat([0; 0], nodes), dims = 2)
+  gradients = gradients .* conversionFactor[1:2]
+  return gradients
+
+end
+
+## Convert gradients to trajectory nodes
+function gradients_to_nodes(gradients::Matrix; gamma=42577478, dwellTime=2e-6, FOV=[220,220,1],reconSize=[200,200,1])
+
+  ## Normalized Conversion (grads in T/m to normalized k-space) is scalingFactor = (gamma*dwellTime*FOV)/reconSize
+  conversionFactor = ((gamma*dwellTime.*FOV) ./ reconSize) /1000 # The 1000 is the conversion from mm to m
+
+  nodes = cumsum(gradients, dims = 2)
+  nodes = nodes .* conversionFactor[1:2]
+  return nodes
+
+end

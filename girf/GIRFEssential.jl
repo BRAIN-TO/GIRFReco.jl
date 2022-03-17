@@ -1,6 +1,6 @@
 using DelimitedFiles, MRIReco, PyPlot, Dierckx, MAT, DSP
 
-export GirfEssential, convertDomain!, time2freq, loadGirf, setIdentifier!
+export GirfEssential, convertDomain!, time2freq, loadGirf, setIdentifier!, buildGIRF_K0, buildGIRF_PN
 
 include("Util.jl")
 
@@ -253,6 +253,183 @@ function buildGIRF()
 
 end
 
+# ## Function for building GIRF from the measurements taken by Tim in June 2021
+# # Takes in nothing, uses fixed filenames for now as we only have one set of GIRF measurements
+# # First sample of GIRF is an underflow, so use samples from 2:end
+# # Store the GIRF Fourier Representation in an Nx3 matrix, with second dimension indices 1,2,3 corresponding to directions x,y,z respectively
+# # Store the frequencies corresponding to the GIRF as a separate output vector
+
+# function buildGIRF_PN(doPlot = true, doFiltering = true)
+
+#     girf_filename_x = "data/GIRF/GIRF_X.mat"
+#     girf_filename_y = "data/GIRF/GIRF_Y.mat"
+#     girf_filename_z = "data/GIRF/GIRF_Z.mat"
+
+#     GIRF_file_x = matread(girf_filename_x)
+#     GIRF_file_y = matread(girf_filename_y)
+#     GIRF_file_z = matread(girf_filename_z)
+
+#     GIRF_length = length(GIRF_file_x["GIRF_FT"]) .- 1
+
+#     GIRF_data = Matrix{ComplexF64}(undef, GIRF_length,3)
+
+#     GIRF_data[:,1] = GIRF_file_x["GIRF_FT"][2:end]
+#     GIRF_data[:,2] = GIRF_file_y["GIRF_FT"][2:end]
+#     GIRF_data[:,3] = GIRF_file_z["GIRF_FT"][2:end]
+#     GIRF_freq = GIRF_file_z["freq"][2:end]
+
+#     if doFiltering
+
+#         window = tukey(GIRF_length, 0.25, zerophase = false)
+
+#         for l = 1:3
+
+#             GIRF_data[:,l] = window .* GIRF_data[:,l]
+
+#         end
+
+#     end
+
+#     if doPlot
+
+#         figure("Gx GIRF Magnitude (k1)")
+#         plot(GIRF_freq, abs.(GIRF_data[:,1]))
+#         xlim([-30,30])
+#         ylim([0.0, 1.05])
+#         xlabel("Frequency [kHz]")
+#         ylabel("GIRF Magnitude")
+
+#         figure("Gy GIRF Magnitude (k1)")
+#         plot(GIRF_freq, abs.(GIRF_data[:,2]))
+#         xlim([-30,30])
+#         ylim([0.0, 1.05])
+#         xlabel("Frequency [kHz]")
+#         ylabel("GIRF Magnitude")
+
+#         figure("Gz GIRF Magnitude (k1)")
+#         plot(GIRF_freq, abs.(GIRF_data[:,3]))
+#         xlim([-30,30])
+#         ylim([0.0, 1.05])
+#         xlabel("Frequency [kHz]")
+#         ylabel("GIRF Magnitude")
+
+#         figure("Gx GIRF Phase (k1)")
+#         plot(GIRF_freq, angle.(GIRF_data[:,1]))
+#         xlim([-30,30])
+#         ylim([-pi, pi])
+#         xlabel("Frequency [kHz]")
+#         ylabel("GIRF Phase")
+
+#         figure("Gy GIRF Phase (k1)")
+#         plot(GIRF_freq, angle.(GIRF_data[:,2]))
+#         xlim([-30,30])
+#         ylim([-pi, pi])
+#         xlabel("Frequency [kHz]")
+#         ylabel("GIRF Phase")
+
+#         figure("Gz GIRF Phase (k1)")
+#         plot(GIRF_freq, angle.(GIRF_data[:,3]))
+#         xlim([-30,30])
+#         ylim([-pi,pi])
+#         xlabel("Frequency [kHz]")
+#         ylabel("GIRF Phase")
+
+#     end
+
+#     return GIRF_freq, GIRF_data
+
+# end
+
+# ## Function for building GIRF from the measurements taken by Tim in June 2021
+# # Takes in nothing, uses fixed filenames for now as we only have one set of GIRF measurements
+# # First sample of GIRF is an underflow, so use samples from 2:end
+# # Store the GIRF Fourier Representation in an Nx3 matrix, with second dimension indices 1,2,3 corresponding to directions x,y,z respectively
+# # Store the frequencies corresponding to the GIRF as a separate output vector
+
+# function buildGIRF_K0(doPlot = true, doFiltering = true)
+
+#     girf_filename_x = "data/GIRF/GIRF_X.mat"
+#     girf_filename_y = "data/GIRF/GIRF_Y.mat"
+#     girf_filename_z = "data/GIRF/GIRF_Z.mat"
+
+#     GIRF_file_x = matread(girf_filename_x)
+#     GIRF_file_y = matread(girf_filename_y)
+#     GIRF_file_z = matread(girf_filename_z)
+
+#     GIRF_length = length(GIRF_file_x["b0ec_FT"]) .- 1
+
+#     GIRF_data = Matrix{ComplexF64}(undef, GIRF_length,3)
+
+#     GIRF_data[:,1] = GIRF_file_x["b0ec_FT"][2:end]
+#     GIRF_data[:,2] = GIRF_file_y["b0ec_FT"][2:end]
+#     GIRF_data[:,3] = GIRF_file_z["b0ec_FT"][2:end]
+#     GIRF_freq = GIRF_file_z["freq"][2:end]
+
+#     if doFiltering
+
+#         window = tukey(GIRF_length, 0.25, zerophase = false)
+
+#         for l = 1:3
+
+#             GIRF_data[:,l] = window .* GIRF_data[:,l]
+
+#         end
+
+#     end
+
+#     # ADD PREPROCESSING TO REMOVE HIGH FREQUENCY NOISE
+
+#     if doPlot
+
+#         figure("Gx GIRF Magnitude (k0)")
+#         plot(GIRF_freq, abs.(GIRF_data[:,1]))
+#         xlim([-3,3])
+#         ylim([0.0, 80])
+#         xlabel("Frequency [kHz]")
+#         ylabel("GIRF Magnitude")
+
+#         figure("Gy GIRF Magnitude (k0)")
+#         plot(GIRF_freq, abs.(GIRF_data[:,2]))
+#         xlim([-3,3])
+#         ylim([0.0, 80])
+#         xlabel("Frequency [kHz]")
+#         ylabel("GIRF Magnitude")
+
+#         figure("Gz GIRF Magnitude (k0)")
+#         plot(GIRF_freq, abs.(GIRF_data[:,3]))
+#         xlim([-3,3])
+#         ylim([0.0, 80])
+#         xlabel("Frequency [kHz]")
+#         ylabel("GIRF Magnitude")
+
+#         figure("Gx GIRF Phase (k0)")
+#         plot(GIRF_freq, angle.(GIRF_data[:,1]))
+#         xlim([-3,3])
+#         ylim([-pi, pi])
+#         xlabel("Frequency [kHz]")
+#         ylabel("GIRF Phase")
+
+
+#         figure("Gy GIRF Phase (k0)")
+#         plot(GIRF_freq, angle.(GIRF_data[:,2]))
+#         xlim([-3,3])
+#         ylim([-pi, pi])
+#         xlabel("Frequency [kHz]")
+#         ylabel("GIRF Phase")
+
+#         figure("Gz GIRF Phase (k0)")
+#         plot(GIRF_freq, angle.(GIRF_data[:,3]))
+#         xlim([-3,3])
+#         ylim([-pi,pi])
+#         xlabel("Frequency [kHz]")
+#         ylabel("GIRF Phase")
+
+#     end
+
+#     return GIRF_freq, GIRF_data
+
+# end
+
 ## Function for building GIRF from the measurements taken by Tim in June 2021
 # Takes in nothing, uses fixed filenames for now as we only have one set of GIRF measurements
 # First sample of GIRF is an underflow, so use samples from 2:end
@@ -260,6 +437,9 @@ end
 # Store the frequencies corresponding to the GIRF as a separate output vector
 
 function buildGIRF_PN(doPlot = true, doFiltering = true)
+
+    # SUPPRESS PLOTTING
+    doPlot = false
 
     girf_filename_x = "data/GIRF/GIRF_X.mat"
     girf_filename_y = "data/GIRF/GIRF_Y.mat"
@@ -292,42 +472,42 @@ function buildGIRF_PN(doPlot = true, doFiltering = true)
 
     if doPlot
 
-        figure("Gx GIRF Magnitude (k1)")
+        figure("Gx GIRF Magnitude")
         plot(GIRF_freq, abs.(GIRF_data[:,1]))
         xlim([-30,30])
         ylim([0.0, 1.05])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Magnitude")
 
-        figure("Gy GIRF Magnitude (k1)")
+        figure("Gy GIRF Magnitude")
         plot(GIRF_freq, abs.(GIRF_data[:,2]))
         xlim([-30,30])
         ylim([0.0, 1.05])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Magnitude")
 
-        figure("Gz GIRF Magnitude (k1)")
+        figure("Gz GIRF Magnitude")
         plot(GIRF_freq, abs.(GIRF_data[:,3]))
         xlim([-30,30])
         ylim([0.0, 1.05])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Magnitude")
 
-        figure("Gx GIRF Phase (k1)")
+        figure("Gx GIRF Phase")
         plot(GIRF_freq, angle.(GIRF_data[:,1]))
         xlim([-30,30])
         ylim([-pi, pi])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Phase")
 
-        figure("Gy GIRF Phase (k1)")
+        figure("Gy GIRF Phase")
         plot(GIRF_freq, angle.(GIRF_data[:,2]))
         xlim([-30,30])
         ylim([-pi, pi])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Phase")
 
-        figure("Gz GIRF Phase (k1)")
+        figure("Gz GIRF Phase")
         plot(GIRF_freq, angle.(GIRF_data[:,3]))
         xlim([-30,30])
         ylim([-pi,pi])
@@ -347,6 +527,9 @@ end
 # Store the frequencies corresponding to the GIRF as a separate output vector
 
 function buildGIRF_K0(doPlot = true, doFiltering = true)
+
+    # SUPPRESS PLOTTING
+    doPlot = false
 
     girf_filename_x = "data/GIRF/GIRF_X.mat"
     girf_filename_y = "data/GIRF/GIRF_Y.mat"
@@ -381,28 +564,28 @@ function buildGIRF_K0(doPlot = true, doFiltering = true)
 
     if doPlot
 
-        figure("Gx GIRF Magnitude (k0)")
+        figure("Gx GIRF Magnitude")
         plot(GIRF_freq, abs.(GIRF_data[:,1]))
         xlim([-3,3])
         ylim([0.0, 80])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Magnitude")
 
-        figure("Gy GIRF Magnitude (k0)")
+        figure("Gy GIRF Magnitude")
         plot(GIRF_freq, abs.(GIRF_data[:,2]))
         xlim([-3,3])
         ylim([0.0, 80])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Magnitude")
 
-        figure("Gz GIRF Magnitude (k0)")
+        figure("Gz GIRF Magnitude")
         plot(GIRF_freq, abs.(GIRF_data[:,3]))
         xlim([-3,3])
         ylim([0.0, 80])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Magnitude")
 
-        figure("Gx GIRF Phase (k0)")
+        figure("Gx GIRF Phase")
         plot(GIRF_freq, angle.(GIRF_data[:,1]))
         xlim([-3,3])
         ylim([-pi, pi])
@@ -410,14 +593,14 @@ function buildGIRF_K0(doPlot = true, doFiltering = true)
         ylabel("GIRF Phase")
 
 
-        figure("Gy GIRF Phase (k0)")
+        figure("Gy GIRF Phase")
         plot(GIRF_freq, angle.(GIRF_data[:,2]))
         xlim([-3,3])
         ylim([-pi, pi])
         xlabel("Frequency [kHz]")
         ylabel("GIRF Phase")
 
-        figure("Gz GIRF Phase (k0)")
+        figure("Gz GIRF Phase")
         plot(GIRF_freq, angle.(GIRF_data[:,3]))
         xlim([-3,3])
         ylim([-pi,pi])
@@ -442,7 +625,7 @@ end
 ##  Function for displaying girf in terminal reasonably
 function displayGirf(g::GirfEssential)
 
-    # @info "Pretty-print NOT implemented yet!"
+    @info "GIRF INFORMATION"
 
     println(g.name)
     println(g.isFreqDomainGirf)

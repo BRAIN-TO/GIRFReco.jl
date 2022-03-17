@@ -1,5 +1,6 @@
 using PyPlot, HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO
 
+include("../girf/GIRFApplier.jl")
 include("../utils/utils.jl")
 
 ## function to calculate the B0 maps from the two images with different echo times
@@ -10,31 +11,31 @@ function calculateB0Maps(imData,slices)
 
 end
 
-## function to crop the B0 map FOV down to the same aspect ratio as that of the spiral scans (our data is 2x oversampled in the readout direction so the default FOV is 2x the size it needs to be in that direction)
-function cropB0Maps(b0_l)
-
-   b0 = mapslices(x->x[:,33:96],b0_l,dims=(1,2))
-
-end
-
 ## Load data files
+
+makeMaps = true
+saveMaps = true
 
 reconSize = (64,64)
 
 @info "Loading Data Files"
-# Set the data file name (Change this for your own system)
-dataFileCartesian = ISMRMRDFile("data/Fieldmaps/fieldMap_30_2.h5")
 
-# read in the raw data from the ISMRMRD file into a RawAcquisitionData object
-r = RawAcquisitionData(dataFileCartesian)
+if makeMaps
 
-# Set filename for preprocessed data 
-fname = "data/testFile.h5"
+    # Set the data file name (Change this for your own system)
+    dataFileCartesian = ISMRMRDFile("data/Fieldmaps/fieldMap_30_2.h5")
 
-# Preprocess Data and save!
-preprocessCartesianData(r::RawAcquisitionData, fname)
+    # read in the raw data from the ISMRMRD file into a RawAcquisitionData object
+    r = RawAcquisitionData(dataFileCartesian)
 
-removeOversampling!(r)
+    # Set filename for preprocessed data 
+    fname = "data/testFile.h5"
+
+    # Preprocess Data and save!
+    preprocessCartesianData(r::RawAcquisitionData, saveMaps; fname)
+
+end
+# removeOversampling!(r)
 
 # Load preprocessed data!
 dataFileNew = ISMRMRDFile("data/testFile.h5")
@@ -49,7 +50,7 @@ nSlices = numSlices(acqDataCartesian)
 #  difference in Diffusion scans
 
 @info "Calculating Sense Maps"
-@time senseCartesian = espirit(acqDataCartesian,(4,4),30,eigThresh_1=0.05, eigThresh_2=0.98)
+@time senseCartesian = espirit(acqDataCartesian,(4,4),10,eigThresh_1=0.01, eigThresh_2=0.98)
 sensitivity = senseCartesian
 
 ## Resize sense maps to match encoding size of data matrix
@@ -73,7 +74,7 @@ paramsCartesian[:iterations] = 20 # number of CG iterations
 paramsCartesian[:solver] = "cgnr" # inverse problem solver method
 paramsCartesian[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false) # turn on store solutions if you want to see the reconstruction convergence (uses more memory)
 paramsCartesian[:senseMaps] = ComplexF32.(sensitivity) # set sensitivity map array
-
+# paramsCartesian[:correctionMap] = ComplexF32.(-1im.*b0Maps)
 ## Defining array mapping from acquisition number to slice number (indexArray[slice = 1:9] = [acquisitionNumbers])
 
 #indexArray = [5,1,6,2,7,3,8,4,9] # for 9 slice phantom
