@@ -268,7 +268,7 @@ function mergeInterleaves(params)
     # Get the other interleave indexes other than the one asked for
     otherInterleaveIndices = [x for x ∈ 1:params[:numInterleaves] if x ∉ params[:interleave]]
 
-    @info "indices = $otherInterleaveIndices"
+    # @info "indices = $otherInterleaveIndices"
 
     # read in the data file from the ISMRMRD format
     dataFile = ISMRMRDFile(params[:interleaveDataFileNames][params[:interleave]])
@@ -350,7 +350,7 @@ function mergeInterleaves(params)
     end
 
     # converting rawData to AcquisitionData
-    @info "Converting RawAcquisitionData to AcquisitionData"
+    # @info "Converting RawAcquisitionData to AcquisitionData"
     acqData = AcquisitionData(rawData,estimateProfileCenter=false)
 
     ## Assume all of the slices share a trajectory
@@ -509,7 +509,7 @@ function mergeRawInterleaves(params)
     # Get the other interleave indexes other than the one asked for
     otherInterleaveIndices = [x for x ∈ 1:params[:numInterleaves] if x ∉ params[:interleave]]
 
-    @info "indices = $otherInterleaveIndices"
+    # @info "indices = $otherInterleaveIndices"
 
     # read in the data file from the ISMRMRD format
     dataFile = ISMRMRDFile(params[:interleaveDataFileNames][params[:interleave]])
@@ -691,8 +691,7 @@ function applyK0!(a::AcquisitionData{T},g::GirfApplier) where T
             ilGrads = nodes_to_gradients(ilNodes; dwellTime=DT, reconSize=S, FOV = F)
 
             k0_correction = ones(size(ilGrads))
-            @info size(k0_correction)
-
+            
             for dim = 1:size(ilGrads,1)
 
                 k0_correction[dim,:] = apply_girf(g,ilGrads[dim,:], ilTimes, ilTimes, dim) # THESE ARE ALL VECTORS SO INPUT orientation (column/row major ordering) doesn't matter
@@ -703,12 +702,12 @@ function applyK0!(a::AcquisitionData{T},g::GirfApplier) where T
 
             a.kdata[l][ilExtractor,:] = a.kdata[l][ilExtractor,:] .* exp.(-1im .*finalCorrection')
 
-            # Visualization of Phase Modulation
-            figure("Phase Modulation 2")
-            plot(vec(ilTimes), vec(angle.(exp.(1im .* finalCorrection))))
-            xlabel("Time [s]")
-            ylabel("k₀ [rad]")
-            title("B₀ Eddy Current Fluctuation During Readout ")
+            # # Visualization of Phase Modulation
+            # figure("Phase Modulation 2")
+            # plot(vec(ilTimes), vec(angle.(exp.(1im .* finalCorrection))))
+            # xlabel("Time [s]")
+            # ylabel("k₀ [rad]")
+            # title("B₀ Eddy Current Fluctuation During Readout ")
             
         end
     

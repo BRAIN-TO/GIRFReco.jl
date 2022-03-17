@@ -50,7 +50,7 @@ nSlices = numSlices(acqDataCartesian)
 #  difference in Diffusion scans
 
 @info "Calculating Sense Maps"
-@time senseCartesian = espirit(acqDataCartesian,(4,4),10,eigThresh_1=0.01, eigThresh_2=0.98)
+senseCartesian = espirit(acqDataCartesian,(4,4),10,eigThresh_1=0.01, eigThresh_2=0.98)
 sensitivity = senseCartesian
 
 ## Resize sense maps to match encoding size of data matrix
@@ -101,10 +101,10 @@ b0Maps = calculateB0Maps(cartesianReco.data,slices)
 
 #resampledRecon = Array{ComplexF64,5}(undef,(reconSize[1], reconSize[2],1,2,1))
 
-resampledRecon = mapslices(x->rotl90(FourierTools.resample(x,reconSize)), cartesianReco.data; dims=[1,2])
+resampledRecon = mapslices(x->rotl90(FourierTools.resample(x,(200,200))), cartesianReco.data; dims=[1,2])
 resampledB0 = mapslices(x->FourierTools.resample(x,(200,200)), b0Maps;dims=[1,2])
 
 ## Plotting Reconstruction
 
-@info "Plotting Reconstruction"
-plotReconstruction(resampledRecon,indexArray,b0Maps)
+# @info "Plotting Reconstruction"
+# plotReconstruction(resampledRecon,indexArray,b0Maps)

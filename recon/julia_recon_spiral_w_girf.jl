@@ -11,24 +11,25 @@ include("../utils/utils.jl")
 @info "Running julia_recon_cartesian to retrieve maps (senseCartesian and b0Maps)"
 include("./julia_recon_cartesian.jl")
 
+
 ## Preparation
 pygui(true)
 
+@info "Starting Spiral Reconstruction"
+
 ## Load ISMRMRD data files (can be undersampled) THIS SHOULD BE THE ONLY SECTION NEEDED TO EDIT TO ADJUST FOR DIFFERENT SCANS
-@info "Loading Data Files"
+# @info "Loading Data Files"
 
 # selectedSlice = 3
 
+
 selectedSlice = 1
-
 excitationList = [4]
-
-# excitationList = 20:2:36 # for MULTISLICE
-
-#excitationList = [4]
-
 sliceSelection = excitationList[selectedSlice]
 
+@info "Slice Chosen = $selectedSlice: \n \nExcitations Chosen = $excitationList "
+
+# excitationList = 20:2:36 # for MULTISLICE
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
@@ -49,16 +50,17 @@ adjustmentDict[:numInterleaves] = 4
 
 adjustmentDict[:singleSlice] = true
 
-@info "Using Parameters:\n\n"
+@info "Using Parameters:\n\nreconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(adjustmentDict[:slices]) \n coils = $(adjustmentDict[:coils]) \n numSamples = $(adjustmentDict[:numSamples])\n\n"
 # define recon size and parameters for data loading
 
-print(" reconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(adjustmentDict[:slices]) \n coils = $(adjustmentDict[:coils]) \n numSamples = $(adjustmentDict[:numSamples])\n\n")
+# print(" reconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(adjustmentDict[:slices]) \n coils = $(adjustmentDict[:coils]) \n numSamples = $(adjustmentDict[:numSamples])\n\n")
 
 ## Convert raw to AcquisitionData
 
-@info "Merging interleaves and reading data"
+@info "Merging interleaves and reading data \n"
 acqDataImaging = mergeRawInterleaves(adjustmentDict)
 
+@info "Loading Gradient Impulse Response Functions \n"
 ## Load GIRFs!
 gK1 = loadGirf(1)
 gAk1 = GirfApplier(gK1, 42577478)
@@ -69,17 +71,17 @@ gAk0 = GirfApplier(gK0, 42577478)
 # @info "Correcting Coil Phase"
 # calibrateAcquisitionPhase!(acqDataImaging)
 
-@info "Correcting For GIRF"
+@info "Correcting For GIRF \n"
 applyGIRF!(acqDataImaging, gAk1)
 
-@info "Correcting For k₀"
+@info "Correcting For k₀ \n"
 applyK0!(acqDataImaging, gAk0)
 
 checkAcquisitionNodes!(acqDataImaging)
 
 ## Sense Map Calculation
 
-@info "Calculating Sense Maps" # Code commented out as the cartesian reconstruction takes care of this
+@info "Validating Sense Maps \n" # Code commented out as the cartesian reconstruction takes care of this
 # acqDataSense = acqDataImaging
 #
 # # Regrid to Cartesian
@@ -95,20 +97,19 @@ checkAcquisitionNodes!(acqDataImaging)
 sensitivity = mapslices(x ->imresize(x, (acqDataImaging.encodingSize[1],acqDataImaging.encodingSize[2])), senseCartesian, dims=[1,2])
 sensitivity = mapslices(rotl90,sensitivity,dims=[1,2])
 
-## Plot the sensitivity maps of each coil
-@info "Plotting SENSE Maps"
+# ## Plot the sensitivity maps of each coil
+# @info "Plotting SENSE Maps \n"
 
-plotSenseMaps(sensitivity,adjustmentDict[:coils])
+# plotSenseMaps(sensitivity,adjustmentDict[:coils])
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
-@info "Resizing B0 Maps"
-
+@info "Validating B0 Maps \n"
 resizedB0 = mapslices(x->imresize(x,(acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0Maps, dims=[1,2])
 
 ## Define Parameter Dictionary for use with reconstruction
 # CAST TO ComplexF32 if you're using current MRIReco.jl
 
-@info "Setting Parameters"
+@info "Setting Parameters \n"
 params = Dict{Symbol,Any}()
 params[:reco] = "multiCoil"
 params[:reconSize] = adjustmentDict[:reconSize]
@@ -121,11 +122,11 @@ params[:senseMaps] = ComplexF32.(sensitivity[:,:,[selectedSlice],:])
 params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 
 ##
-@info "Performing Reconstruction"
+@info "Performing Reconstruction \n"
 reco = reconstruction(acqDataImaging,params)
 
 ## Plotting reconstruction
-@info "Plotting Reconstruction"
+@info "Plotting Reconstruction \n"
 
 # IF MULTISLICE
 # indexArray = [5,1,6,2,7,3,8,4,9]
@@ -134,32 +135,14 @@ reco = reconstruction(acqDataImaging,params)
 indexArray = 1
 
 #totalRecon = sum(abs2,reco.data,dims=5)
-plotReconstruction(reco,1)
-
-## Plotting for debugging
-
-slice1 = abs.(resampledRecon[:,:,selectedSlice,1,1])
-slice2 = abs.(reco.data[:,:,1,1,1])
-
-slice1 = slice1./maximum(slice1)
-slice2 = slice2./maximum(slice2)
-
-figure("Reference Recon")
-PyPlot.imshow(slice1,cmap="gray")
-colorbar()
-gcf().suptitle("|Image|")
-
-figure("Spiral Recon2")
-PyPlot.imshow(slice2,cmap="gray")
-colorbar()
-gcf().suptitle("|Image|")
+plotReconstruction(reco, indexArray, b0Maps)
 
 ## Plot the image edges (feature comparison)
 
-img_edges₁ = detect_edges(slice1,Canny(spatial_scale = 2.6))
-img_edges₂ = detect_edges(slice2,Canny(spatial_scale = 2.7))
+# img_edges₁ = detect_edges(slice1,Canny(spatial_scale = 2.6))
+# img_edges₂ = detect_edges(slice2,Canny(spatial_scale = 2.7))
 
-##imEdges = cat(img_edges₁,img_edges₂,zeros(size(img_edges₁)),dims=3)
+# imEdges = cat(img_edges₁,img_edges₂,zeros(size(img_edges₁)),dims=3)
 
-#figure("Edge Differences")
-#PyPlot.imshow(imEdges)
+# figure("Edge Differences")
+# PyPlot.imshow(imEdges)

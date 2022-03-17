@@ -80,8 +80,8 @@ function GirfEssential(data::AbstractVecOrMat, vect::AbstractVector, isFreq::Boo
 
     convertDomain!(g)
 
-    @info "Created GirfEssential Structure with the parameters as follows:\n"
-    print(g)
+    # @info "Created GirfEssential Structure with the parameters as follows:"
+    # print(g)
 
     return g
 
