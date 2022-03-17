@@ -2,14 +2,14 @@ using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBin
 
 # Note: the files are found relative of the location of the folder, not the
 # environment current folder
-include("../io/grad_reader.jl")
+include("../io/GradientReader.jl")
 include("../girf/GIRFApplier.jl")
 
-include("../utils/utils.jl")
+include("../utils/Utils.jl")
 
 ## Executing Cartesian recon from which B0/sensitivity maps have been computed
 @info "Running julia_recon_cartesian to retrieve maps (senseCartesian and b0Maps)"
-include("./julia_recon_cartesian.jl")
+include("../recon/CartesianRecon.jl")
 
 
 ## Preparation
