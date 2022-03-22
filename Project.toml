@@ -16,3 +16,6 @@ RegularizedLeastSquares = "1e9c538a-f78c-5de5-8ffb-0b6dbe892d23"
 Scratch = "6c6a2e73-6563-6170-7368-637461726353"
 SparsityOperators = "a5ff1dd3-4e0a-50db-9022-6d011c1d5846"
 Waveforms = "cb13b1c6-351e-5134-b3ad-d6a530956a82"
+
+[extras]
+CPUSummary = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
