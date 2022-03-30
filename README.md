@@ -30,20 +30,6 @@ Minimum working example for spiral reconstruction with GIRF correction
     ```
     add MRIReco
     ```
-7. We have to make some small changes to MRIReco to make it compatible with GIRFReco. To make packages editable add them as development packages via
-    ```
-    dev MRIReco
-    ```
-    - *Note*: If you have installed MRIReco as a dev package for other projects earlier, it might not have been updated to the latest version. In this case, go to you local package folder (usually `C:\Users\<username>\.julia\dev\MRIReco`) and `git pull` to update to the current master
-8. Update your packages and restart Julia. You might have to repeat sthis several times until the update command finishes without errors:
-   ```
-   update
-   ```
-   - *Note*: The `dev` package of MRIReco might have a local path from a different computer saved in the `Manifest.toml` file (main folder of `GIRFReco`). If you get a related error message, use a text editor to change it in that file to `C:\Users\<username>\.julia\dev\MRIReco` and redo the update.
-9. In order to run our non-Cartesian spiral reconstruction examples, you will have to edit one file in the MRIReco.jl package (which therefore has to be added via `dev`, see (7), to enable editing of Julia package source code). This change relates to the header data structure. 
-    - In line 6 of `RawAcqData.jl` change: `Base.@kwdef struct EncodingCounters` to `Base.@kwdef mutable struct EncodingCounters`
-    - In line 22 of `RawAcqData.jl`  change: `Base.@kwdef struct AcquisitionHeader` to `Base.@kwdef mutable struct AcquisitionHeader`
-  
 
 ## Examples
 
@@ -60,6 +46,6 @@ Minimum working example for spiral reconstruction with GIRF correction
     ```
 2.  Interplay of GIRF.jl and MRIReco.jl: Using the julia recon package to reconstruct a spiral image with a GIRF-predicted trajectory
     ```
-    recon/julia_recon_spiral_w_girf.jl
+    recon/SpiralRecon.jl
     ```
     
