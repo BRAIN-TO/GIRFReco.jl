@@ -1,4 +1,4 @@
-using DelimitedFiles, Dierckx, MAT, DSP
+using Statistics, DelimitedFiles, Dierckx, MAT, DSP
 
 export GirfEssential, convertDomain!, time2freq, loadGirf, setIdentifier!, buildGIRF_K0, buildGIRF_PN
 
@@ -208,10 +208,10 @@ function saveGirf(g::GirfEssential, filename::String)
 end
 
 ## Function for loading (AJAFFRAY Pre-Built)
-function loadGirf(degree = 1)
+function loadGirf(degree = 1, id = 1)
 
     if degree == 1
-        gFreq, gData = buildGIRF_PN()
+        gFreq, gData = loadGIRFMatlabTim(1)
     elseif degree == 0
         gFreq, gData = buildGIRF_K0()
     else
@@ -253,197 +253,30 @@ function buildGIRF()
 
 end
 
-# ## Function for building GIRF from the measurements taken by Tim in June 2021
-# # Takes in nothing, uses fixed filenames for now as we only have one set of GIRF measurements
-# # First sample of GIRF is an underflow, so use samples from 2:end
-# # Store the GIRF Fourier Representation in an Nx3 matrix, with second dimension indices 1,2,3 corresponding to directions x,y,z respectively
-# # Store the frequencies corresponding to the GIRF as a separate output vector
-
-# function buildGIRF_PN(doPlot = true, doFiltering = true)
-
-#     girf_filename_x = "data/GIRF/GIRF_X.mat"
-#     girf_filename_y = "data/GIRF/GIRF_Y.mat"
-#     girf_filename_z = "data/GIRF/GIRF_Z.mat"
-
-#     GIRF_file_x = matread(girf_filename_x)
-#     GIRF_file_y = matread(girf_filename_y)
-#     GIRF_file_z = matread(girf_filename_z)
-
-#     GIRF_length = length(GIRF_file_x["GIRF_FT"]) .- 1
-
-#     GIRF_data = Matrix{ComplexF64}(undef, GIRF_length,3)
-
-#     GIRF_data[:,1] = GIRF_file_x["GIRF_FT"][2:end]
-#     GIRF_data[:,2] = GIRF_file_y["GIRF_FT"][2:end]
-#     GIRF_data[:,3] = GIRF_file_z["GIRF_FT"][2:end]
-#     GIRF_freq = GIRF_file_z["freq"][2:end]
-
-#     if doFiltering
-
-#         window = tukey(GIRF_length, 0.25, zerophase = false)
-
-#         for l = 1:3
-
-#             GIRF_data[:,l] = window .* GIRF_data[:,l]
-
-#         end
-
-#     end
-
-#     if doPlot
-
-#         figure("Gx GIRF Magnitude (k1)")
-#         plot(GIRF_freq, abs.(GIRF_data[:,1]))
-#         xlim([-30,30])
-#         ylim([0.0, 1.05])
-#         xlabel("Frequency [kHz]")
-#         ylabel("GIRF Magnitude")
-
-#         figure("Gy GIRF Magnitude (k1)")
-#         plot(GIRF_freq, abs.(GIRF_data[:,2]))
-#         xlim([-30,30])
-#         ylim([0.0, 1.05])
-#         xlabel("Frequency [kHz]")
-#         ylabel("GIRF Magnitude")
-
-#         figure("Gz GIRF Magnitude (k1)")
-#         plot(GIRF_freq, abs.(GIRF_data[:,3]))
-#         xlim([-30,30])
-#         ylim([0.0, 1.05])
-#         xlabel("Frequency [kHz]")
-#         ylabel("GIRF Magnitude")
-
-#         figure("Gx GIRF Phase (k1)")
-#         plot(GIRF_freq, angle.(GIRF_data[:,1]))
-#         xlim([-30,30])
-#         ylim([-pi, pi])
-#         xlabel("Frequency [kHz]")
-#         ylabel("GIRF Phase")
-
-#         figure("Gy GIRF Phase (k1)")
-#         plot(GIRF_freq, angle.(GIRF_data[:,2]))
-#         xlim([-30,30])
-#         ylim([-pi, pi])
-#         xlabel("Frequency [kHz]")
-#         ylabel("GIRF Phase")
-
-#         figure("Gz GIRF Phase (k1)")
-#         plot(GIRF_freq, angle.(GIRF_data[:,3]))
-#         xlim([-30,30])
-#         ylim([-pi,pi])
-#         xlabel("Frequency [kHz]")
-#         ylabel("GIRF Phase")
-
-#     end
-
-#     return GIRF_freq, GIRF_data
-
-# end
-
-# ## Function for building GIRF from the measurements taken by Tim in June 2021
-# # Takes in nothing, uses fixed filenames for now as we only have one set of GIRF measurements
-# # First sample of GIRF is an underflow, so use samples from 2:end
-# # Store the GIRF Fourier Representation in an Nx3 matrix, with second dimension indices 1,2,3 corresponding to directions x,y,z respectively
-# # Store the frequencies corresponding to the GIRF as a separate output vector
-
-# function buildGIRF_K0(doPlot = true, doFiltering = true)
-
-#     girf_filename_x = "data/GIRF/GIRF_X.mat"
-#     girf_filename_y = "data/GIRF/GIRF_Y.mat"
-#     girf_filename_z = "data/GIRF/GIRF_Z.mat"
-
-#     GIRF_file_x = matread(girf_filename_x)
-#     GIRF_file_y = matread(girf_filename_y)
-#     GIRF_file_z = matread(girf_filename_z)
-
-#     GIRF_length = length(GIRF_file_x["b0ec_FT"]) .- 1
-
-#     GIRF_data = Matrix{ComplexF64}(undef, GIRF_length,3)
-
-#     GIRF_data[:,1] = GIRF_file_x["b0ec_FT"][2:end]
-#     GIRF_data[:,2] = GIRF_file_y["b0ec_FT"][2:end]
-#     GIRF_data[:,3] = GIRF_file_z["b0ec_FT"][2:end]
-#     GIRF_freq = GIRF_file_z["freq"][2:end]
-
-#     if doFiltering
-
-#         window = tukey(GIRF_length, 0.25, zerophase = false)
-
-#         for l = 1:3
-
-#             GIRF_data[:,l] = window .* GIRF_data[:,l]
-
-#         end
-
-#     end
-
-#     # ADD PREPROCESSING TO REMOVE HIGH FREQUENCY NOISE
-
-#     if doPlot
-
-#         figure("Gx GIRF Magnitude (k0)")
-#         plot(GIRF_freq, abs.(GIRF_data[:,1]))
-#         xlim([-3,3])
-#         ylim([0.0, 80])
-#         xlabel("Frequency [kHz]")
-#         ylabel("GIRF Magnitude")
-
-#         figure("Gy GIRF Magnitude (k0)")
-#         plot(GIRF_freq, abs.(GIRF_data[:,2]))
-#         xlim([-3,3])
-#         ylim([0.0, 80])
-#         xlabel("Frequency [kHz]")
-#         ylabel("GIRF Magnitude")
-
-#         figure("Gz GIRF Magnitude (k0)")
-#         plot(GIRF_freq, abs.(GIRF_data[:,3]))
-#         xlim([-3,3])
-#         ylim([0.0, 80])
-#         xlabel("Frequency [kHz]")
-#         ylabel("GIRF Magnitude")
-
-#         figure("Gx GIRF Phase (k0)")
-#         plot(GIRF_freq, angle.(GIRF_data[:,1]))
-#         xlim([-3,3])
-#         ylim([-pi, pi])
-#         xlabel("Frequency [kHz]")
-#         ylabel("GIRF Phase")
-
-
-#         figure("Gy GIRF Phase (k0)")
-#         plot(GIRF_freq, angle.(GIRF_data[:,2]))
-#         xlim([-3,3])
-#         ylim([-pi, pi])
-#         xlabel("Frequency [kHz]")
-#         ylabel("GIRF Phase")
-
-#         figure("Gz GIRF Phase (k0)")
-#         plot(GIRF_freq, angle.(GIRF_data[:,3]))
-#         xlim([-3,3])
-#         ylim([-pi,pi])
-#         xlabel("Frequency [kHz]")
-#         ylabel("GIRF Phase")
-
-#     end
-
-#     return GIRF_freq, GIRF_data
-
-# end
-
 ## Function for building GIRF from the measurements taken by Tim in June 2021
 # Takes in nothing, uses fixed filenames for now as we only have one set of GIRF measurements
 # First sample of GIRF is an underflow, so use samples from 2:end
 # Store the GIRF Fourier Representation in an Nx3 matrix, with second dimension indices 1,2,3 corresponding to directions x,y,z respectively
 # Store the frequencies corresponding to the GIRF as a separate output vector
 
-function buildGIRF_PN(doPlot = true, doFiltering = true)
+function buildGIRF_PN(doPlot = true, doFiltering = true; id = 2)
 
     # SUPPRESS PLOTTING
     doPlot = false
 
-    girf_filename_x = "data/GIRF/GIRF_X.mat"
-    girf_filename_y = "data/GIRF/GIRF_Y.mat"
-    girf_filename_z = "data/GIRF/GIRF_Z.mat"
+    if id == 1
+
+        girf_filename_x = "data/GIRF/GIRF_X.mat"
+        girf_filename_y = "data/GIRF/GIRF_Y.mat"
+        girf_filename_z = "data/GIRF/GIRF_Z.mat"
+
+    else
+
+        girf_filename_x = "data/GIRF/GIRF_ISMRM2022/2020Nov_Gx.mat"
+        girf_filename_y = "data/GIRF/GIRF_ISMRM2022/2020Nov_Gy.mat"
+        girf_filename_z = "data/GIRF/GIRF_ISMRM2022/2020Nov_Gz.mat"
+
+    end
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)
@@ -456,7 +289,16 @@ function buildGIRF_PN(doPlot = true, doFiltering = true)
     GIRF_data[:,1] = GIRF_file_x["GIRF_FT"][2:end]
     GIRF_data[:,2] = GIRF_file_y["GIRF_FT"][2:end]
     GIRF_data[:,3] = GIRF_file_z["GIRF_FT"][2:end]
-    GIRF_freq = GIRF_file_z["freq"][2:end]
+    
+    if id ==1
+        GIRF_freq = GIRF_file_z["freq"][2:end]
+
+    else
+
+        GIRF_freq, dgf, gfmax = time2freq(GIRF_file_z["roTime"])
+        GIRF_freq = GIRF_freq[2:end] .* 1000
+    
+    end
 
     if doFiltering
 
@@ -520,20 +362,115 @@ function buildGIRF_PN(doPlot = true, doFiltering = true)
 
 end
 
+
+"""
+   GIRF_freq, GIRF_data, GIRF_length = loadGIRFTimMatlab()
+loads different measured GIRFs from Siemens Prisma, as computed in Matlab (Zhe "Tim" Wu's code)
+# Arguments
+* `idGirf`              - identifier for selected GIRF
+                         0 = example GIRF in this repo
+                         1 = Nov 2020 pos blips
+                         2 = June 2021 pos blips
+                         3 = June 2021 pos/neg blips (4 averages) 
+                         4 = November 2021, pos/neg blips (4 averages)
+# Outputs
+* `GIRF_freq`           - 
+* `GIRF_data`           - x 3 data
+* `GIRF_length`           -                        
+"""
+function loadGIRFMatlabTim( idGirf = 4 )
+    isNewGirf = idGirf >= 1 # file format changed between older and newer ids
+   
+    if isNewGirf
+        pathGirf = "data/GIRF/GIRF_ISMRM2022"
+
+        if idGirf==1
+            girf_filename_x = joinpath(pathGirf, "2020Nov_Gx.mat")
+            girf_filename_y = joinpath(pathGirf, "2020Nov_Gy.mat")
+            girf_filename_z = joinpath(pathGirf, "2020Nov_Gz.mat")
+        elseif idGirf==2
+            girf_filename_x = joinpath(pathGirf, "2021Jun_Gx.mat")
+            girf_filename_y = joinpath(pathGirf, "2021Jun_Gy.mat")
+            girf_filename_z = joinpath(pathGirf, "2021Jun_Gz.mat")
+        elseif idGirf==3
+            girf_filename_x = joinpath(pathGirf, "2021Jun_PosNeg_Gx.mat")
+            girf_filename_y = joinpath(pathGirf, "2021Jun_PosNeg_Gy.mat")
+            girf_filename_z = joinpath(pathGirf, "2021Jun_PosNeg_Gz.mat")
+        elseif idGirf==4
+            girf_filename_x = joinpath(pathGirf, "2021Nov_PosNeg_Gx.mat")
+            girf_filename_y = joinpath(pathGirf, "2021Nov_PosNeg_Gy.mat")
+            girf_filename_z = joinpath(pathGirf, "2021Nov_PosNeg_Gz.mat")
+        else
+            println("Unknown idGirf")
+        end
+
+    else
+
+        girf_filename_x = "data/GIRF/GIRF_X.mat"
+        girf_filename_y = "data/GIRF/GIRF_Y.mat"
+        girf_filename_z = "data/GIRF/GIRF_Z.mat"
+    end
+
+    GIRF_file_x = matread(girf_filename_x)
+    GIRF_file_y = matread(girf_filename_y)
+    GIRF_file_z = matread(girf_filename_z)
+
+
+    if isNewGirf
+        # average 50 GIRF averages
+        tmp_data = GIRF_file_x["GIRF_FT"]
+        GIRF_length = size(tmp_data,1) .-1
+        GIRF_data = Matrix{ComplexF64}(undef, GIRF_length,3)
+
+        tmp_data = mean(GIRF_file_x["GIRF_FT"], dims = 2)
+        GIRF_data[:, 1] = tmp_data[2:end]
+        tmp_data = mean(GIRF_file_y["GIRF_FT"], dims = 2)
+        GIRF_data[:, 2] = tmp_data[2:end]
+        tmp_data = mean(GIRF_file_z["GIRF_FT"], dims = 2)
+        GIRF_data[:, 3] = tmp_data[2:end]
+
+        GIRF_data[:,1] = mean(GIRF_data[:,1], dims=2)
+        # freq not saved, has to be computed
+        dwellTimeSig = GIRF_file_z["dwellTimeSig"]
+        freq_fullrange = 1 / (dwellTimeSig / 1e6) / 1e3 # Full spectrum width, in unit of kHz
+        GIRF_freq = range(-freq_fullrange/2, stop=freq_fullrange/2, length=GIRF_length)
+
+    else
+        GIRF_data = Matrix{ComplexF64}(undef, GIRF_length,3)
+        GIRF_length = length(GIRF_file_x["GIRF_FT"]) .- 1
+        GIRF_data[:,1] = GIRF_file_x["GIRF_FT"][2:end]
+        GIRF_data[:,2] = GIRF_file_y["GIRF_FT"][2:end]
+        GIRF_data[:,3] = GIRF_file_z["GIRF_FT"][2:end]
+        GIRF_freq = GIRF_file_z["freq"][2:end]
+    end
+
+    return GIRF_freq, GIRF_data
+end
+
 ## Function for building GIRF from the measurements taken by Tim in June 2021
 # Takes in nothing, uses fixed filenames for now as we only have one set of GIRF measurements
 # First sample of GIRF is an underflow, so use samples from 2:end
 # Store the GIRF Fourier Representation in an Nx3 matrix, with second dimension indices 1,2,3 corresponding to directions x,y,z respectively
 # Store the frequencies corresponding to the GIRF as a separate output vector
 
-function buildGIRF_K0(doPlot = true, doFiltering = true)
+function buildGIRF_K0(doPlot = true, doFiltering = true; id = 1)
 
     # SUPPRESS PLOTTING
     doPlot = false
 
-    girf_filename_x = "data/GIRF/GIRF_X.mat"
-    girf_filename_y = "data/GIRF/GIRF_Y.mat"
-    girf_filename_z = "data/GIRF/GIRF_Z.mat"
+    if id == 1
+
+        girf_filename_x = "data/GIRF/GIRF_X.mat"
+        girf_filename_y = "data/GIRF/GIRF_Y.mat"
+        girf_filename_z = "data/GIRF/GIRF_Z.mat"
+
+    else
+
+        girf_filename_x = "data/GIRF/GIRFGx_CoilCombined_Dwell5us.mat"
+        girf_filename_y = "data/GIRF/GIRFGy_CoilCombined_Dwell5us.mat"
+        girf_filename_z = "data/GIRF/GIRFGz_CoilCombined_Dwell5us.mat"
+
+    end
 
     GIRF_file_x = matread(girf_filename_x)
     GIRF_file_y = matread(girf_filename_y)

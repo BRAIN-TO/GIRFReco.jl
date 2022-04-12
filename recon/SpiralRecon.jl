@@ -22,13 +22,13 @@ pygui(true)
 
 # selectedSlice = 3
 
-selectedSlice = 1
-excitationList = [4]
+selectedSlice = vec(1:9)
+# excitationList = [4]
+
+excitationList = vec(20:2:36) # for MULTISLICE
 sliceSelection = excitationList[selectedSlice]
 
 @info "Slice Chosen = $selectedSlice: \n \nExcitations Chosen = $excitationList "
-
-# excitationList = 20:2:36 # for MULTISLICE
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
@@ -39,7 +39,9 @@ adjustmentDict[:coils] = 20
 adjustmentDict[:numSamples] = 15475
 adjustmentDict[:delay] = 0.00000 # naive delay correction
 
-adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_21_1_2.h5", "data/Spirals/523_23_2_2.h5", "data/Spirals/523_25_3_2.h5", "data/Spirals/523_27_4_2.h5"]
+# adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_21_1_2.h5", "data/Spirals/523_23_2_2.h5", "data/Spirals/523_25_3_2.h5", "data/Spirals/523_27_4_2.h5"]
+
+adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_96_2.h5","data/Spirals/523_98_2.h5", "data/Spirals/523_100_2.h5", "data/Spirals/523_102_2.h5"]
 adjustmentDict[:trajFilename] = "data/Gradients/gradients523.txt"
 adjustmentDict[:excitations] = sliceSelection
 
@@ -47,7 +49,7 @@ adjustmentDict[:doMultiInterleave] = true
 adjustmentDict[:doOddInterleave] = true
 adjustmentDict[:numInterleaves] = 4
 
-adjustmentDict[:singleSlice] = true
+adjustmentDict[:singleSlice] = false
 
 @info "Using Parameters:\n\nreconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(adjustmentDict[:slices]) \n coils = $(adjustmentDict[:coils]) \n numSamples = $(adjustmentDict[:numSamples])\n\n"
 # define recon size and parameters for data loading
@@ -61,11 +63,11 @@ acqDataImaging = mergeRawInterleaves(adjustmentDict)
 
 @info "Loading Gradient Impulse Response Functions \n"
 ## Load GIRFs!
-gK1 = loadGirf(1)
+gK1 = loadGirf(1,1)
 gAk1 = GirfApplier(gK1, 42577478)
 
-gK0 = loadGirf(0)
-gAk0 = GirfApplier(gK0, 42577478)
+# gK0 = loadGirf(0)
+# gAk0 = GirfApplier(gK0, 42577478)
 
 # @info "Correcting Coil Phase"
 # calibrateAcquisitionPhase!(acqDataImaging)
@@ -73,8 +75,8 @@ gAk0 = GirfApplier(gK0, 42577478)
 @info "Correcting For GIRF \n"
 applyGIRF!(acqDataImaging, gAk1)
 
-@info "Correcting For k₀ \n"
-applyK0!(acqDataImaging, gAk0)
+# @info "Correcting For k₀ \n"
+# applyK0!(acqDataImaging, gAk0)
 
 checkAcquisitionNodes!(acqDataImaging)
 
@@ -101,11 +103,11 @@ params = Dict{Symbol,Any}()
 params[:reco] = "multiCoil"
 params[:reconSize] = adjustmentDict[:reconSize]
 params[:regularization] = "L2"
-params[:λ] = 1.e-3
-params[:iterations] = 20
-params[:solver] = "admm"
+params[:λ] = 5.e-4
+params[:iterations] = 50
+params[:solver] = "cgnr"
 params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
-params[:senseMaps] = ComplexF32.(sensitivity[:,:,[selectedSlice],:])
+params[:senseMaps] = ComplexF32.(sensitivity[:,:,selectedSlice,:])
 params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 
 ##
@@ -116,13 +118,13 @@ reco = reconstruction(acqDataImaging,params)
 @info "Plotting Reconstruction \n"
 
 # IF MULTISLICE
-# indexArray = [5,1,6,2,7,3,8,4,9]
+indexArray = [6,7,3,8,4,9]
 
 # IF SINGLESLICE
-indexArray = 1
+# indexArray = 1
 
 #totalRecon = sum(abs2,reco.data,dims=5)
-plotReconstruction(reco, indexArray, b0Maps)
+plotReconstruction(reco, indexArray, resizedB0)
 
 ## Plot the image edges (feature comparison)
 

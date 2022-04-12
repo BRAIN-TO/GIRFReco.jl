@@ -23,7 +23,7 @@ reconSize = (64,64)
 if makeMaps
 
     # Set the data file name (Change this for your own system)
-    dataFileCartesian = ISMRMRDFile("data/Fieldmaps/fieldMap_30_2.h5")
+    dataFileCartesian = ISMRMRDFile("data/Fieldmaps/fieldMap_105_gre_2.h5")
 
     # read in the raw data from the ISMRMRD file into a RawAcquisitionData object
     r = RawAcquisitionData(dataFileCartesian)
@@ -78,8 +78,8 @@ paramsCartesian[:senseMaps] = ComplexF32.(sensitivity) # set sensitivity map arr
 # paramsCartesian[:correctionMap] = ComplexF32.(-1im.*b0Maps)
 ## Defining array mapping from acquisition number to slice number (indexArray[slice = 1:9] = [acquisitionNumbers])
 
-#indexArray = [5,1,6,2,7,3,8,4,9] # for 9 slice phantom
-indexArray = 1 # for 1 slice phantom
+indexArray = [5,1,6,2,7,3,8,4,9] # for 9 slice phantom
+#indexArray = 1 # for 1 slice phantom
 
 ## Call the reconstruction function
 
