@@ -1,6 +1,5 @@
 using PyPlot, HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO
 
-include("../girf/GIRFApplier.jl")
 include("../utils/Utils.jl")
 
 ## function to calculate the B0 maps from the two images with different echo times

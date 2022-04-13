@@ -1,9 +1,8 @@
-using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection
+using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
 
 # Note: the files are found relative of the location of the folder, not the
 # environment current folder
 include("../io/GradientReader.jl")
-include("../girf/GIRFApplier.jl")
 
 include("../utils/Utils.jl")
 
@@ -45,9 +44,9 @@ adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_96_2.h5","data/Spi
 adjustmentDict[:trajFilename] = "data/Gradients/gradients523.txt"
 adjustmentDict[:excitations] = sliceSelection
 
-adjustmentDict[:doMultiInterleave] = true
-adjustmentDict[:doOddInterleave] = true
-adjustmentDict[:numInterleaves] = 4
+adjustmentDict[:doMultiInterleave] = false
+adjustmentDict[:doOddInterleave] = false
+adjustmentDict[:numInterleaves] = 1
 
 adjustmentDict[:singleSlice] = false
 
@@ -66,8 +65,8 @@ acqDataImaging = mergeRawInterleaves(adjustmentDict)
 gK1 = loadGirf(1,1)
 gAk1 = GirfApplier(gK1, 42577478)
 
-# gK0 = loadGirf(0)
-# gAk0 = GirfApplier(gK0, 42577478)
+gK0 = loadGirf(0,1)
+gAk0 = GirfApplier(gK0, 42577478)
 
 # @info "Correcting Coil Phase"
 # calibrateAcquisitionPhase!(acqDataImaging)
@@ -103,8 +102,8 @@ params = Dict{Symbol,Any}()
 params[:reco] = "multiCoil"
 params[:reconSize] = adjustmentDict[:reconSize]
 params[:regularization] = "L2"
-params[:λ] = 5.e-4
-params[:iterations] = 50
+params[:λ] = 5.e-6
+params[:iterations] = 20
 params[:solver] = "cgnr"
 params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
 params[:senseMaps] = ComplexF32.(sensitivity[:,:,selectedSlice,:])
