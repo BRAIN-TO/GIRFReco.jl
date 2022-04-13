@@ -34,7 +34,7 @@ adjustmentDict = Dict{Symbol,Any}()
 adjustmentDict[:reconSize] = (200,200)
 adjustmentDict[:interleave] = 1
 adjustmentDict[:slices] = 1
-adjustmentDict[:coils] = 20
+adjustmentDict[:coils] = 5
 adjustmentDict[:numSamples] = 15475
 adjustmentDict[:delay] = 0.00000 # naive delay correction
 
