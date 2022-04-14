@@ -1,19 +1,21 @@
 using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
 
+# %%
+# Include tools and reader functions for running the spiral reconstruction recipe
 # Note: the files are found relative of the location of the folder, not the
 # environment current folder
 include("../io/GradientReader.jl")
-
 include("../utils/Utils.jl")
 
 ## Executing Cartesian recon from which B0/sensitivity maps have been computed
 @info "Running julia_recon_cartesian to retrieve maps (senseCartesian and b0Maps)"
 include("../recon/CartesianRecon.jl")
 
-
-## Preparation
+## Set figures to be unlocked from the window (i.e use matplotlib backend with controls)
 pygui(true)
 
+
+## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction"
 
 ## Load ISMRMRD data files (can be undersampled) THIS SHOULD BE THE ONLY SECTION NEEDED TO EDIT TO ADJUST FOR DIFFERENT SCANS
@@ -31,10 +33,10 @@ sliceSelection = excitationList[selectedSlice]
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] = (200,200)
+adjustmentDict[:reconSize] = (400,400)
 adjustmentDict[:interleave] = 1
 adjustmentDict[:slices] = 1
-adjustmentDict[:coils] = 5
+adjustmentDict[:coils] = 20
 adjustmentDict[:numSamples] = 15475
 adjustmentDict[:delay] = 0.00000 # naive delay correction
 
@@ -44,9 +46,9 @@ adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_96_2.h5","data/Spi
 adjustmentDict[:trajFilename] = "data/Gradients/gradients523.txt"
 adjustmentDict[:excitations] = sliceSelection
 
-adjustmentDict[:doMultiInterleave] = false
-adjustmentDict[:doOddInterleave] = false
-adjustmentDict[:numInterleaves] = 1
+adjustmentDict[:doMultiInterleave] = true
+adjustmentDict[:doOddInterleave] = true
+adjustmentDict[:numInterleaves] = 2
 
 adjustmentDict[:singleSlice] = false
 
@@ -103,7 +105,7 @@ params[:reco] = "multiCoil"
 params[:reconSize] = adjustmentDict[:reconSize]
 params[:regularization] = "L2"
 params[:λ] = 5.e-6
-params[:iterations] = 20
+params[:iterations] = 40
 params[:solver] = "cgnr"
 params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
 params[:senseMaps] = ComplexF32.(sensitivity[:,:,selectedSlice,:])
