@@ -8,6 +8,8 @@ function plotReconstruction(images, slices, b0; figHandles = [])
     # Slice ordering check (show the correct order of slices as the images are read in not in geometrically sequential order)
     indexArray = slices
 
+    @info slices
+
     # Plot magnitude images (normalize)
     if isempty(figHandles)
         figure("Magnitude Images")
@@ -83,7 +85,7 @@ function plotSenseMaps(sense,n_channels)
 
 end
 
-# TODO?
+# TODO!
 function plotTrajAndData(acq)
 
     for l in 1:length(acq.traj)
@@ -93,32 +95,6 @@ function plotTrajAndData(acq)
         kSignal[l,:] = acq.kdata[l,:,1]
 
     end
-
-end
-
-# Mosaic-plots reconstruction resuls (abs and phase) for selected slices
-function plotReconstruction(reco, slices)
-
-    indexArray = slices
-
-    figure(990)
-    absData = 2 .*mapslices(x->abs.(x),reco.data[:,:,slices,1,1],dims=(1,2))
-    absMosaic = mosaicview(absData, nrow=Int(floor(sqrt(length(slices)))),npad=5,rowmajor=true, fillvalue=0)
-
-    PyPlot.imshow(absMosaic,cmap="gray", vmax = 0.5e-5, vmin = 0)
-    colorbar()
-
-    gcf().suptitle("|Images|")
-
-    figure(1010)
-
-    phaseData = mapslices(x -> ROMEO.unwrap(x),angle.(reco.data[:,:,slices,1,1]),dims=(1,2))
-    phaseMosaic = mosaicview(phaseData,nrow=Int(floor(sqrt(length(slices)))),npad=5,rowmajor=true, fillvalue=0)
-
-    PyPlot.imshow(phaseMosaic, cmap="inferno",vmax = 4*pi,vmin=-4*pi)
-    colorbar()
-
-    gcf().suptitle("∠Images")
 
 end
 
@@ -245,8 +221,9 @@ function adjustHeader!(raw, reconSize, numSamples, interleaveNumber, singleSlice
             raw.profiles[l].head.idx.slice = 0
         end
 
-        # Set center sample to 0 (only for spiral scans)
+        @info raw.profiles[l].head.idx.slice
 
+        # Set center sample to 0 (only for spiral scans)
         raw.profiles[l].head.center_sample = 0
 
         # print("\n",raw.profiles[l].head.idx)
@@ -258,7 +235,7 @@ function adjustHeader!(raw, reconSize, numSamples, interleaveNumber, singleSlice
 
 end
 
-## Function to make sure that the acquisition nodes aren't out of the Domain expected by MRIReco.jl
+## Function to make sure that the acquisition nodes aren't out of the Domain expected by MRIReco.jl [-0.5, 0.5]
 function checkAcquisitionNodes!(a::AcquisitionData)
 
     a.traj[1].nodes[abs.(a.traj[1].nodes[:]) .> 0.5] .= 0.5
@@ -451,7 +428,7 @@ function mergeRawInterleaves(params)
         acqData.traj[l].times = timeTrack # set times to the total time vector
         acqData.traj[l].TE = 0.00 # set the TE to 0
         acqData.traj[l].AQ = times[end] # set the acquisition time to the last element of the time vector (should be the latest time)
-        acqData.traj[l].circular = false # set whether to use a circular filter on the kspace data
+        acqData.traj[l].circular = true # set whether to use a circular filter on the kspace data
 
     end
 
@@ -601,4 +578,4 @@ end
 #         end    
 #     end
 
-# end
+# end# excitationList = [4]
