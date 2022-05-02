@@ -221,7 +221,7 @@ function adjustHeader!(raw, reconSize, numSamples, interleaveNumber, singleSlice
             raw.profiles[l].head.idx.slice = 0
         end
 
-        @info raw.profiles[l].head.idx.slice
+        # @info raw.profiles[l].head.idx.slice
 
         # Set center sample to 0 (only for spiral scans)
         raw.profiles[l].head.center_sample = 0
@@ -578,4 +578,4 @@ end
 #         end    
 #     end
 
-# end# excitationList = [4]
+# end
