@@ -8,6 +8,8 @@ function plotReconstruction(images, slices, b0; figHandles = [])
     # Slice ordering check (show the correct order of slices as the images are read in not in geometrically sequential order)
     indexArray = slices
 
+    # @info slices
+
     # Plot magnitude images (normalize)
     if isempty(figHandles)
         figure("Magnitude Images")
@@ -83,7 +85,7 @@ function plotSenseMaps(sense,n_channels)
 
 end
 
-# TODO?
+# TODO!
 function plotTrajAndData(acq)
 
     for l in 1:length(acq.traj)
@@ -93,32 +95,6 @@ function plotTrajAndData(acq)
         kSignal[l,:] = acq.kdata[l,:,1]
 
     end
-
-end
-
-# Mosaic-plots reconstruction resuls (abs and phase) for selected slices
-function plotReconstruction(reco, slices)
-
-    indexArray = slices
-
-    figure(990)
-    absData = 2 .*mapslices(x->abs.(x),reco.data[:,:,slices,1,1],dims=(1,2))
-    absMosaic = mosaicview(absData, nrow=Int(floor(sqrt(length(slices)))),npad=5,rowmajor=true, fillvalue=0)
-
-    PyPlot.imshow(absMosaic,cmap="gray", vmax = 0.5e-5, vmin = 0)
-    colorbar()
-
-    gcf().suptitle("|Images|")
-
-    figure(1010)
-
-    phaseData = mapslices(x -> ROMEO.unwrap(x),angle.(reco.data[:,:,slices,1,1]),dims=(1,2))
-    phaseMosaic = mosaicview(phaseData,nrow=Int(floor(sqrt(length(slices)))),npad=5,rowmajor=true, fillvalue=0)
-
-    PyPlot.imshow(phaseMosaic, cmap="inferno",vmax = 4*pi,vmin=-4*pi)
-    colorbar()
-
-    gcf().suptitle("∠Images")
 
 end
 
@@ -216,7 +192,6 @@ function do_k0_correction!(rawData,k0_phase_modulation, interleave)
 end
 
 ## Function to adjust the header data in the acquisition (requires mutable header)
-
 function adjustHeader!(raw, reconSize, numSamples, interleaveNumber, singleSlice)
 
     # For every profile in the acquisition
@@ -246,8 +221,9 @@ function adjustHeader!(raw, reconSize, numSamples, interleaveNumber, singleSlice
             raw.profiles[l].head.idx.slice = 0
         end
 
-        # Set center sample to 0 (only for spiral scans)
+        # @info raw.profiles[l].head.idx.slice
 
+        # Set center sample to 0 (only for spiral scans)
         raw.profiles[l].head.center_sample = 0
 
         # print("\n",raw.profiles[l].head.idx)
@@ -259,143 +235,7 @@ function adjustHeader!(raw, reconSize, numSamples, interleaveNumber, singleSlice
 
 end
 
-## PREPROCESSING
-function mergeInterleaves(params)
-
-    # constant flag for GIRF correction (maybe set up as a listener later on in the development)
-    doGIRF = true
-
-    # Get the other interleave indexes other than the one asked for
-    otherInterleaveIndices = [x for x ∈ 1:params[:numInterleaves] if x ∉ params[:interleave]]
-
-    # @info "indices = $otherInterleaveIndices"
-
-    # read in the data file from the ISMRMRD format
-    dataFile = ISMRMRDFile(params[:interleaveDataFileNames][params[:interleave]])
-
-    # Read in the gradient file and perform GIRF correction to calculate trajectory and calculate k0 phase modulation
-    traj, k0_correction = read_gradient_txt_file(params[:trajFilename],params[:reconSize],params[:delay], doGIRF)
-
-    # Read in raw data from the dataFile
-    rawData = RawAcquisitionData(dataFile)
-
-    # delete everything that is not a chosen excitation (for efficiency)
-    indices = 1:length(rawData.profiles)
-    ic = [x for x ∈ indices if x ∉ params[:excitations]]
-    deleteat!(rawData.profiles,ic)
-
-    # @info "indices = $ic" #DEBUG
-
-    # set up time vector for tracking all of the interleaves
-    timeTrack = []
-
-    # synchronize trajectory data and the kspace data
-    times = syncTrajAndData!(rawData, traj, params[:numSamples], params[:interleave])
-
-    # Perform data correction to offset k0 modulation
-    do_k0_correction!(rawData, k0_correction, params[:interleave])
-
-    # adjust the header so that each diffusion direction is considered as a contrast instead of a repetition
-    adjustHeader!(rawData, params[:reconSize], params[:numSamples], params[:interleave],params[:singleSlice])
-
-    # add the times to the time tracking vector
-    append!(timeTrack,times)
-
-    # Repeat the above steps for each interleave, adjusting the times and headers appropriately
-    if params[:doMultiInterleave]
-
-        for l in otherInterleaveIndices
-
-            # read in separate interleave data file
-            dataFileTemp = ISMRMRDFile(params[:interleaveDataFileNames][l])
-            rawDataTemp = RawAcquisitionData(dataFileTemp)
-            deleteat!(rawDataTemp.profiles,ic) # delete profiles which aren't needed
-
-            # read in the gradient file and perform the GIRF correction
-            trajTemp, k0_correction = read_gradient_txt_file(params[:trajFilename],params[:reconSize],params[:delay], doGIRF)
-
-            # synchronize the trajectory from the gradient file and the data from the raw data file for the interleave
-            timesTemp = syncTrajAndData!(rawDataTemp, trajTemp, params[:numSamples], l)
-
-            # perform eddy current correction to the data
-            do_k0_correction!(rawDataTemp, k0_correction, l)
-
-            # adjust the header to reflect the arrangement of data expected by MRIReco.jl's reconstruction function
-            adjustHeader!(rawDataTemp,params[:reconSize], params[:numSamples], l, params[:singleSlice])
-
-            # append the important data (the profile and the sampling times) to the raw Data file created out of this look
-            append!(rawData.profiles,deepcopy(rawDataTemp.profiles))
-            append!(timeTrack,deepcopy(timesTemp))
-
-        end
-
-    # if there is the choice to do odd or opposing interleaves, add the 2nd interleave
-    elseif params[:doOddInterleave]
-
-        dataFileTemp = ISMRMRDFile(params[:interleaveDataFileNames][3])
-        rawDataTemp = RawAcquisitionData(dataFileTemp)
-        deleteat!(rawDataTemp.profiles,ic)
-
-        trajTemp, k0_correction = read_gradient_txt_file(params[:trajFilename],params[:reconSize],params[:delay], doGIRF)
-
-        timesTemp = syncTrajAndData!(rawDataTemp, trajTemp, params[:numSamples], 3)
-
-        do_k0_correction!(rawDataTemp, k0_correction, 3)
-
-        adjustHeader!(rawDataTemp,params[:reconSize], params[:numSamples], 2, params[:singleSlice])
-
-        append!(rawData.profiles,copy(rawDataTemp.profiles))
-        append!(timeTrack,timesTemp)
-
-    end
-
-    # converting rawData to AcquisitionData
-    # @info "Converting RawAcquisitionData to AcquisitionData"
-    acqData = AcquisitionData(rawData,estimateProfileCenter=false)
-
-    ## Assume all of the slices share a trajectory
-    for l = 1:length(acqData.traj)
-
-        acqData.traj[l].times = timeTrack # set times to the total time vector
-        acqData.traj[l].TE = 0.00 # set the TE to 0
-        acqData.traj[l].AQ = times[end] # set the acquisition time to the last element of the time vector (should be the latest time)
-        acqData.traj[l].circular = false # set whether to use a circular filter on the kspace data
-
-    end
-
-    # correctedRaw = RawAcquisitionData(acqData)
-    # fout = ISMRMRDFile("data/nonCartesianProcessed.h5")
-    # save(fout,correctedRaw)
-
-    # return the acquisition data object with everything corrected
-    return acqData
-
-end
-
-# ## Get gradients from the trajectory
-# function nodes_to_gradients(nodes::Matrix; gamma=42577478, dwellTime=2e-6, FOV=[0.22,0.22,0.01],reconSize=[200,200,1])
-
-#     ## Normalized Conversion (norm kspace to grads in T/m) is scalingFactor = reconSize/(gamma*dwellTime*FOV)
-#     conversionFactor = reconSize./(gamma*dwellTime.*FOV)
-
-#     gradients = diff(hcat([0; 0], nodes), dims = 2)
-#     gradients = gradients .* conversionFactor[1:2]
-#     return gradients
-
-# end
-
-# ## Convert gradients to trajectory nodes
-# function gradients_to_nodes(gradients::Matrix; gamma=42577478, dwellTime=2e-6, FOV=[0.22,0.22,0.01],reconSize=[200,200,1])
-
-#     ## Normalized Conversion (grads in T/m to normalized k-space) is scalingFactor = (gamma*dwellTime*FOV)/reconSize
-#     conversionFactor = (gamma*dwellTime.*FOV) ./ reconSize
-
-#     nodes = cumsum(gradients, dims = 2)
-#     nodes = nodes .* conversionFactor[1:2]
-#     return nodes
-
-# end
-
+## Function to make sure that the acquisition nodes aren't out of the Domain expected by MRIReco.jl [-0.5, 0.5]
 function checkAcquisitionNodes!(a::AcquisitionData)
 
     a.traj[1].nodes[abs.(a.traj[1].nodes[:]) .> 0.5] .= 0.5
@@ -418,6 +258,7 @@ function validateSiemensMRD!(r::RawAcquisitionData)
 
 end
 
+# Validate and check data dimensions
 function validateAcqData!(a::AcquisitionData)
 
     ## Dimensions CHECK:
@@ -427,6 +268,7 @@ function validateAcqData!(a::AcquisitionData)
     # kdata element dimensions: dim1:=kspace nodes | dim2:=channels/coils
 
     permutedims(a.kdata,[3,2,1])
+    checkAcquisitionNodes!(a)
 
 end
 
@@ -486,12 +328,6 @@ function removeOversampling!(raw::RawAcquisitionData; dims = [1])
     # halve encoding size of first dimension
     raw.params["encodedSize"][idxDim] /= 2
     raw.params["encodedFOV"][idxDim] /= 2
-
-end
-
-function preprocessNonCartesianData(r::RawAcquisitionData)
-
-
 
 end
 
@@ -592,7 +428,7 @@ function mergeRawInterleaves(params)
         acqData.traj[l].times = timeTrack # set times to the total time vector
         acqData.traj[l].TE = 0.00 # set the TE to 0
         acqData.traj[l].AQ = times[end] # set the acquisition time to the last element of the time vector (should be the latest time)
-        acqData.traj[l].circular = false # set whether to use a circular filter on the kspace data
+        acqData.traj[l].circular = true # set whether to use a circular filter on the kspace data
 
     end
 

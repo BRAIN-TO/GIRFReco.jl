@@ -7,7 +7,11 @@ HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 ImageBinarization = "cbc4b850-ae4b-5111-9e64-df94c024a13d"
 ImageEdgeDetection = "2b14c160-480b-11ea-1b58-656063328ff7"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+LinearOperators = "5c8ed15e-5a4c-59e4-a42b-c7e8811fb125"
 MAT = "23992714-dd62-5051-b70f-ba57cb901cac"
+MRIBase = "f7771a9a-6e57-4e71-863b-6e4b6a2f17df"
+MRIFiles = "5a6f062f-bf45-497d-b654-ad17aae2a530"
+MRIGradients = "6ea382ba-d04a-44a2-b811-544bd2aee867"
 MRIReco = "bdf86e05-2d2b-5731-a332-f3fe1f9e047f"
 MosaicViews = "e94cdb99-869f-56ef-bcf0-1ae2bcbe0389"
 NFFT = "efe261a4-0d2b-5849-be55-fc731d526b0d"
@@ -15,7 +19,11 @@ ROMEO = "1ea8258b-a15d-4adb-ad20-01632f467a84"
 RegularizedLeastSquares = "1e9c538a-f78c-5de5-8ffb-0b6dbe892d23"
 Scratch = "6c6a2e73-6563-6170-7368-637461726353"
 SparsityOperators = "a5ff1dd3-4e0a-50db-9022-6d011c1d5846"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Waveforms = "cb13b1c6-351e-5134-b3ad-d6a530956a82"
+
+[compat]
+LinearOperators = "=2.2.3"
 
 [extras]
 CPUSummary = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"

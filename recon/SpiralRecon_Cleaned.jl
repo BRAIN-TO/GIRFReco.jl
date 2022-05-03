@@ -8,28 +8,26 @@ include("../io/GradientReader.jl")
 include("../utils/Utils.jl")
 
 ## Executing Cartesian recon from which B0/sensitivity maps have been computed
-@info "Running julia_recon_cartesian to retrieve sensitivity and B₀ Maps)"
+@info "Running julia_recon_cartesian to retrieve maps (senseCartesian and b0Maps)"
 include("../recon/CartesianRecon.jl")
 
 ## Set figures to be unlocked from the window (i.e use matplotlib backend with controls)
 pygui(true)
 
-## Default to single slice selection
-multiSlice = false
-
 ## Choose Slice (can be [single number] OR [1,2,3,4,5,6,7,8,9]
-sliceChoice = [1,2,3,4,5,6,7,8,9]
-sliceChoice = [9]
-
-if length(sliceChoice) > 1
-    multiSlice = true
-end
+# sliceChoice = [1,2,3,4,5,6,7,8,9] # UNCOMMENT FOR MULTISLICE
+sliceChoice = [3] # UNCOMMENT FOR SINGLESLICE (SLICES 3, 7 and 8 are good examples)
+diffusionDirection = 0
 
 ## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction Pipeline"
 
-## Load ISMRMRD data files (can be undersampled) THIS SHOULD BE THE ONLY SECTION NEEDED TO EDIT TO ADJUST FOR DIFFERENT SCANS
-# @info "Loading Data Files"
+## Default to single slice selection. Choose multi-slice only if computer is capable.
+multiSlice = false
+
+if length(sliceChoice) > 1
+    multiSlice = true
+end
 
 if !multiSlice
     selectedSlice = sliceChoice
@@ -37,7 +35,8 @@ else
     selectedSlice = sort(vec(sliceChoice))
 end
 
-excitationList = vec(20:2:36) # DATASET SPECIFIC
+## The ISMRMRD File contains more than one excitation, so we choose the set corresponding to the b-value 0 images
+excitationList = vec(20:2:36).+ diffusionDirection * 18 # DATASET SPECIFIC INDEXING
 sliceSelection = excitationList[selectedSlice]
 
 @info "Slice Chosen = $selectedSlice: \n \nExcitations Chosen = $excitationList "
@@ -50,8 +49,6 @@ adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 20
 adjustmentDict[:numSamples] = 15475
 adjustmentDict[:delay] = 0.00000 # naive delay correction
-
-# adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_21_1_2.h5", "data/Spirals/523_23_2_2.h5", "data/Spirals/523_25_3_2.h5", "data/Spirals/523_27_4_2.h5"]
 
 adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_96_2.h5","data/Spirals/523_98_2.h5", "data/Spirals/523_100_2.h5", "data/Spirals/523_102_2.h5"]
 adjustmentDict[:trajFilename] = "data/Gradients/gradients523.txt"
@@ -66,8 +63,6 @@ adjustmentDict[:singleSlice] = !multiSlice
 @info "Using Parameters:\n\nreconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(adjustmentDict[:slices]) \n coils = $(adjustmentDict[:coils]) \n numSamples = $(adjustmentDict[:numSamples])\n\n"
 # define recon size and parameters for data loading
 
-# print(" reconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(adjustmentDict[:slices]) \n coils = $(adjustmentDict[:coils]) \n numSamples = $(adjustmentDict[:numSamples])\n\n")
-
 ## Convert raw to AcquisitionData
 
 @info "Merging interleaves and reading data \n"
@@ -78,29 +73,28 @@ acqDataImaging = mergeRawInterleaves(adjustmentDict)
 gK1 = loadGirf(1,1)
 gAk1 = GirfApplier(gK1, 42577478)
 
-gK0 = loadGirf(0,1)
-gAk0 = GirfApplier(gK0, 42577478)
-
-# @info "Correcting Coil Phase"
-# calibrateAcquisitionPhase!(acqDataImaging)
-
 @info "Correcting For GIRF \n"
 applyGIRF!(acqDataImaging, gAk1)
 
-# @info "Correcting For k₀ \n"
-# applyK0!(acqDataImaging, gAk0)
+# Load K₀ GIRF
+gK0 = loadGirf(0,1)
+gAk0 = GirfApplier(gK0, 42577478)
 
+@info "Correcting For k₀ \n"
+applyK0!(acqDataImaging, gAk0)
+
+## Check the k-space nodes so they don't exceed frequency limits [-0.5, 0.5] (inclusive)
 checkAcquisitionNodes!(acqDataImaging)
 
-## Sense Map Calculation
-
+## Sense Map loading
 @info "Validating Sense Maps \n"
+
 # Resize sense maps to match encoding size of data matrix
 sensitivity = mapslices(x ->imresize(x, (acqDataImaging.encodingSize[1],acqDataImaging.encodingSize[2])), senseCartesian, dims=[1,2])
 sensitivity = mapslices(rotl90,sensitivity,dims=[1,2])
 
 # ## Plot the sensitivity maps of each coil
-# @info "Plotting SENSE Maps \n"
+@info "Plotting SENSE Maps \n"
 plotSenseMaps(sensitivity,adjustmentDict[:coils])
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
@@ -115,25 +109,16 @@ params = Dict{Symbol,Any}()
 params[:reco] = "multiCoil"
 params[:reconSize] = adjustmentDict[:reconSize]
 params[:regularization] = "L2"
-params[:λ] = 5.e-2 # CHANGE THIS TO GET BETTER OR WORSE RECONSTRUCTION RESULTS
+params[:λ] = 1e-2 # CHANGE THIS TO GET BETTER OR WORSE RECONSTRUCTION RESULTS
 params[:iterations] = 20
 params[:solver] = "cgnr"
 params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
 params[:senseMaps] = ComplexF32.(sensitivity[:,:,selectedSlice,:])
 params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 
-##
+## Call to reconstruction
 @info "Performing Reconstruction \n"
 @time reco = reconstruction(acqDataImaging,params)
-
-# ## Plotting reconstruction
-# @info "Plotting Reconstruction \n"
-# indexArray = [5,1,6,2,7,3,8,4,9] # DATASET SPECIFIC
-# if multiSlice
-#     indexArray = indexArray[selectedSlice]
-# else
-#     indexArray = 1
-# end
 
 #totalRecon = sum(abs2,reco.data,dims=5)
 plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:,:,selectedSlice])
