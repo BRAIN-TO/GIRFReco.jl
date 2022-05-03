@@ -8,7 +8,7 @@ function plotReconstruction(images, slices, b0; figHandles = [])
     # Slice ordering check (show the correct order of slices as the images are read in not in geometrically sequential order)
     indexArray = slices
 
-    @info slices
+    # @info slices
 
     # Plot magnitude images (normalize)
     if isempty(figHandles)

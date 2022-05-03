@@ -16,12 +16,13 @@ pygui(true)
 
 ## Choose Slice (can be [single number] OR [1,2,3,4,5,6,7,8,9]
 # sliceChoice = [1,2,3,4,5,6,7,8,9] # UNCOMMENT FOR MULTISLICE
-sliceChoice = [8] # UNCOMMENT FOR SINGLESLICE
+sliceChoice = [3] # UNCOMMENT FOR SINGLESLICE (SLICES 3, 7 and 8 are good examples)
+diffusionDirection = 0
 
 ## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction Pipeline"
 
-## Default to single slice selection
+## Default to single slice selection. Choose multi-slice only if computer is capable.
 multiSlice = false
 
 if length(sliceChoice) > 1
@@ -34,7 +35,8 @@ else
     selectedSlice = sort(vec(sliceChoice))
 end
 
-excitationList = vec(20:2:36) # DATASET SPECIFIC
+## The ISMRMRD File contains more than one excitation, so we choose the set corresponding to the b-value 0 images
+excitationList = vec(20:2:36).+ diffusionDirection * 18 # DATASET SPECIFIC INDEXING
 sliceSelection = excitationList[selectedSlice]
 
 @info "Slice Chosen = $selectedSlice: \n \nExcitations Chosen = $excitationList "
@@ -74,12 +76,12 @@ gAk1 = GirfApplier(gK1, 42577478)
 @info "Correcting For GIRF \n"
 applyGIRF!(acqDataImaging, gAk1)
 
-## Load K₀ GIRF
-# gK0 = loadGirf(0,1)
-# gAk0 = GirfApplier(gK0, 42577478)
+# Load K₀ GIRF
+gK0 = loadGirf(0,1)
+gAk0 = GirfApplier(gK0, 42577478)
 
-# @info "Correcting For k₀ \n"
-# applyK0!(acqDataImaging, gAk0)
+@info "Correcting For k₀ \n"
+applyK0!(acqDataImaging, gAk0)
 
 ## Check the k-space nodes so they don't exceed frequency limits [-0.5, 0.5] (inclusive)
 checkAcquisitionNodes!(acqDataImaging)
@@ -107,7 +109,7 @@ params = Dict{Symbol,Any}()
 params[:reco] = "multiCoil"
 params[:reconSize] = adjustmentDict[:reconSize]
 params[:regularization] = "L2"
-params[:λ] = 5.e-2 # CHANGE THIS TO GET BETTER OR WORSE RECONSTRUCTION RESULTS
+params[:λ] = 1e-2 # CHANGE THIS TO GET BETTER OR WORSE RECONSTRUCTION RESULTS
 params[:iterations] = 20
 params[:solver] = "cgnr"
 params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)

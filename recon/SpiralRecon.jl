@@ -8,7 +8,7 @@ include("../io/GradientReader.jl")
 include("../utils/Utils.jl")
 
 ## Executing Cartesian recon from which B0/sensitivity maps have been computed
-@info "Running julia_recon_cartesian to retrieve maps (senseCartesian and b0Maps)"
+@info "Running julia_recon_cartesian to retrieve sensitivity and B₀ Maps)"
 include("../recon/CartesianRecon.jl")
 
 ## Set figures to be unlocked from the window (i.e use matplotlib backend with controls)
@@ -19,7 +19,7 @@ multiSlice = false
 
 ## Choose Slice (can be [single number] OR [1,2,3,4,5,6,7,8,9]
 sliceChoice = [1,2,3,4,5,6,7,8,9]
-sliceChoice = [8]
+sliceChoice = [9]
 
 if length(sliceChoice) > 1
     multiSlice = true
