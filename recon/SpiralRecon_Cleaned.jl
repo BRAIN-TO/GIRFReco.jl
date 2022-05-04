@@ -36,7 +36,7 @@ else
 end
 
 ## The ISMRMRD File contains more than one excitation, so we choose the set corresponding to the b-value 0 images
-excitationList = vec(20:2:36).+ diffusionDirection * 18 # DATASET SPECIFIC INDEXING
+excitationList = vec(20:2:36) .+ diffusionDirection * 18 # DATASET SPECIFIC INDEXING
 sliceSelection = excitationList[selectedSlice]
 
 @info "Slice Chosen = $selectedSlice: \n \nExcitations Chosen = $excitationList "
