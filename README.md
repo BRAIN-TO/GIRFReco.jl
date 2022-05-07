@@ -1,6 +1,6 @@
 # MRIRecipes.jl
 
-Recipes for image reconstructon using the MRIReco.jl package. 
+Recipes for image reconstruction using the MRIReco.jl package. 
 
 Includes a working example for spiral reconstruction with GIRF correction and a Cartesian reconstruction example for sensitivity and off-resonance map calculation.
 
