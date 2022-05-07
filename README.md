@@ -20,7 +20,7 @@ Updated to be included in MRIRecipes.jl https://github.com/BRAIN-TO/MRIRecipes.j
 8. type `activate .` to activate a new Julia environment for the MRIRecipes.jl project
 9. type `dev MRIGradients` to tell Julia which MRIGradients to use (this will be fixed upon package registration)
 10. type `instantiate` to download and install all of the necessary packages.
-11. Proceed to run the demos found in the /src/ directory.
+11. Proceed to run the demos found in the /recon/ directory.
 
 ### OLD DOCS
 
