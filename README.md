@@ -1,12 +1,28 @@
-# GIRFReco
+# MRIRecipes.jl
 
-Minimum working example for spiral reconstruction with GIRF correction
+Recipes for image reconstructon using the MRIReco.jl package. 
+
+Includes a working example for spiral reconstruction with GIRF correction and a Cartesian reconstruction example for sensitivity and off-resonance map calculation.
+
+### NEW DOCS:
 
 Updated to be included in MRIRecipes.jl https://github.com/BRAIN-TO/MRIRecipes.jl
 
 ## Getting Started!
 
-1. To get started, make sure you have Julia installed. At least v1.5 is preferable (v1.6 is optimal).
+1. To get started, make sure you have Julia installed. At least v1.6 is preferable (v1.7 is optimal).
+2. Clone the MRIRecipes.jl project via Github to a local directory
+3. Download the data supplement from Zenodo (https://doi.org/10.5281/zenodo.6510020) and extract somwhere. 
+4. Move the extracted folder (data) into the MRIRecipes.jl directory
+5. Clone the MRIGradients project via Github to your Julia dev folder (usually /home/.julia/dev/). This can be found at: https://github.com/BRAIN-TO/MRIGradients
+6. Open a Julia REPL in your editor of choice
+7. In the REPL, type `]` to enter package mode
+8. type `activate .` to activate a new Julia environment for the MRIRecipes.jl project
+9. type `dev MRIGradients` to tell Julia which MRIGradients to use (this will be fixed upon package registration)
+10. type `instantiate` to download and install all of the necessary packages.
+11. Proceed to run the demos found in the /src/ directory.
+
+### OLD DOCS
 
 2. Open the GIRFReco folder in the text editor of your choice (we use Atom with the Julia extension *Juno*) after configuring the text editor to use Julia. 
 
