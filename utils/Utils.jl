@@ -2,7 +2,16 @@ using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBin
 
 ## General Plotting function for the reconstruction
 
-# Mosaic-plots reconstruction for selected slices and corresponding B0 map
+"Mosaic-plots reconstruction for selected slices and corresponding B0 map"
+
+"""
+plotReconstruction(images, slices, b0; figHandles = [])
+Plots the magnitude and phase of the reconstructed images for a given slice or slices, along with a B₀ map if applicable
+# Arguments
+* `images` - Complex-valued images reconstructed using MRIReco.jl
+* `slices::Vector{Int}` - slices to plot
+* `b0::` - off-resonance map to plot along with images
+"""
 function plotReconstruction(images, slices, b0; figHandles = [])
 
     # Slice ordering check (show the correct order of slices as the images are read in not in geometrically sequential order)
@@ -55,7 +64,7 @@ function plotReconstruction(images, slices, b0; figHandles = [])
 
 end
 
-# Function plots all profiles in the acquisition to check consistency with ISMRMRD file
+"Function plots all profiles in the acquisition to check consistency with ISMRMRD file"
 function checkProfiles(rawData)
 
     numProfiles2 = 128 # Set to the number of profiles that you would like to see
@@ -71,7 +80,14 @@ function checkProfiles(rawData)
 end
 
 
-# Create figure and plot the sensitivity maps for each coil composed as a collage
+
+"""
+plotSenseMaps!(sense, n_channels)
+Plots coil sensitivity maps from the channels, for a total of n_channels plots
+# Arguments
+* `sense` - sensitivity maps
+* `n_channels::Int` - number of coils (usually last dimension of sense)
+"""
 function plotSenseMaps(sense,n_channels)
     # Magnitude maps
     figure("Sensitivity Map Magnitude"); clf(); for ch in 1:n_channels; subplot(8,4,ch); PyPlot.imshow((abs.(sense[:,:,1,ch]))); end;
@@ -85,7 +101,7 @@ function plotSenseMaps(sense,n_channels)
 
 end
 
-# TODO!
+"WIP: Plots trajectory and Data, doesn't work currently"
 function plotTrajAndData(acq)
 
     for l in 1:length(acq.traj)
@@ -100,7 +116,16 @@ end
 
 ## PREPROCESSING
 
-# Function to synchronize trajectory and kspace data as they are not sampled 1:1
+
+"""
+syncTrajAndData!(a::AcquisitionData)
+Synchronizes k-space trajectory and sampled data as they do not usually have a common sampling rate
+# Arguments
+* `rawData::RawAcquisitionData` - RawAcquisitionData object
+* `traj::Trajectory` - Trajectory object to be synchronized with data contained in rawData
+* `idx_crop::Int` - Trajectory and Data may contain samples we don't want in the recon, usually at the end of acquisition. Ignore samples after idx_crop
+* `interleave::Int` - index of interleave
+"""
 function syncTrajAndData!(rawData, traj, idx_crop, interleave)
 
     # get number of gradient samples
@@ -147,7 +172,15 @@ function syncTrajAndData!(rawData, traj, idx_crop, interleave)
 
 end
 
-## Function to correct k0 fluctuations during trajectory
+
+"""
+do_k0_correction!(rawData, k0_phase_modulation, interleave)
+Applies phase modulation due to 0th-order field fluctuations during the acquisition
+# Arguments
+* `rawData::RawAcquisitionData` - RawAcquisitionData object
+* `k0_phase_modulation::Matrix{Complex{T}}` - Vector containing phase modulation measurements
+* `interleave::Int` - index of interleave
+"""
 function do_k0_correction!(rawData,k0_phase_modulation, interleave)
 
 
@@ -191,7 +224,17 @@ function do_k0_correction!(rawData,k0_phase_modulation, interleave)
 
 end
 
-## Function to adjust the header data in the acquisition (requires mutable header)
+
+"""
+adjustHeader!(raw::RawAcquisitionData, reconSize, numSamples, interleaveNumber, singleSlice)
+Adjusts the header data for each interleave and slice of spiral diffusion RawAcquisitionData
+# Arguments
+* `raw::RawAcquisitionData` - RawAcquisitionData object
+* `reconSize::Vector` - Reconstruction matrix size
+* `numSamples::Int` - Number of samples per interleave
+* `interleaveNumber::Int` - Index of interleave for multi-shot acquisitionNumbers
+* `singleSlice::Bool` - flag for single-slice reconstruction/acquisition
+"""
 function adjustHeader!(raw, reconSize, numSamples, interleaveNumber, singleSlice)
 
     # For every profile in the acquisition
@@ -235,14 +278,25 @@ function adjustHeader!(raw, reconSize, numSamples, interleaveNumber, singleSlice
 
 end
 
-## Function to make sure that the acquisition nodes aren't out of the Domain expected by MRIReco.jl [-0.5, 0.5]
+"""
+checkAcquisitionNodes!(a::AcquisitionData)
+Validates processed AcquisitionData object to make sure that |kᵢ| < 0.5 ∀ i ∈ [1, Nₛ] 
+# Arguments
+* `a::AcquisitionData` - AcquisitionData object
+"""
 function checkAcquisitionNodes!(a::AcquisitionData)
 
     a.traj[1].nodes[abs.(a.traj[1].nodes[:]) .> 0.5] .= 0.5
 
 end
 
-## Function for correcting conversion errors in MRD from Siemens data. Mainly related to the ordering of indices and fov units
+
+"""
+validateSiemensMRD!(r::RawAcquisitionData)
+Validates RawAcquisitionData object created from ISMRMRD format object 
+# Arguments
+* `r::RawAcquisitionData` - RawAcquisitionData object
+"""
 function validateSiemensMRD!(r::RawAcquisitionData)
 
     @info "Validating Siemens converted data"
@@ -258,7 +312,12 @@ function validateSiemensMRD!(r::RawAcquisitionData)
 
 end
 
-# Validate and check data dimensions
+"""
+validateAcqData!(a::AcquisitionData)
+Validates processed AcquisitionData object after manipulation, etc...
+# Arguments
+* `a::AcquisitionData` - AcquisitionData object
+"""
 function validateAcqData!(a::AcquisitionData)
 
     ## Dimensions CHECK:

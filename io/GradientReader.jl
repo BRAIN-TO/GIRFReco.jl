@@ -2,6 +2,7 @@ using DelimitedFiles, MRIReco, PyPlot, Dierckx, MAT, DSP
 
 export read_gradient_txt_file
 
+"Reads in text file containing gradient waveform information"
 function read_gradient_txt_file(fileName, reconSize, delay)
     
     gradientData = readdlm(fileName,'\n')
