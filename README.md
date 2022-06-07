@@ -13,8 +13,9 @@ Updated to be included in MRIRecipes.jl https://github.com/BRAIN-TO/MRIRecipes.j
 1. To get started, make sure you have Julia installed. At least v1.6 is preferable (v1.7 is optimal).
 2. Clone the MRIRecipes.jl project via Github to a local directory
 3. Download the data supplement from Zenodo (https://doi.org/10.5281/zenodo.6510020) and extract somwhere. 
+   - *Note: This might take a few minutes. You can skip ahead and continue with step 5-10 in the meantime.*
 4. Move the extracted folder (data) into the MRIRecipes.jl directory
-5. Clone the MRIGradients project via Github to your Julia dev folder (usually /home/.julia/dev/). This can be found at: https://github.com/BRAIN-TO/MRIGradients
+5. Clone the `MRIGradients` project via Github to your Julia dev folder (usually `/home/.julia/dev/` on Linux or `C:\Users\<username>\.julia\dev` on Windows). `MRIGradients` can be found at: https://github.com/BRAIN-TO/MRIGradients
 6. Open a Julia REPL in your editor of choice
 7. In the REPL, type `]` to enter package mode
 8. type `activate .` to activate a new Julia environment for the MRIRecipes.jl project
