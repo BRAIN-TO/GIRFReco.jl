@@ -8,7 +8,7 @@ include("../io/GradientReader.jl")
 include("../utils/Utils.jl")
 
 ## Executing Cartesian recon from which B0/sensitivity maps have been computed
-@info "Running julia_recon_cartesian to retrieve maps (senseCartesian and b0Maps)"
+@info "Running CartesianRecon to retrieve maps (senseCartesian and b0Maps)"
 include("../recon/CartesianRecon.jl")
 
 ## Set figures to be unlocked from the window (i.e use matplotlib backend with controls)
@@ -43,7 +43,7 @@ sliceSelection = excitationList[selectedSlice]
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] = (200,200)
+adjustmentDict[:reconSize] = (112,112) #(200,200)
 adjustmentDict[:interleave] = 1
 adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 20
@@ -121,6 +121,7 @@ params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 @time reco = reconstruction(acqDataImaging,params)
 
 #totalRecon = sum(abs2,reco.data,dims=5)
+@info "Plotting Reconstruction \n"
 plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:,:,selectedSlice])
 
 ## Plot the image edges (feature comparison)
@@ -132,3 +133,5 @@ plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:,:,selectedSlice])
 
 # figure("Edge Differences")
 # PyPlot.imshow(imEdges)
+
+@info "Successfully Completed SpiralRecon \n"

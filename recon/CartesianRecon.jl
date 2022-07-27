@@ -79,4 +79,8 @@ cartesianReco = reconstruction(acqDataCartesian,paramsCartesian)
 ## Calculate B0 maps from the acquired images (if two TEs)
 
 slices = 1:length(indexArray)
+
+@info "Calculating B0 Maps"
 b0Maps = calculateB0Maps(cartesianReco.data,slices)
+
+@info "Successfully Completed CartesianReconstruction"
