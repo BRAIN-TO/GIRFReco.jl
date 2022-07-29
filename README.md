@@ -6,8 +6,6 @@ Includes a working example for spiral reconstruction with GIRF correction and a 
 
 ### NEW DOCS:
 
-Updated to be included in MRIRecipes.jl https://github.com/BRAIN-TO/MRIRecipes.jl
-
 ## Getting Started!
 
 1. To get started, make sure you have Julia installed. At least v1.6 is preferable (v1.7 is optimal).
