@@ -5,19 +5,27 @@ using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBin
 "Mosaic-plots reconstruction for selected slices and corresponding B0 map"
 
 """
-plotReconstruction(images, slices, b0; figHandles = [])
+plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInterleaved = false)
+
 Plots the magnitude and phase of the reconstructed images for a given slice or slices, along with a B₀ map if applicable
 # Arguments
 * `images` - Complex-valued images reconstructed using MRIReco.jl
-* `slices::Vector{Int}` - slices to plot
-* `b0::` - off-resonance map to plot along with images
+* `slicesIndex::Vector{Int}` - slices to plot
+* `b0` - off-resonance map to plot along with images
+* `figHandles` - String vectors in size of [3,1] for titles of three figures (Magnitude & Phase of reconstructed images, and B0 maps)
+* `isSliceInterleaved` - Bool, for 2D scanning, indicate this value as `true` to make sure the slice order on the displayed results is correct
 """
-function plotReconstruction(images, slices, b0; figHandles = [])
+function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInterleaved = false)
 
-    # Slice ordering check (show the correct order of slices as the images are read in not in geometrically sequential order)
-    indexArray = slices
+    sliceNum = length(slicesIndex)
+    reorderSliceIndex = zeros(Int16, size(slicesIndex))
 
-    # @info slices
+    if isSliceInterleaved && sliceNum > 1
+        reorderSliceIndex[1:2:end] = slicesIndex[1:Int(ceil(sliceNum / 2))]
+        reorderSliceIndex[2:2:end] = slicesIndex[Int(ceil(sliceNum / 2) + 1) : end]
+    else
+        reorderSliceIndex = slicesIndex
+    end
 
     # Plot magnitude images (normalize)
     if isempty(figHandles)
@@ -25,8 +33,11 @@ function plotReconstruction(images, slices, b0; figHandles = [])
     else
         figure(figHandles[1])
     end
-    absData = abs.(images[:, :, slices, 1, 1]) ./ maximum(abs.(images[:, :, slices, 1, 1]))
-    absMosaic = mosaicview(absData, nrow = Int(floor(sqrt(length(slices)))), npad = 5, rowmajor = true, fillvalue = 0)
+
+    clf()
+
+    absData = mapslices(x -> abs.(x) ./ maximum(abs.(x)), images[:, :, reorderSliceIndex], dims = [1,2])
+    absMosaic = mosaicview(absData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
     PyPlot.imshow(absMosaic, cmap = "gray")
     colorbar()
@@ -40,8 +51,10 @@ function plotReconstruction(images, slices, b0; figHandles = [])
         figure(figHandles[2])
     end
 
-    phaseData = mapslices(x -> ROMEO.unwrap(x), angle.(images[:, :, slices, 1, 1]), dims = (1, 2))
-    phaseMosaic = mosaicview(phaseData, nrow = Int(floor(sqrt(length(slices)))), npad = 5, rowmajor = true, fillvalue = 0)
+    clf()
+
+    phaseData = mapslices(x -> ROMEO.unwrap(x), angle.(images[:, :, reorderSliceIndex, 1, 1]), dims = [1,2])
+    phaseMosaic = mosaicview(phaseData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
     PyPlot.imshow(phaseMosaic, cmap = "inferno", vmax = 3 * pi, vmin = -3 * pi)
     colorbar()
@@ -55,7 +68,9 @@ function plotReconstruction(images, slices, b0; figHandles = [])
         figure(figHandles[3])
     end
 
-    b0Mosaic = mosaicview(b0[:, :, slices], nrow = Int(floor(sqrt(length(slices)))), npad = 5, rowmajor = true, fillvalue = 0)
+    clf()
+
+    b0Mosaic = mosaicview(b0[:, :, reorderSliceIndex], nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
     PyPlot.imshow(b0Mosaic, cmap = "inferno", vmax = 500, vmin = -500)
     colorbar()
@@ -90,12 +105,12 @@ Plots coil sensitivity maps from the channels, for a total of n_channels plots
 """
 function plotSenseMaps(sense,n_channels)
     # Magnitude maps
-    figure("Sensitivity Map Magnitude"); clf(); for ch in 1:n_channels; subplot(8,4,ch); PyPlot.imshow((abs.(sense[:,:,1,ch]))); end;
+    figure("Sensitivity Map Magnitude"); clf(); for ch in 1:n_channels; subplot(8,4,ch); PyPlot.imshow((abs.(sense[:,:,1,ch])), cmap = "gray"); end;
     subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
     gcf()
 
     # Phase maps
-    figure("Sensitivity Map Phase"); clf(); for ch in 1:n_channels; subplot(8,4,ch); PyPlot.imshow(ROMEO.unwrap(angle.(sense[:,:,1,ch]))); end;
+    figure("Sensitivity Map Phase"); clf(); for ch in 1:n_channels; subplot(8,4,ch); PyPlot.imshow(ROMEO.unwrap(angle.(sense[:,:,1,ch])), cmap = "gray"); end;
     subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
     gcf()
 
@@ -375,7 +390,7 @@ removes 2x readout oversampling in specified raw data dimensions by iFFT, croppi
 function removeOversampling!(raw::RawAcquisitionData; dims = [1])
     idxDim = dims[1]
     Ns = raw.params["encodedSize"][idxDim]
-    idxCropFov = convert(Vector{Int64}, [1:floor(Ns/4); ceil(3/4*Ns+1):Ns])
+    idxCropFov = convert(Vector{Int32}, [1:floor(Ns/4); ceil(3/4*Ns+1):Ns])
     # For every profile in the acquisition
     for iProfile = 1:length(raw.profiles)
         # IFFT to image space, crop, FFT back to k-space
