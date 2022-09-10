@@ -26,8 +26,8 @@ pygui(true)
 
 ## Choose Slice (can be [single number] OR [1,2,3,4,5,6,7,8,9]
 sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # UNCOMMENT FOR MULTISLICE
-# sliceChoice = [12] # UNCOMMENT FOR SINGLESLICE (SLICES 3, 7 and 8 are good examples)
-diffusionDirection = 0 # CAN BE FROM 0 (b=0) to 7 (1-7 are 6 directions of b=1000)
+# sliceChoice = [6] # UNCOMMENT FOR SINGLESLICE (SLICES 3, 7 and 8 are good examples)
+diffusionDirection = 0 # CAN BE FROM 0 (b=0) to 6 (e.g. for 6 direction MDDW, 1-6 are 6 directions)
 
 ## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction Pipeline"
@@ -67,8 +67,8 @@ adjustmentDict[:reconSize] = (112,112) #(200,200)
 adjustmentDict[:interleave] = 1
 adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 20
-# adjustmentDict[:numSamples] = 15475
-adjustmentDict[:numSamples] = 16084
+# adjustmentDict[:numSamples] = 16084 # Total Number of ADC event, including the period of gradient rewinder
+adjustmentDict[:numSamples] = 15655 # Total Number of readout before gradient rewinder
 adjustmentDict[:delay] = 0.00000 # naive delay correction
 
 adjustmentDict[:interleaveDataFileNames] = [fname_spiralIntlv1, fname_spiralIntlv2, fname_spiralIntlv3, fname_spiralIntlv4]
@@ -143,7 +143,7 @@ params[:iterations] = 20
 params[:solver] = "cgnr"
 params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
 params[:senseMaps] = ComplexF32.(sensitivity[:,:,selectedSlice,:])
-# params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
+params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 
 ## Call to reconstruction
 @info "Performing Reconstruction \n"
