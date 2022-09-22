@@ -10,7 +10,7 @@ for id in ${idsCartesian[@]}; do
     echo $filepattern 
     foundFiles=$(ls ${pathData}/${filepattern}*.dat)
     echo "Converting $foundFiles to mrd using IsmrmrdParameterMap_Siemens_NX.xsl"
-    siemens_to_ismrmrd -f $foundFiles -z 2 -x IsmrmrdParameterMap_Siemens_NX.xsl
+    siemens_to_ismrmrd -f $foundFiles -z 2 -x IsmrmrdParameterMap_Siemens_NX.xsl --skipSyncData
 done
 
 for id in ${idsSpiral[@]}; do
@@ -18,5 +18,5 @@ for id in ${idsSpiral[@]}; do
     echo $filepattern 
     foundFiles=$(ls ${pathData}/${filepattern}*.dat)
     echo "Converting $foundFiles to mrd using IsmrmrdParameterMap_Siemens_NX_ReadinSpiral.xsl"
-    siemens_to_ismrmrd -f $foundFiles -z 2 -x IsmrmrdParameterMap_Siemens_NX_ReadinSpiral.xsl
+    siemens_to_ismrmrd -f $foundFiles -z 2 -x IsmrmrdParameterMap_Siemens_NX_ReadinSpiral.xsl --skipSyncData
 done
