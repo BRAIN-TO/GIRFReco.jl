@@ -35,7 +35,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
 
     # Plot magnitude images (normalize)
-    if isempty(figHandles)
+    if length(figHandles) < 1
         figure("Magnitude Images")
     else
         figure(figHandles[1])
@@ -59,7 +59,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     gcf().suptitle("|Images|")
 
     # Plot phase images
-    if isempty(figHandles)
+    if length(figHandles) < 2
         figure("Phase Images")
     else
         figure(figHandles[2])
@@ -83,7 +83,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     gcf().suptitle("∠Images")
 
     # Plot B0 maps
-    if isempty(figHandles)
+    if length(figHandles) < 3
         figure("B₀ Map Images")
     else
         figure(figHandles[3])
