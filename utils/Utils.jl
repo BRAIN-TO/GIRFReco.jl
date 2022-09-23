@@ -35,7 +35,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
 
     # Plot magnitude images (normalize)
-    if isempty(figHandles)
+    if length(figHandles) < 1
         figure("Magnitude Images")
     else
         figure(figHandles[1])
@@ -59,7 +59,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     gcf().suptitle("|Images|")
 
     # Plot phase images
-    if isempty(figHandles)
+    if length(figHandles) < 2
         figure("Phase Images")
     else
         figure(figHandles[2])
@@ -83,7 +83,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     gcf().suptitle("∠Images")
 
     # Plot B0 maps
-    if isempty(figHandles)
+    if length(figHandles) < 3
         figure("B₀ Map Images")
     else
         figure(figHandles[3])
@@ -461,7 +461,7 @@ function mergeRawInterleaves(params)
     dataFile = ISMRMRDFile(params[:interleaveDataFileNames][params[:interleave]])
 
     # Read in the gradient file and perform GIRF correction to calculate trajectory and calculate k0 phase modulation
-    traj = read_gradient_txt_file(params[:trajFilename],params[:reconSize],params[:delay])
+    trajAll = read_gradient_txt_file(params[:trajFilename],params[:reconSize],params[:delay])
 
     # Read in raw data from the dataFile
     rawData = RawAcquisitionData(dataFile)
@@ -477,10 +477,11 @@ function mergeRawInterleaves(params)
     timeTrack = []
 
     # synchronize trajectory data and the kspace data
-    times = syncTrajAndData!(rawData, traj, params[:numSamples], params[:interleave])
+    times = syncTrajAndData!(rawData, trajAll, params[:numSamples], params[:interleave])
 
     # adjust the header so that each diffusion direction is considered as a contrast instead of a repetition
-    adjustHeader!(rawData, params[:reconSize], params[:numSamples], params[:interleave],params[:singleSlice])
+    # adjustHeader!(rawData, params[:reconSize], params[:numSamples], params[:interleave],params[:singleSlice])
+    adjustHeader!(rawData, params[:reconSize], params[:numSamples], 1, params[:singleSlice])
 
     # add the times to the time tracking vector
     append!(timeTrack,times)
@@ -496,10 +497,10 @@ function mergeRawInterleaves(params)
             deleteat!(rawDataTemp.profiles,ic) # delete profiles which aren't needed
 
             # read in the gradient file and perform the GIRF correction
-            trajTemp = read_gradient_txt_file(params[:trajFilename],params[:reconSize],params[:delay])
+            # trajTemp = read_gradient_txt_file(params[:trajFilename],params[:reconSize],params[:delay])
 
             # synchronize the trajectory from the gradient file and the data from the raw data file for the interleave
-            timesTemp = syncTrajAndData!(rawDataTemp, trajTemp, params[:numSamples], l)
+            timesTemp = syncTrajAndData!(rawDataTemp, trajAll, params[:numSamples], l)
 
             # adjust the header to reflect the arrangement of data expected by MRIReco.jl's reconstruction function
             adjustHeader!(rawDataTemp,params[:reconSize], params[:numSamples], l, params[:singleSlice])
@@ -517,9 +518,9 @@ function mergeRawInterleaves(params)
         rawDataTemp = RawAcquisitionData(dataFileTemp)
         deleteat!(rawDataTemp.profiles,ic)
 
-        trajTemp = read_gradient_txt_file(params[:trajFilename],params[:reconSize],params[:delay])
+        # trajTemp = read_gradient_txt_file(params[:trajFilename],params[:reconSize],params[:delay])
 
-        timesTemp = syncTrajAndData!(rawDataTemp, trajTemp, params[:numSamples], 3)
+        timesTemp = syncTrajAndData!(rawDataTemp, trajAll, params[:numSamples], 3)
 
         adjustHeader!(rawDataTemp,params[:reconSize], params[:numSamples], 2, params[:singleSlice])
 
