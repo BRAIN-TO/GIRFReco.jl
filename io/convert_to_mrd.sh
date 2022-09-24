@@ -9,6 +9,11 @@ function print_usage {
     exit 1
 }
 
+if [[ $# == 0 ]]; then
+    print_usage
+    exit 1
+fi
+
 while getopts p:c:s:h flag
 do
     case "${flag}" in
