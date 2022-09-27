@@ -1,6 +1,6 @@
-using PyPlot, HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
+using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
 
-include("../utils/Utils.jl")
+# include("../utils/Utils.jl")
 
 ## function to calculate the B0 maps from the two images with different echo times
 # TODO have the b0 map calculation be capable of handling variable echo times
@@ -24,8 +24,8 @@ reconSize = (64,64)
 
 @info "Loading Data Files"
 
-b0FileName = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Phantom\\dat\\field_map_83_2.h5"
-processedFileName = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Phantom\\dat\\processedCartesianData.h5" # filename for preprocessed data 
+b0FileName = "data/Fieldmaps/field_map_83_2.h5"
+processedFileName = "data/Fieldmaps/processedCartesianData.h5" # filename for preprocessed data 
 
 if makeMaps
 

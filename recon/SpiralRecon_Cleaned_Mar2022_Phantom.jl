@@ -1,4 +1,4 @@
-using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
+using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
 
 # %%
 # Include tools and reader functions for running the spiral reconstruction recipe
@@ -22,7 +22,7 @@ if reloadCartesianData || !((@isdefined senseCartesian) && (@isdefined b0Maps))
 end
 
 ## Set figures to be unlocked from the win9ow (i.e use matplotlib backend with controls)
-pygui(true)
+# pygui(true)
 
 ## Choose Slice (can be [single number] OR [1,2,3,4,5,6,7,8,9]
 sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # UNCOMMENT FOR MULTISLICE
@@ -33,7 +33,7 @@ diffusionDirection = 0 # CAN BE FROM 0 (b=0) to 6 (e.g. for 6 direction MDDW, 1-
 @info "Starting Spiral Reconstruction Pipeline"
 
 ## Default to single slice selection. Choose multi-slice only if computer is capable.
-multiSlice = false
+multiSlice = true
 
 if length(sliceChoice) > 1
     multiSlice = true
@@ -52,14 +52,14 @@ sliceSelection = excitationList[selectedSlice]
 
 @info "Slice Chosen = $selectedSlice: \n \nExcitations Chosen = $excitationList "
 
-fname_spiralIntlv1 = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Phantom\\dat\\508_72_2.h5"
-fname_spiralIntlv2 = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Phantom\\dat\\508_74_2.h5"
-fname_spiralIntlv3 = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Phantom\\dat\\508_76_2.h5"
-fname_spiralIntlv4 = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Phantom\\dat\\508_78_2.h5"
-fname_gradient = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\508\\gradients.txt"
-fname_girfGx = "D:\\SpiralDiffusion\\DataNov2020\\GIRF\\GIRF_ISMRM2022\\2021Nov_PosNeg_Gx.mat"
-fname_girfGy = "D:\\SpiralDiffusion\\DataNov2020\\GIRF\\GIRF_ISMRM2022\\2021Nov_PosNeg_Gy.mat"
-fname_girfGz = "D:\\SpiralDiffusion\\DataNov2020\\GIRF\\GIRF_ISMRM2022\\2021Nov_PosNeg_Gz.mat"
+fname_spiralIntlv1 = "data/Spirals/508_72_2.h5"
+fname_spiralIntlv2 = "data/Spirals/508_74_2.h5"
+fname_spiralIntlv3 = "data/Spirals/508_76_2.h5"
+fname_spiralIntlv4 = "data/Spirals/508_78_2.h5"
+fname_gradient = "data/Gradients/gradients508.txt"
+fname_girfGx = "data/GIRF/GIRF_ISMRM2022/2021Nov_PosNeg_Gx.mat"
+fname_girfGy = "data/GIRF/GIRF_ISMRM2022/2021Nov_PosNeg_Gy.mat"
+fname_girfGz = "data/GIRF/GIRF_ISMRM2022/2021Nov_PosNeg_Gz.mat"
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
@@ -151,6 +151,7 @@ params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 
 #totalRecon = sum(abs2,reco.data,dims=5)
 @info "Plotting Reconstruction \n"
+
 plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:,:,selectedSlice])
 
 ## Plot the image edges (feature comparison)
