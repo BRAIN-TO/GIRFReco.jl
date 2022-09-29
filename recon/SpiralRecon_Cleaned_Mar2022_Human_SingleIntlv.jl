@@ -1,4 +1,4 @@
-using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
+using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
 
 # %%
 # Include tools and reader functions for running the spiral reconstruction recipe
@@ -19,10 +19,7 @@ sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
 # sliceChoice = [6] # For single-slice
 
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
-diffusionDirection = 1
-
-## Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
-reconSize = (112, 112)
+diffusionDirection = 0
 
 ## Determine to reconstruct single-interleave data, or one interleave out of multi-interleave data.
 isDataSingleIntlv = false
@@ -34,30 +31,30 @@ startIndexIntlv = 3
 # For single interleave data, use this section
 if isDataSingleIntlv
     startIndexIntlv = 1 # Should always be 1 for single-interleave data.
-    # fname_spiralIntlv = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\511_134_2.h5" # Gradient 511, b = 300, 10 diff directions
-    # fname_spiralIntlv = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\511_136_2.h5" # Gradient 511, b = 700, 30 diff directions
-    # fname_spiralIntlv = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\511_138_2.h5" # Gradient 511, b = 2500, 64 diff directions
-    fname_spiralIntlv = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\508_140_2.h5" # Gradient 508, interleave 0, b = 300, 10 diff directions
-    # fname_spiralIntlv = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\508_142_2.h5" # Gradient 508, interleave 0, b = 700, 30 diff directions
-    # fname_spiralIntlv = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\508_144_2.h5" # Gradient 508, interleave 0, b = 2500, 64 diff directions
+    # fname_spiralIntlv = "data/Spirals/511_134_2.h5" # Gradient 511, b = 300, 10 diff directions
+    # fname_spiralIntlv = "data/Spirals/511_136_2.h5" # Gradient 511, b = 700, 30 diff directions
+    # fname_spiralIntlv = "data/Spirals/511_138_2.h5" # Gradient 511, b = 2500, 64 diff directions
+    # fname_spiralIntlv = "data/Spirals/508_140_2.h5" # Gradient 508, interleave 0, b = 300, 10 diff directions
+    # fname_spiralIntlv = "data/Spirals/508_142_2.h5" # Gradient 508, interleave 0, b = 700, 30 diff directions
+    fname_spiralIntlv = "data/Spirals/508_144_2.h5" # Gradient 508, interleave 0, b = 2500, 64 diff directions
 else
     # Multi-interleave data, needs all 4 file names, but will only read the corresponding one.
-    fname_spiralIntlv0 = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\508_124_2.h5" # Gradient 508, interleave 0, b = 2000, 6 diff directions, 4 averages
-    fname_spiralIntlv1 = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\508_126_2.h5" # Gradient 508, interleave 1, b = 2000, 6 diff directions, 4 averages
-    fname_spiralIntlv2 = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\508_128_2.h5" # Gradient 508, interleave 2, b = 2000, 6 diff directions, 4 averages
-    fname_spiralIntlv3 = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\508_130_2.h5" # Gradient 508, interleave 3, b = 2000, 6 diff directions, 4 averages
+    fname_spiralIntlv0 = "data/Spirals/508_124_2.h5" # Gradient 508, interleave 0, b = 2000, 6 diff directions, 4 averages
+    fname_spiralIntlv1 = "data/Spirals/508_126_2.h5" # Gradient 508, interleave 1, b = 2000, 6 diff directions, 4 averages
+    fname_spiralIntlv2 = "data/Spirals/508_128_2.h5" # Gradient 508, interleave 2, b = 2000, 6 diff directions, 4 averages
+    fname_spiralIntlv3 = "data/Spirals/508_130_2.h5" # Gradient 508, interleave 3, b = 2000, 6 diff directions, 4 averages
 end
 
 ## Total number of ADC points BEFORE the rewinder at the end of the spiral readout. For gradient 508, use 15655 (out of 16084); for gradient 511, use 15445 (out of 15624).
 numADCSamples = 15655
 
 ## File name for the spiral gradient
-fname_gradient = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\508\\gradients.txt" # Contains all 4 interleaves.
-# fname_gradient = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\511\\gradients.txt"
+fname_gradient = "data/Gradients/gradients508.txt" # Contains all 4 interleaves.
+# fname_gradient = "data/Gradoemts/gradients511.txt"
 
-fname_girfGx = "D:\\SpiralDiffusion\\DataNov2020\\GIRF\\GIRF_ISMRM2022\\2021Nov_PosNeg_Gx.mat"
-fname_girfGy = "D:\\SpiralDiffusion\\DataNov2020\\GIRF\\GIRF_ISMRM2022\\2021Nov_PosNeg_Gy.mat"
-fname_girfGz = "D:\\SpiralDiffusion\\DataNov2020\\GIRF\\GIRF_ISMRM2022\\2021Nov_PosNeg_Gz.mat"
+fname_girfGx = "data/GIRF/GIRF_ISMRM2022/2021Nov_PosNeg_Gx.mat"
+fname_girfGy = "data/GIRF/GIRF_ISMRM2022/2021Nov_PosNeg_Gy.mat"
+fname_girfGz = "data/GIRF/GIRF_ISMRM2022/2021Nov_PosNeg_Gz.mat"
 
 ## Gyromagnetic ratio, in unit of Hz
 gamma = 42577478
@@ -73,8 +70,10 @@ end
 
 totalSliceNum = size(sensitivity, 3)
 
+## Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
+reconSize = (200,200) # need to do this after the cartesian reco otherwise recon size is 64,64
+
 ## Set figures to be unlocked from the win9ow (i.e use matplotlib backend with controls)
-pygui(true)
 
 ## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction Pipeline"

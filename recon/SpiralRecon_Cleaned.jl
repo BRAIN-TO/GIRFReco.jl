@@ -1,4 +1,4 @@
-using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
+using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
 
 # %%
 # Include tools and reader functions for running the spiral reconstruction recipe
@@ -12,7 +12,6 @@ include("../utils/Utils.jl")
 include("../recon/CartesianRecon.jl")
 
 ## Set figures to be unlocked from the window (i.e use matplotlib backend with controls)
-pygui(true)
 
 ## Choose Slice (can be [single number] OR [1,2,3,4,5,6,7,8,9]
 # sliceChoice = [1,2,3,4,5,6,7,8,9] # UNCOMMENT FOR MULTISLICE
