@@ -1,6 +1,6 @@
 using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
 
-# include("../utils/Utils.jl")
+include("../utils/Utils.jl")
 
 ## function to calculate the B0 maps from the two images with different echo times
 # TODO have the b0 map calculation be capable of handling variable echo times
