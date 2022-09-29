@@ -20,7 +20,7 @@ saveMaps = true
 TE1 = 4.92
 TE2 = 7.38 
 
-reconSize = (64,64)
+reconSize = (112,112)
 
 @info "Loading Data Files"
 
@@ -82,7 +82,7 @@ indexArray = [8,1,9,2,10,3,11,4,12,5,13,6,14,7,15] # for 15 slice phantom
 ## Call the reconstruction function
 
 @info "Performing Reconstruction"
-cartesianReco = reconstruction(acqDataCartesian,paramsCartesian)
+@time cartesianReco = reconstruction(acqDataCartesian,paramsCartesian)
 
 ## Calculate B0 maps from the acquired images (if two TEs)
 

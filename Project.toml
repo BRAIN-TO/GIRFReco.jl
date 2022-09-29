@@ -32,6 +32,7 @@ LinearOperators = "=2.2.3"
 MRIBase = "=0.1.2"
 NFFT = "=0.12.3"
 NFFTTools = "=0.2.3"
+RegularizedLeastSquares = "=0.8.4"
 
 [extras]
 CPUSummary = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"

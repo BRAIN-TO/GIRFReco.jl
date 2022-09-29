@@ -10,7 +10,7 @@ include("../utils/Utils.jl")
 ## ----------------------------- User-defined Variables -------------------------- ##
 
 ## Set true if we need to reload Cartesian and/or spiral data compulsively.
-reloadCartesianData = false
+reloadCartesianData = true
 reloadSpiralData = true
 reloadGIRFData = false
 
@@ -22,21 +22,21 @@ sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
 diffusionDirection = 0
 
 ## Determine to reconstruct single-interleave data, or one interleave out of multi-interleave data.
-isDataSingleIntlv = false
+isDataSingleIntlv = true
 
 # Which interleave to be reconstructed. For single-interleave data, it will always be set as 1; for multi-interleave data, the value set here will be used.
 # For multi-interleaved data, this value is ranging from [1:TotNumIntlv] (total number of interleaves), indicating which interleave to be reconstructed
-startIndexIntlv = 3 
+startIndexIntlv = 3
 
 # For single interleave data, use this section
 if isDataSingleIntlv
     startIndexIntlv = 1 # Should always be 1 for single-interleave data.
     # fname_spiralIntlv = "data/Spirals/511_134_2.h5" # Gradient 511, b = 300, 10 diff directions
     # fname_spiralIntlv = "data/Spirals/511_136_2.h5" # Gradient 511, b = 700, 30 diff directions
-    # fname_spiralIntlv = "data/Spirals/511_138_2.h5" # Gradient 511, b = 2500, 64 diff directions
+    fname_spiralIntlv = "data/Spirals/511_138_2.h5" # Gradient 511, b = 2500, 64 diff directions
     # fname_spiralIntlv = "data/Spirals/508_140_2.h5" # Gradient 508, interleave 0, b = 300, 10 diff directions
     # fname_spiralIntlv = "data/Spirals/508_142_2.h5" # Gradient 508, interleave 0, b = 700, 30 diff directions
-    fname_spiralIntlv = "data/Spirals/508_144_2.h5" # Gradient 508, interleave 0, b = 2500, 64 diff directions
+    # fname_spiralIntlv = "data/Spirals/508_144_2.h5" # Gradient 508, interleave 0, b = 2500, 64 diff directions
 else
     # Multi-interleave data, needs all 4 file names, but will only read the corresponding one.
     fname_spiralIntlv0 = "data/Spirals/508_124_2.h5" # Gradient 508, interleave 0, b = 2000, 6 diff directions, 4 averages
@@ -46,11 +46,12 @@ else
 end
 
 ## Total number of ADC points BEFORE the rewinder at the end of the spiral readout. For gradient 508, use 15655 (out of 16084); for gradient 511, use 15445 (out of 15624).
-numADCSamples = 15655
+#numADCSamples = 15655
+numADCSamples = 15445
 
 ## File name for the spiral gradient
-fname_gradient = "data/Gradients/gradients508.txt" # Contains all 4 interleaves.
-# fname_gradient = "data/Gradoemts/gradients511.txt"
+# fname_gradient = "data/Gradients/gradients508.txt" # Contains all 4 interleaves.
+fname_gradient = "data/Gradients/gradients511.txt"
 
 fname_girfGx = "data/GIRF/GIRF_ISMRM2022/2021Nov_PosNeg_Gx.mat"
 fname_girfGy = "data/GIRF/GIRF_ISMRM2022/2021Nov_PosNeg_Gy.mat"
@@ -71,7 +72,7 @@ end
 totalSliceNum = size(sensitivity, 3)
 
 ## Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
-reconSize = (200,200) # need to do this after the cartesian reco otherwise recon size is 64,64
+reconSize = (112,112) # need to do this after the cartesian reco otherwise recon size is 64,64
 
 ## Set figures to be unlocked from the win9ow (i.e use matplotlib backend with controls)
 
@@ -92,7 +93,7 @@ else
 end
 
 ## The ISMRMRD File contains more than one excitation, so we choose the set corresponding to the b-value 0 images
-excitationList = vec(totalSliceNum*2 + 2 : 2 : totalSliceNum*4) .+ diffusionDirection * totalSliceNum * 2 # DATASET SPECIFIC INDEXING: 15 slices, starting from profile 32
+excitationList = collect(totalSliceNum*2 + 2 : 2 : totalSliceNum*4) .+ diffusionDirection * totalSliceNum * 2 # DATASET SPECIFIC INDEXING: 15 slices, starting from profile 32
 sliceSelection = excitationList[selectedSlice]
 
 @info "Slice Chosen = $selectedSlice: \n \nExcitations Chosen = $excitationList "
@@ -176,7 +177,7 @@ params[:reco] = "multiCoil"
 params[:reconSize] = adjustmentDict[:reconSize]
 params[:regularization] = "L2"
 params[:λ] = 1e-2 # CHANGE THIS TO GET BETTER OR WORSE RECONSTRUCTION RESULTS
-params[:iterations] = 20
+params[:iterations] = 10
 params[:solver] = "cgnr"
 params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
 params[:senseMaps] = ComplexF32.(sensitivity[:,:,selectedSlice,:])
