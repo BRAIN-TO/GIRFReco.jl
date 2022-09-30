@@ -83,6 +83,7 @@ slices = 1:length(indexArray)
 
 @info "Calculating B0 Maps"
 b0Maps = calculateB0Maps(cartesianReco.data,slices)
+b0Maps2 = estimateB0Maps(cartesianReco.data,slices)
 
 r2 = pcg_ml_est_fieldmap(cartesianReco.data[:,:,7,1,1],cartesianReco.data[:,:,7,2,1])
 

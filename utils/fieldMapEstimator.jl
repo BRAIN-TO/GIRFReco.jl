@@ -35,3 +35,16 @@ function pcg_ml_est_fieldmap(y,z)
     return x
 
 end
+
+
+function estimateB0Maps(imData,slices)
+
+    b0Maps = Complex.(zeros(size(imData)[1:3]))
+
+    for slice in slices
+        b0Maps[:,:,slice] = rotl90(pcg_ml_est_fieldmap(imData[:,:,slice,1,1],imData[:,:,slice,2,1])) ./ ((7.38-4.92)/1000)
+    end
+
+    return real.(b0Maps)
+
+end
