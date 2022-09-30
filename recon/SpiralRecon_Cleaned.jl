@@ -42,7 +42,7 @@ sliceSelection = excitationList[selectedSlice]
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] = (112,112) #(200,200)
+adjustmentDict[:reconSize] = (200,200)
 adjustmentDict[:interleave] = 1
 adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 20
@@ -119,7 +119,7 @@ params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 @info "Performing Reconstruction \n"
 @time reco = reconstruction(acqDataImaging,params)
 
-pygui(true)
+# pygui(true)
 
 #totalRecon = sum(abs2,reco.data,dims=5)
 @info "Plotting Reconstruction \n"

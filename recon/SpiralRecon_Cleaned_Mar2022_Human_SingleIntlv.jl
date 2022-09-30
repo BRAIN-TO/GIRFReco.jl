@@ -177,7 +177,7 @@ params[:reco] = "multiCoil"
 params[:reconSize] = adjustmentDict[:reconSize]
 params[:regularization] = "L2"
 params[:λ] = 1e-2 # CHANGE THIS TO GET BETTER OR WORSE RECONSTRUCTION RESULTS
-params[:iterations] = 10
+params[:iterations] = 20
 params[:solver] = "cgnr"
 params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
 params[:senseMaps] = ComplexF32.(sensitivity[:,:,selectedSlice,:])

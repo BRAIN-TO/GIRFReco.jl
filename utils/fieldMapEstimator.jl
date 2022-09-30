@@ -1,3 +1,4 @@
+using Flux
 
 function ml_cost(x::Matrix{T},y::Matrix{Complex{T}},z::Matrix{Complex{T}}, β) where T
 
@@ -11,24 +12,29 @@ function R(x::Matrix{T}) where T
 
 end
 
-function pcg_ml_est_fieldmap(y,z)
+function pcg_ml_est_fieldmap(y,z,β) 
 
     d = 1
-    x = angle.(conj.(y) .* z)
+    κ = conj.(y) .* z
+    x = angle.(κ)
+    m = abs.(κ)
 
-    while d < 10000
+    trust_step = 0.1 ./ (m .+ 4*β)
+
+    while d < 100
 
         gs = gradient(Flux.params(x)) do
-            ml_cost(x, y, z,0.01)
+            ml_cost(x, y,z,β) # need to interpolate the y z and β to have better performance 
         end
+
         x̄ = gs[x]
-        x .-= 0.01 .* x̄
+        x .-= trust_step .* x̄ 
 
-        if mod(d,100) == 0
-            println(ml_cost(x, y, z,0.01))
+        if mod(d,10) == 0
+            println(ml_cost(x, y, z, β))
         end
 
-        d += 1
+        d += 1 # TODO add early stopping criteria
 
     end
 
@@ -37,13 +43,14 @@ function pcg_ml_est_fieldmap(y,z)
 end
 
 
-function estimateB0Maps(imData,slices)
+function estimateB0Maps(imData,slices, TE1,TE2,β,isrotated)
 
     b0Maps = Complex.(zeros(size(imData)[1:3]))
-
     for slice in slices
-        b0Maps[:,:,slice] = rotl90(pcg_ml_est_fieldmap(imData[:,:,slice,1,1],imData[:,:,slice,2,1])) ./ ((7.38-4.92)/1000)
+        b0Maps[:,:,slice] = pcg_ml_est_fieldmap(imData[:,:,slice,1,1],imData[:,:,slice,2,1],β) ./ ((TE2 - TE1)/1000)
     end
+
+    b0Maps = mapslices(isrotated ? x->x : x-> rotl90(x),b0Maps,dims=(1,2)) 
 
     return real.(b0Maps)
 

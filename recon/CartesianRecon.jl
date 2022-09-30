@@ -1,4 +1,4 @@
-using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
+using Flux, HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
 
 include("../utils/Utils.jl")
 include("../utils/fieldMapEstimator.jl")
@@ -83,8 +83,6 @@ slices = 1:length(indexArray)
 
 @info "Calculating B0 Maps"
 b0Maps = calculateB0Maps(cartesianReco.data,slices)
-b0Maps2 = estimateB0Maps(cartesianReco.data,slices)
-
-r2 = pcg_ml_est_fieldmap(cartesianReco.data[:,:,7,1,1],cartesianReco.data[:,:,7,2,1])
+b0Maps2 = estimateB0Maps(cartesianReco.data,slices,4.92,7.38,0.00001,false)
 
 @info "Successfully Completed CartesianReconstruction"

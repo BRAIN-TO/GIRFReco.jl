@@ -1,6 +1,7 @@
 using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
 
 include("../utils/Utils.jl")
+include("../utils/fieldMapEstimator.jl")
 
 ## function to calculate the B0 maps from the two images with different echo times
 # TODO have the b0 map calculation be capable of handling variable echo times
@@ -90,5 +91,6 @@ slices = 1:length(indexArray)
 
 @info "Calculating B0 Maps"
 b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
+b0Maps2 = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,0.00001,true)
 
 @info "Successfully Completed CartesianReconstruction"
