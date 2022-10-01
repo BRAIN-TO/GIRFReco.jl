@@ -28,12 +28,5 @@ SparsityOperators = "a5ff1dd3-4e0a-50db-9022-6d011c1d5846"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Waveforms = "cb13b1c6-351e-5134-b3ad-d6a530956a82"
 
-[compat]
-LinearOperators = "=2.2.3"
-MRIBase = "=0.1.2"
-NFFT = "=0.12.3"
-NFFTTools = "=0.2.3"
-RegularizedLeastSquares = "=0.8.4"
-
 [extras]
 CPUSummary = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
