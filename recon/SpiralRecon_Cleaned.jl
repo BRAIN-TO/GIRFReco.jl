@@ -14,15 +14,15 @@ include("../recon/CartesianRecon.jl")
 ## Set figures to be unlocked from the window (i.e use matplotlib backend with controls)
 
 ## Choose Slice (can be [single number] OR [1,2,3,4,5,6,7,8,9]
-sliceChoice = [1,2,3,4,5,6,7,8,9] # UNCOMMENT FOR MULTISLICE
-# sliceChoice = [3] # UNCOMMENT FOR SINGLESLICE (SLICES 3, 7 and 8 are good examples)
+# sliceChoice = [1,2,3,4,5,6,7,8,9] # UNCOMMENT FOR MULTISLICE
+sliceChoice = [8] # UNCOMMENT FOR SINGLESLICE (SLICES 3, 7 and 8 are good examples)
 diffusionDirection = 0 # CAN BE FROM 0 (b=0) to 7 (1-7 are 6 directions of b=1000)
 
 ## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction Pipeline"
 
 ## Default to single slice selection. Choose multi-slice only if computer is capable.
-multiSlice = true
+multiSlice = false
 
 if length(sliceChoice) > 1
     multiSlice = true
@@ -119,7 +119,7 @@ params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 @info "Performing Reconstruction \n"
 @time reco = reconstruction(acqDataImaging,params)
 
-# pygui(true)
+pygui(true)
 
 #totalRecon = sum(abs2,reco.data,dims=5)
 @info "Plotting Reconstruction \n"
