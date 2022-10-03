@@ -18,6 +18,8 @@ include("../recon/CartesianRecon.jl")
 sliceChoice = [7] # UNCOMMENT FOR SINGLESLICE (SLICES 3, 7 and 8 are good examples)
 diffusionDirection = 0 # CAN BE FROM 0 (b=0) to 6 (1-6 are 6 directions of b=1000)
 
+reconSize = (200,200)
+
 ## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction Pipeline"
 
@@ -42,15 +44,15 @@ sliceSelection = excitationList[selectedSlice]
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] = (200,200)
+adjustmentDict[:reconSize] = reconSize
 adjustmentDict[:interleave] = 1
 adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 20
 adjustmentDict[:numSamples] = 15475
 adjustmentDict[:delay] = 0.00000 # naive delay correction
 
-adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_96_2.h5","data/Spirals/523_98_2.h5", "data/Spirals/523_100_2.h5", "data/Spirals/523_102_2.h5"]
-adjustmentDict[:trajFilename] = "data/Gradients/gradients523.txt"
+adjustmentDict[:interleaveDataFileNames] = ["../DataNov2020/Spirals/523_96_2.h5","../DataNov2020/Spirals/523_98_2.h5", "../DataNov2020/Spirals/523_100_2.h5", "../DataNov2020/Spirals/523_102_2.h5"]
+adjustmentDict[:trajFilename] = "../DataNov2020/Gradients/gradients523.txt"
 adjustmentDict[:excitations] = sliceSelection
 
 adjustmentDict[:doMultiInterleave] = true
@@ -119,20 +121,9 @@ params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 @info "Performing Reconstruction \n"
 @time reco = reconstruction(acqDataImaging,params)
 
-pygui(true)
-
 #totalRecon = sum(abs2,reco.data,dims=5)
 @info "Plotting Reconstruction \n"
+pygui(true)
 plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:,:,selectedSlice])
-
-## Plot the image edges (feature comparison)
-
-# img_edges₁ = detect_edges(slice1,Canny(spatial_scale = 2.6))
-# img_edges₂ = detect_edges(slice2,Canny(spatial_scale = 2.7))
-
-# imEdges = cat(img_edges₁,img_edges₂,zeros(size(img_edges₁)),dims=3)
-
-# figure("Edge Differences")
-# PyPlot.imshow(imEdges)
 
 @info "Successfully Completed SpiralRecon \n"

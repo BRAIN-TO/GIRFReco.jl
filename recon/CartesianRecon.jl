@@ -16,20 +16,18 @@ end
 makeMaps = true
 saveMaps = true
 
-reconSize = (64,64)
-
 @info "Loading Data Files"
 
 if makeMaps
 
     # Set the data file name (Change this for your own system)
-    dataFileCartesian = ISMRMRDFile("data/Fieldmaps/fieldMap_105_gre_2.h5")
+    dataFileCartesian = ISMRMRDFile("../DataNov2020/Fieldmaps/fieldMap_105_gre_2.h5")
 
     # read in the raw data from the ISMRMRD file into a RawAcquisitionData object
     r = RawAcquisitionData(dataFileCartesian)
 
     # Set filename for preprocessed data 
-    fname = "data/testFile.h5"
+    fname = "../DataNov2020/testFile.h5"
 
     # Preprocess Data and save!
     preprocessCartesianData(r::RawAcquisitionData, saveMaps; fname)
@@ -39,7 +37,7 @@ end
 # removeOversampling!(r)
 
 # Load preprocessed data!
-dataFileNew = ISMRMRDFile("data/testFile.h5")
+dataFileNew = ISMRMRDFile("../DataNov2020/testFile.h5")
 rawDataNew = RawAcquisitionData(dataFileNew)
 acqDataCartesian= AcquisitionData(rawDataNew, estimateProfileCenter=true)
 
@@ -84,5 +82,10 @@ slices = 1:length(indexArray)
 @info "Calculating B0 Maps"
 b0Maps = calculateB0Maps(cartesianReco.data,slices)
 b0Maps2 = estimateB0Maps(cartesianReco.data,slices,4.92,7.38,0.00001,false)
+
+@info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps) \n"
+pygui(true) # Leave this code till we need plotting.
+# plotSenseMaps(sensitivity,nCoils)
+plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps2, isSliceInterleaved = true, rotateAngle = 270)
 
 @info "Successfully Completed CartesianReconstruction"
