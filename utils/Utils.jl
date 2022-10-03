@@ -67,7 +67,8 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
 
     clf()
 
-    phaseData = mapslices(x -> ROMEO.unwrap(x), angle.(images[:, :, reorderSliceIndex, 1, 1]), dims = [1,2])
+    # phaseData = mapslices(x -> ROMEO.unwrap(x), angle.(images[:, :, reorderSliceIndex, 1, 1]), dims = [1,2])
+    phaseData = angle.(images[:, :, reorderSliceIndex, 1, 1])
     if rotateAngle == 90
         phaseData = mapslices(x -> rotr90(x), phaseData, dims = [1,2])
     elseif rotateAngle == 180
@@ -77,7 +78,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     phaseMosaic = mosaicview(phaseData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    imshow(phaseMosaic, cmap = "inferno", vmax = 3 * pi, vmin = -3 * pi)
+    imshow(phaseMosaic, cmap = "inferno", vmax = pi, vmin = -pi)
     colorbar()
 
     gcf().suptitle("∠Images")
@@ -146,7 +147,7 @@ function plotSenseMaps(sense,n_channels; sliceIndex = 1)
     gcf()
 
     # Phase maps
-    figure(@sprintf("Sensitivity Map Phase of Slice %d / %d", sliceIndex, sliceNum)); clf(); for ch in 1:n_channels; subplot(8,4,ch); imshow(ROMEO.unwrap(angle.(sense[:,:,1,ch])), cmap = "gray"); end;
+    figure(@sprintf("Sensitivity Map Phase of Slice %d / %d", sliceIndex, sliceNum)); clf(); for ch in 1:n_channels; subplot(8,4,ch); imshow(angle.(sense[:,:,1,ch]), cmap = "gray"); end;
     subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
     gcf()
 
