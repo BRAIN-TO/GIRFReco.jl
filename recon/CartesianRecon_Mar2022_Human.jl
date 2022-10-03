@@ -21,12 +21,10 @@ saveMaps = true
 TE1 = 4.92
 TE2 = 7.38 
 
-reconSize = (112,112)
-
 @info "Loading Data Files"
 
-b0FileName = "data/Fieldmaps/field_map_132_2.h5"
-processedFileName = "data/Fieldmaps/processedCartesianData.h5" # filename for preprocessed data 
+b0FileName = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\field_map_132_2.h5"
+processedFileName = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\processedCartesianData.h5" # filename for preprocessed data 
 
 if makeMaps
 
@@ -59,8 +57,6 @@ nSlices = numSlices(acqDataCartesian)
 senseCartesian = espirit(acqDataCartesian,(6,6),24,eigThresh_1=0.02, eigThresh_2=0.95)
 sensitivity = senseCartesian
 
-plotSenseMaps(sensitivity,nCoils)
-
 ## Parameter dictionary definition for reconstruction
 
 @info "Setting Parameters"
@@ -92,5 +88,10 @@ slices = 1:length(indexArray)
 @info "Calculating B0 Maps"
 b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
 b0Maps2 = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,0.00001,true)
+
+@info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps) \n"
+pygui(true) # Leave this code till we need plotting.
+# plotSenseMaps(sensitivity,nCoils)
+plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps2, isSliceInterleaved = true, rotateAngle = 270)
 
 @info "Successfully Completed CartesianReconstruction"

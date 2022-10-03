@@ -20,12 +20,10 @@ saveMaps = true
 TE1 = 4.92
 TE2 = 7.38 
 
-reconSize = (64,64)
-
 @info "Loading Data Files"
 
-b0FileName = "data/Fieldmaps/field_map_83_2.h5"
-processedFileName = "data/Fieldmaps/processedCartesianData.h5" # filename for preprocessed data 
+b0FileName = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Phantom\\dat\\field_map_83_2.h5"
+processedFileName = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Phantom\\dat\\processedCartesianData.h5" # filename for preprocessed data 
 
 if makeMaps
 
@@ -69,7 +67,7 @@ paramsCartesian[:reconSize] = (acqDataCartesian.encodingSize[1],acqDataCartesian
 paramsCartesian[:regularization] = "L2" # choose regularization for the recon algorithm
 paramsCartesian[:λ] = 1.e-2 # recon parameter (there may be more of these, need to dig into code to identify them for solvers other than cgnr)
 paramsCartesian[:iterations] = 20 # number of CG iterations
-paramsCartesian[:solver] = "admm" # inverse problem solver method
+paramsCartesian[:solver] = "cgnr" # inverse problem solver method
 paramsCartesian[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false) # turn on store solutions if you want to see the reconstruction convergence (uses more memory)
 paramsCartesian[:senseMaps] = ComplexF32.(sensitivity) # set sensitivity map array
 # paramsCartesian[:correctionMap] = ComplexF32.(-1im.*b0Maps)
@@ -90,5 +88,11 @@ slices = 1:length(indexArray)
 
 @info "Calculating B0 Maps"
 b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
+b0Maps2 = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,0.00001,true)
+
+@info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps) \n"
+pygui(true) # Leave this code till we need plotting.
+# plotSenseMaps(sensitivity,nCoils)
+plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps2, isSliceInterleaved = true, rotateAngle = 270)
 
 @info "Successfully Completed CartesianReconstruction"
