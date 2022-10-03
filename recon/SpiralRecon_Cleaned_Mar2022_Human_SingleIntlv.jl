@@ -1,4 +1,4 @@
-using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
+using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
 
 # %%
 # Include tools and reader functions for running the spiral reconstruction recipe
@@ -18,28 +18,28 @@ reloadGIRFData = false
 sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
 # sliceChoice = [6] # For single-slice
 
-## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
-diffusionDirection = 1
-
 ## Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
-reconSize = (112, 112)
+reconSize = (112,112) #(200, 200) for gradient 508
+
+## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
+diffusionDirection = 0
 
 ## Determine to reconstruct single-interleave data, or one interleave out of multi-interleave data.
-isDataSingleIntlv = false
+isDataSingleIntlv = true
 
 # Which interleave to be reconstructed. For single-interleave data, it will always be set as 1; for multi-interleave data, the value set here will be used.
 # For multi-interleaved data, this value is ranging from [1:TotNumIntlv] (total number of interleaves), indicating which interleave to be reconstructed
-startIndexIntlv = 3 
+startIndexIntlv = 3
 
 # For single interleave data, use this section
 if isDataSingleIntlv
     startIndexIntlv = 1 # Should always be 1 for single-interleave data.
-    # fname_spiralIntlv = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\511_134_2.h5" # Gradient 511, b = 300, 10 diff directions
-    # fname_spiralIntlv = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\511_136_2.h5" # Gradient 511, b = 700, 30 diff directions
-    # fname_spiralIntlv = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\511_138_2.h5" # Gradient 511, b = 2500, 64 diff directions
-    fname_spiralIntlv = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\508_140_2.h5" # Gradient 508, interleave 0, b = 300, 10 diff directions
-    # fname_spiralIntlv = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\508_142_2.h5" # Gradient 508, interleave 0, b = 700, 30 diff directions
-    # fname_spiralIntlv = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\508_144_2.h5" # Gradient 508, interleave 0, b = 2500, 64 diff directions
+    # fname_spiralIntlv = "data/Spirals/511_134_2.h5" # Gradient 511, b = 300, 10 diff directions
+    # fname_spiralIntlv = "data/Spirals/511_136_2.h5" # Gradient 511, b = 700, 30 diff directions
+    fname_spiralIntlv = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\511_138_2.h5" # Gradient 511, b = 2500, 64 diff directions
+    # fname_spiralIntlv = "data/Spirals/508_140_2.h5" # Gradient 508, interleave 0, b = 300, 10 diff directions
+    # fname_spiralIntlv = "data/Spirals/508_142_2.h5" # Gradient 508, interleave 0, b = 700, 30 diff directions
+    # fname_spiralIntlv = "data/Spirals/508_144_2.h5" # Gradient 508, interleave 0, b = 2500, 64 diff directions
 else
     # Multi-interleave data, needs all 4 file names, but will only read the corresponding one.
     fname_spiralIntlv0 = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\508_124_2.h5" # Gradient 508, interleave 0, b = 2000, 6 diff directions, 4 averages
@@ -49,11 +49,12 @@ else
 end
 
 ## Total number of ADC points BEFORE the rewinder at the end of the spiral readout. For gradient 508, use 15655 (out of 16084); for gradient 511, use 15445 (out of 15624).
-numADCSamples = 15655
+# numADCSamples = 15655
+numADCSamples = 15445
 
 ## File name for the spiral gradient
-fname_gradient = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\508\\gradients.txt" # Contains all 4 interleaves.
-# fname_gradient = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\511\\gradients.txt"
+# fname_gradient = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\508\\gradients.txt" # Contains all 4 interleaves.
+fname_gradient = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\511\\gradients.txt"
 
 fname_girfGx = "D:\\SpiralDiffusion\\DataNov2020\\GIRF\\GIRF_ISMRM2022\\2021Nov_PosNeg_Gx.mat"
 fname_girfGy = "D:\\SpiralDiffusion\\DataNov2020\\GIRF\\GIRF_ISMRM2022\\2021Nov_PosNeg_Gy.mat"
@@ -74,7 +75,6 @@ end
 totalSliceNum = size(sensitivity, 3)
 
 ## Set figures to be unlocked from the win9ow (i.e use matplotlib backend with controls)
-pygui(true)
 
 ## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction Pipeline"
@@ -93,7 +93,7 @@ else
 end
 
 ## The ISMRMRD File contains more than one excitation, so we choose the set corresponding to the b-value 0 images
-excitationList = vec(totalSliceNum*2 + 2 : 2 : totalSliceNum*4) .+ diffusionDirection * totalSliceNum * 2 # DATASET SPECIFIC INDEXING: 15 slices, starting from profile 32
+excitationList = collect(totalSliceNum*2 + 2 : 2 : totalSliceNum*4) .+ diffusionDirection * totalSliceNum * 2 # DATASET SPECIFIC INDEXING: 15 slices, starting from profile 32
 sliceSelection = excitationList[selectedSlice]
 
 @info "Slice Chosen = $selectedSlice: \n \nExcitations Chosen = $excitationList "
@@ -166,7 +166,7 @@ plotSenseMaps(sensitivity,size(sensitivity, 4),sliceIndex = 10)
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Resizing B0 Maps \n"
-resizedB0 = mapslices(x->imresize(x,(acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0Maps, dims=[1,2])
+resizedB0 = mapslices(x->imresize(x,(acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0Maps2, dims=[1,2])
 
 ## Define Parameter Dictionary for use with reconstruction
 # CAST TO ComplexF32 if you're using current MRIReco.jl
@@ -189,6 +189,7 @@ params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 
 #totalRecon = sum(abs2,reco.data,dims=5)
 @info "Plotting Reconstruction \n"
+pygui(true)
 plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:,:,selectedSlice], figHandles = ["Original Magnitude", "Original Phase", "B0"], isSliceInterleaved = true, rotateAngle = 270)
 
 @info "Successfully Completed SpiralRecon \n"

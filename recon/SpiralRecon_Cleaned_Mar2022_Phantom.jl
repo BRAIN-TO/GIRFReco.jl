@@ -1,4 +1,4 @@
-using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
+using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
 
 # %%
 # Include tools and reader functions for running the spiral reconstruction recipe
@@ -21,19 +21,18 @@ if reloadCartesianData || !((@isdefined senseCartesian) && (@isdefined b0Maps))
     include("CartesianRecon_Mar2022_Phantom.jl")
 end
 
-## Set figures to be unlocked from the win9ow (i.e use matplotlib backend with controls)
-pygui(true)
-
 ## Choose Slice (can be [single number] OR [1,2,3,4,5,6,7,8,9]
 sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # UNCOMMENT FOR MULTISLICE
 # sliceChoice = [6] # UNCOMMENT FOR SINGLESLICE (SLICES 3, 7 and 8 are good examples)
 diffusionDirection = 0 # CAN BE FROM 0 (b=0) to 6 (e.g. for 6 direction MDDW, 1-6 are 6 directions)
 
+reconSize = (112,112) #(200,200)
+
 ## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction Pipeline"
 
 ## Default to single slice selection. Choose multi-slice only if computer is capable.
-multiSlice = false
+multiSlice = true
 
 if length(sliceChoice) > 1
     multiSlice = true
@@ -52,18 +51,18 @@ sliceSelection = excitationList[selectedSlice]
 
 @info "Slice Chosen = $selectedSlice: \n \nExcitations Chosen = $excitationList "
 
-fname_spiralIntlv1 = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Phantom\\dat\\508_72_2.h5"
-fname_spiralIntlv2 = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Phantom\\dat\\508_74_2.h5"
-fname_spiralIntlv3 = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Phantom\\dat\\508_76_2.h5"
-fname_spiralIntlv4 = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Phantom\\dat\\508_78_2.h5"
-fname_gradient = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\508\\gradients.txt"
-fname_girfGx = "D:\\SpiralDiffusion\\DataNov2020\\GIRF\\GIRF_ISMRM2022\\2021Nov_PosNeg_Gx.mat"
-fname_girfGy = "D:\\SpiralDiffusion\\DataNov2020\\GIRF\\GIRF_ISMRM2022\\2021Nov_PosNeg_Gy.mat"
-fname_girfGz = "D:\\SpiralDiffusion\\DataNov2020\\GIRF\\GIRF_ISMRM2022\\2021Nov_PosNeg_Gz.mat"
+fname_spiralIntlv1 = "data/Spirals/508_72_2.h5"
+fname_spiralIntlv2 = "data/Spirals/508_74_2.h5"
+fname_spiralIntlv3 = "data/Spirals/508_76_2.h5"
+fname_spiralIntlv4 = "data/Spirals/508_78_2.h5"
+fname_gradient = "data/Gradients/gradients508.txt"
+fname_girfGx = "data/GIRF/GIRF_ISMRM2022/2021Nov_PosNeg_Gx.mat"
+fname_girfGy = "data/GIRF/GIRF_ISMRM2022/2021Nov_PosNeg_Gy.mat"
+fname_girfGz = "data/GIRF/GIRF_ISMRM2022/2021Nov_PosNeg_Gz.mat"
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] = (112,112) #(200,200)
+adjustmentDict[:reconSize] =  reconSize
 adjustmentDict[:interleave] = 1
 adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 20
@@ -128,7 +127,7 @@ plotSenseMaps(sensitivity,adjustmentDict[:coils])
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Resizing B0 Maps \n"
-resizedB0 = mapslices(x->imresize(x,(acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0Maps, dims=[1,2])
+resizedB0 = mapslices(x->imresize(x,(acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0Maps2, dims=[1,2])
 
 ## Define Parameter Dictionary for use with reconstruction
 # CAST TO ComplexF32 if you're using current MRIReco.jl
@@ -149,18 +148,9 @@ params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 @info "Performing Reconstruction \n"
 @time reco = reconstruction(acqDataImaging,params)
 
-#totalRecon = sum(abs2,reco.data,dims=5)
 @info "Plotting Reconstruction \n"
+## Set figures to be unlocked from the win9ow (i.e use matplotlib backend with controls)
+pygui(true)
 plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:,:,selectedSlice])
-
-## Plot the image edges (feature comparison)
-
-# img_edges₁ = detect_edges(slice1,Canny(spatial_scale = 2.6))
-# img_edges₂ = detect_edges(slice2,Canny(spatial_scale = 2.7))
-
-# imEdges = cat(img_edges₁,img_edges₂,zeros(size(img_edges₁)),dims=3)
-
-# figure("Edge Differences")
-# PyPlot.imshow(imEdges)
 
 @info "Successfully Completed SpiralRecon \n"

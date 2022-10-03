@@ -53,7 +53,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     absMosaic = mosaicview(absData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    PyPlot.imshow(absMosaic, cmap = "gray")
+    imshow(absMosaic, cmap = "gray")
     colorbar()
 
     gcf().suptitle("|Images|")
@@ -67,7 +67,8 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
 
     clf()
 
-    phaseData = mapslices(x -> ROMEO.unwrap(x), angle.(images[:, :, reorderSliceIndex, 1, 1]), dims = [1,2])
+    # phaseData = mapslices(x -> ROMEO.unwrap(x), angle.(images[:, :, reorderSliceIndex, 1, 1]), dims = [1,2])
+    phaseData = angle.(images[:, :, reorderSliceIndex, 1, 1])
     if rotateAngle == 90
         phaseData = mapslices(x -> rotr90(x), phaseData, dims = [1,2])
     elseif rotateAngle == 180
@@ -77,7 +78,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     phaseMosaic = mosaicview(phaseData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    PyPlot.imshow(phaseMosaic, cmap = "inferno", vmax = 3 * pi, vmin = -3 * pi)
+    imshow(phaseMosaic, cmap = "inferno", vmax = pi, vmin = -pi)
     colorbar()
 
     gcf().suptitle("∠Images")
@@ -101,7 +102,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     b0Mosaic = mosaicview(b0Data[:, :, reorderSliceIndex], nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    PyPlot.imshow(b0Mosaic, cmap = "inferno", vmax = 500, vmin = -500)
+    imshow(b0Mosaic, cmap = "inferno", vmax = 500, vmin = -500)
     colorbar()
 
     gcf().suptitle("B₀ Maps [rad/s]")
@@ -141,12 +142,12 @@ function plotSenseMaps(sense,n_channels; sliceIndex = 1)
     end
 
     # Magnitude maps
-    figure(@sprintf("Sensitivity Map Magnitude of Slice %d / %d", sliceIndex, sliceNum)); clf(); for ch in 1:n_channels; subplot(8,4,ch); PyPlot.imshow((abs.(sense[:,:,1,ch])), cmap = "gray"); end;
+    figure(@sprintf("Sensitivity Map Magnitude of Slice %d / %d", sliceIndex, sliceNum)); clf(); for ch in 1:n_channels; subplot(8,4,ch); imshow((abs.(sense[:,:,1,ch])), cmap = "gray"); end;
     subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
     gcf()
 
     # Phase maps
-    figure(@sprintf("Sensitivity Map Phase of Slice %d / %d", sliceIndex, sliceNum)); clf(); for ch in 1:n_channels; subplot(8,4,ch); PyPlot.imshow(ROMEO.unwrap(angle.(sense[:,:,1,ch])), cmap = "gray"); end;
+    figure(@sprintf("Sensitivity Map Phase of Slice %d / %d", sliceIndex, sliceNum)); clf(); for ch in 1:n_channels; subplot(8,4,ch); imshow(angle.(sense[:,:,1,ch]), cmap = "gray"); end;
     subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
     gcf()
 
