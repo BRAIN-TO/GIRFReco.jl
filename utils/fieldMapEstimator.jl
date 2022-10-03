@@ -19,9 +19,9 @@ function pcg_ml_est_fieldmap(y,z,β)
     x = angle.(κ)
     m = abs.(κ)
 
-    trust_step = 0.005 ./ (m .+ 4*β)
+    trust_step = 0.001 ./ (m .+ 4*β)
 
-    while d < 100
+    while d < 1000
 
         gs = gradient(Flux.params(x)) do
             ml_cost(x, y,z,β) # need to interpolate the y z and β to have better performance 

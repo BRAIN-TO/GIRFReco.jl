@@ -56,7 +56,7 @@ nSlices = numSlices(acqDataCartesian)
 #  difference in Diffusion scans
 
 @info "Calculating Sense Maps"
-senseCartesian = espirit(acqDataCartesian,(4,4),10,eigThresh_1=0.01, eigThresh_2=0.98)
+senseCartesian = espirit(acqDataCartesian,(6,6),24,eigThresh_1=0.02, eigThresh_2=0.95)
 sensitivity = senseCartesian
 
 plotSenseMaps(sensitivity,nCoils)
@@ -70,7 +70,7 @@ paramsCartesian[:reconSize] = (acqDataCartesian.encodingSize[1],acqDataCartesian
 paramsCartesian[:regularization] = "L2" # choose regularization for the recon algorithm
 paramsCartesian[:λ] = 1.e-2 # recon parameter (there may be more of these, need to dig into code to identify them for solvers other than cgnr)
 paramsCartesian[:iterations] = 20 # number of CG iterations
-paramsCartesian[:solver] = "admm" # inverse problem solver method
+paramsCartesian[:solver] = "cgnr" # inverse problem solver method
 paramsCartesian[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false) # turn on store solutions if you want to see the reconstruction convergence (uses more memory)
 paramsCartesian[:senseMaps] = ComplexF32.(sensitivity) # set sensitivity map array
 # paramsCartesian[:correctionMap] = ComplexF32.(-1im.*b0Maps)

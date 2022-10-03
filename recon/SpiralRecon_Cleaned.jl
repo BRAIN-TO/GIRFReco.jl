@@ -15,8 +15,8 @@ include("../recon/CartesianRecon.jl")
 
 ## Choose Slice (can be [single number] OR [1,2,3,4,5,6,7,8,9]
 # sliceChoice = [1,2,3,4,5,6,7,8,9] # UNCOMMENT FOR MULTISLICE
-sliceChoice = [8] # UNCOMMENT FOR SINGLESLICE (SLICES 3, 7 and 8 are good examples)
-diffusionDirection = 0 # CAN BE FROM 0 (b=0) to 7 (1-7 are 6 directions of b=1000)
+sliceChoice = [7] # UNCOMMENT FOR SINGLESLICE (SLICES 3, 7 and 8 are good examples)
+diffusionDirection = 0 # CAN BE FROM 0 (b=0) to 6 (1-6 are 6 directions of b=1000)
 
 ## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction Pipeline"

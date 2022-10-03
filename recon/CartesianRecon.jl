@@ -51,7 +51,7 @@ nSlices = numSlices(acqDataCartesian)
 #  difference in Diffusion scans
 
 @info "Calculating Sense Maps"
-senseCartesian = espirit(acqDataCartesian,(4,4),10,eigThresh_1=0.01, eigThresh_2=0.98)
+senseCartesian = espirit(acqDataCartesian,(6,6),24,eigThresh_1=0.02, eigThresh_2=0.95)
 sensitivity = senseCartesian
 
 ## Parameter dictionary definition for reconstruction
