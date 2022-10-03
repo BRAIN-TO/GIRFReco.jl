@@ -149,6 +149,7 @@ params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 @info "Performing Reconstruction \n"
 @time reco = reconstruction(acqDataImaging,params)
 
+
 #totalRecon = sum(abs2,reco.data,dims=5)
 @info "Plotting Reconstruction \n"
 plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:,:,selectedSlice], isSliceInterleaved = true, rotateAngle = 270)

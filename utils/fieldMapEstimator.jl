@@ -19,7 +19,7 @@ function pcg_ml_est_fieldmap(y,z,β)
     x = angle.(κ)
     m = abs.(κ)
 
-    trust_step = 0.001 ./ (m .+ 4*β)
+    trust_step = 0.01 ./ (m .+ 4*β)
 
     while d < 1000
 
