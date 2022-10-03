@@ -17,26 +17,31 @@ function pcg_ml_est_fieldmap(y,z,β)
     d = 1
     κ = conj.(y) .* z
     x = angle.(κ)
-    m = abs.(κ)
+    m = abs.(κ) ./ maximum(abs.(κ))
 
-    trust_step = 0.01 ./ (m .+ 4*β)
+    reltol = 5e-3
+    c = 0
+    Δ = 1
+    itcount = 0
 
-    while d < 1000
+    trust_step = 1.0 ./ (m .+ 4*β)
+
+    while Δ > reltol
 
         gs = gradient(Flux.params(x)) do
-            ml_cost(x, y,z,β) # need to interpolate the y z and β to have better performance 
+            c = ml_cost(x, y,z,β) # need to interpolate the y z and β to have better performance 
         end
 
         x̄ = gs[x]
         x .-= trust_step .* x̄ 
 
-        if mod(d,10) == 0
-            println(ml_cost(x, y, z, β))
-        end
+        Δ = abs.(ml_cost(x,y,z,β) - c)/c
 
-        d += 1 # TODO add early stopping criteria
+        itcount +=1
 
     end
+
+    println("Required $itcount iterations to converge below tolerance")
 
     return x
 
