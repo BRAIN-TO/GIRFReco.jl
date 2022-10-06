@@ -64,7 +64,7 @@ function pcg_ml_est_fieldmap(y::AbstractMatrix{Complex{T}},z::AbstractMatrix{Com
 
     end
 
-    println("Required $itcount iterations to converge below tolerance")
+    print("Required $itcount iterations to converge below tolerance $reltol ")
 
     return x
 
@@ -87,6 +87,7 @@ function estimateB0Maps(imData,slices, TE1,TE2,β,isrotated)
     b0Maps = Complex.(zeros(size(imData)[1:3]))
     for slice in slices
         b0Maps[:,:,slice] = pcg_ml_est_fieldmap(imData[:,:,slice,1,1],imData[:,:,slice,2,1],β) ./ ((TE2 - TE1)/1000)
+        println("for slice $slice")
     end
 
     b0Maps = mapslices(isrotated ? x->x : x-> rotl90(x),b0Maps,dims=(1,2)) 
