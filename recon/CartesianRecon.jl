@@ -1,4 +1,4 @@
-using Flux, HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
+using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
 
 include("../utils/Utils.jl")
 include("../utils/fieldMapEstimator.jl")
@@ -16,18 +16,20 @@ end
 makeMaps = true
 saveMaps = true
 
+reconSize = (64,64)
+
 @info "Loading Data Files"
 
 if makeMaps
 
     # Set the data file name (Change this for your own system)
-    dataFileCartesian = ISMRMRDFile("../DataNov2020/Fieldmaps/fieldMap_105_gre_2.h5")
+    dataFileCartesian = ISMRMRDFile("data/Fieldmaps/fieldMap_105_gre_2.h5")
 
     # read in the raw data from the ISMRMRD file into a RawAcquisitionData object
     r = RawAcquisitionData(dataFileCartesian)
 
     # Set filename for preprocessed data 
-    fname = "../DataNov2020/testFile.h5"
+    fname = "data/testFile.h5"
 
     # Preprocess Data and save!
     preprocessCartesianData(r::RawAcquisitionData, saveMaps; fname)
@@ -37,9 +39,11 @@ end
 # removeOversampling!(r)
 
 # Load preprocessed data!
-dataFileNew = ISMRMRDFile("../DataNov2020/testFile.h5")
+dataFileNew = ISMRMRDFile("data/testFile.h5")
 rawDataNew = RawAcquisitionData(dataFileNew)
-acqDataCartesian= AcquisitionData(rawDataNew, estimateProfileCenter=true)
+acqDataCartesian = AcquisitionData(rawDataNew, estimateProfileCenter=true)
+
+# acqDataCartesian = changeEncodingSize2D(acqDataCartesian,[reconSize[1],reconSize[2],1])
 
 # Define coils and slices
 nCoils = size(acqDataCartesian.kdata[1],2)
@@ -49,7 +53,7 @@ nSlices = numSlices(acqDataCartesian)
 #  difference in Diffusion scans
 
 @info "Calculating Sense Maps"
-senseCartesian = espirit(acqDataCartesian,(6,6),24,eigThresh_1=0.02, eigThresh_2=0.95)
+senseCartesian = espirit(acqDataCartesian,(4,4),12,(64,64),eigThresh_1=0.01, eigThresh_2=0.98, match_acq_size = true)
 sensitivity = senseCartesian
 
 ## Parameter dictionary definition for reconstruction
@@ -57,7 +61,7 @@ sensitivity = senseCartesian
 @info "Setting Parameters"
 paramsCartesian = Dict{Symbol,Any}() # instantiate dictionary
 paramsCartesian[:reco] = "multiCoil" # choose multicoil reconstruction
-paramsCartesian[:reconSize] = (acqDataCartesian.encodingSize[1],acqDataCartesian.encodingSize[2]) # set recon size to be the same as encoded size
+paramsCartesian[:reconSize] = reconSize # set recon size to be the same as encoded size
 paramsCartesian[:regularization] = "L2" # choose regularization for the recon algorithm
 paramsCartesian[:λ] = 1.e-2 # recon parameter (there may be more of these, need to dig into code to identify them for solvers other than cgnr)
 paramsCartesian[:iterations] = 20 # number of CG iterations
@@ -79,13 +83,10 @@ cartesianReco = reconstruction(acqDataCartesian,paramsCartesian)
 
 slices = 1:length(indexArray)
 
+mapData = cartesianReco.data
+
 @info "Calculating B0 Maps"
 b0Maps = calculateB0Maps(cartesianReco.data,slices)
-b0Maps2 = estimateB0Maps(cartesianReco.data,slices,4.92,7.38,0.00001,false)
-
-@info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps) \n"
-pygui(true) # Leave this code till we need plotting.
-# plotSenseMaps(sensitivity,nCoils)
-plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps2, isSliceInterleaved = true, rotateAngle = 270)
+b0Maps2 = estimateB0Maps(cartesianReco.data,slices,4.92,7.38,false; β = 0.00001, reltol = 1e-3)
 
 @info "Successfully Completed CartesianReconstruction"

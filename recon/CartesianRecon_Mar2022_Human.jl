@@ -2,6 +2,7 @@ using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
 
 include("../utils/Utils.jl")
 include("../utils/fieldMapEstimator.jl")
+include("../utils/shiftksp.jl")
 
 ## function to calculate the B0 maps from the two images with different echo times
 # TODO have the b0 map calculation be capable of handling variable echo times
@@ -13,7 +14,6 @@ function calculateB0Maps(imData,slices,echoTime1,echoTime2)
 end
 
 ## Load data files
-
 makeMaps = true
 saveMaps = true
 
@@ -21,10 +21,12 @@ saveMaps = true
 TE1 = 4.92
 TE2 = 7.38 
 
+reconSize = (200,200)
+
 @info "Loading Data Files"
 
-b0FileName = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\field_map_132_2.h5"
-processedFileName = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\processedCartesianData.h5" # filename for preprocessed data 
+b0FileName = "data/Fieldmaps/field_map_132_2.h5"
+processedFileName = "data/Fieldmaps/processedCartesianData.h5" # filename for preprocessed data 
 
 if makeMaps
 
@@ -50,13 +52,21 @@ acqDataCartesian= AcquisitionData(rawDataNew, estimateProfileCenter=true)
 nCoils = size(acqDataCartesian.kdata[1],2)
 nSlices = numSlices(acqDataCartesian)
 
+# shift FOV to middle :) 
+shiftksp!(acqDataCartesian,[0,-20])
+#changeFOV!(acqDataCartesian,[1.5,1.5])
+
 ## Don't have to recalculate sense maps for both scans but possibly it could make a
 #  difference in Diffusion scans
 
 @info "Calculating Sense Maps"
-senseCartesian = espirit(acqDataCartesian,(6,6),24,eigThresh_1=0.02, eigThresh_2=0.95)
+senseCartesian = espirit(acqDataCartesian,(4,4),12,eigThresh_1=0.01, eigThresh_2=0.98)
 sensitivity = senseCartesian
 
+plotSenseMaps(sensitivity,nCoils)
+
+acqDataCartesian.traj[1].cartesian = false
+acqDataCartesian.traj[2].cartesian = false
 ## Parameter dictionary definition for reconstruction
 
 @info "Setting Parameters"
@@ -87,11 +97,4 @@ slices = 1:length(indexArray)
 
 @info "Calculating B0 Maps"
 b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
-b0Maps2 = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,0.00001,true)
-
-@info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps) \n"
-pygui(true) # Leave this code till we need plotting.
-# plotSenseMaps(sensitivity,nCoils)
-plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps2, isSliceInterleaved = true, rotateAngle = 270)
-
-@info "Successfully Completed CartesianReconstruction"
+@time b0Maps2 = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,true; β = 0.5, reltol = 1e-4)
