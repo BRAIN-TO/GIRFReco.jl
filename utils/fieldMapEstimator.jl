@@ -7,11 +7,12 @@ Calculates the ML estimator cost between an estimated phase map and the underlyi
 * `x::Matrix{T}` - fieldmap estimate (in radians)
 * `y::Matrix{Complex{T}}` - Complex first-echo image data
 * `z::Matrix{Complex{T}}` - Complex second-echo image data
+* `m::Matrix{T}` - normalized weighting data (m ∈ [0,1]:= abs.(conj.(y).*z)./maximum(abs.(conj.(y).*z))), precomputed for speed
 * `β` - Regularization parameter controlling roughness penalty
 """
-function ml_cost(x::Matrix{T},y::Matrix{Complex{T}},z::Matrix{Complex{T}}, β) where T
+function ml_cost(x::Matrix{T},y::Matrix{Complex{T}},z::Matrix{Complex{T}},m::Matrix{T}, β) where T
 
-    Ψ = (sum(abs.(conj.(y) .* z) .* (1 .- cos.(angle.(z) .- angle.(y) .- x)),dims=[1,2]) + β * R(x))[1]
+    Ψ = (sum(m.* (1 .- cos.(angle.(z) .- angle.(y) .- x)),dims=[1,2]) + β * R(x))[1]
 
 end
 
@@ -54,13 +55,13 @@ function pcg_ml_est_fieldmap(y::AbstractMatrix{Complex{T}},z::AbstractMatrix{Com
     while Δ > reltol
 
         gs = gradient(Flux.params(x)) do
-            c = ml_cost(x, y,z,β) # need to interpolate the y z and β to have better performance 
+            c = ml_cost(x, y,z,m,β) # need to interpolate the y z and β to have better performance 
         end
 
         x̄ = gs[x]
-        x .-= trust_step .* x̄ 
+        x .-= (trust_step) .* x̄ 
 
-        Δ = abs.(ml_cost(x,y,z,β) - c)/c
+        Δ = abs.(ml_cost(x,y,z,m,β) - c)/c
 
         itcount +=1
 
@@ -93,13 +94,11 @@ function estimateB0Maps(imData,slices, TE1,TE2,isrotated; β = 5e-4, reltol = 0.
 
     b0Maps = Complex.(zeros(size(imData)[1:3]))
 
-    for slice in slices
-<<<<<<< HEAD
-        b0Maps[:,:,slice] = pcg_ml_est_fieldmap(imData[:,:,slice,1,1],imData[:,:,slice,2,1],β,reltol) ./ ((TE2 - TE1)/1000)
-=======
-        b0Maps[:,:,slice] = pcg_ml_est_fieldmap(imData[:,:,slice,1,1],imData[:,:,slice,2,1],β) ./ ((TE2 - TE1)/1000)
-        println("for slice $slice")
->>>>>>> 4ecba2115c623d1a3b5cd209060f76a7ea42dcbe
+    @sync for slice in slices
+        Threads.@spawn begin
+            b0Maps[:,:,slice] = pcg_ml_est_fieldmap(imData[:,:,slice,1,1],imData[:,:,slice,2,1],β,reltol) ./ ((TE2 - TE1)/1000)
+            println("for slice $slice")
+        end
     end
 
     b0Maps = mapslices(isrotated ? x->x : x-> rotl90(x),b0Maps,dims=(1,2)) 
