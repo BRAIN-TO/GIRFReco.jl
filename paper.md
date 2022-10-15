@@ -25,6 +25,8 @@ The required steps for spiral diffusion reconstruction (shown in Figure 1) are t
 5.	Off-resonance (B0) map estimation 
 6.	Non-Cartesian parallel image reconstruction with off-resonance correction
 
+![Figure 1](paper/GIRFReco_Pipeline.png?raw=true "Template Reconstruction Pipeline")
+
 ## Conclusion
 
 We provide here an example reconstruction pipeline that is built on an established reconstruction package (MRIReco.jl) and extend its capability to provide an end-to-end template for spiral image reconstruction which is open-source from raw data to final image. 
