@@ -1,4 +1,4 @@
-using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
+using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients, NIfTI
 
 include("../utils/Utils.jl")
 include("../utils/fieldMapEstimator.jl")
@@ -12,6 +12,9 @@ function calculateB0Maps(imData,slices,echoTime1,echoTime2)
 
 end
 
+## Dictionary of frequently changed parameters
+include("ReconConfig.jl")
+
 ## Load data files
 
 makeMaps = true
@@ -23,8 +26,10 @@ TE2 = 7.38
 
 @info "Loading Data Files"
 
-b0FileName = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\field_map_132_2.h5"
-processedFileName = "D:\\OneDrive - UHN\\MRP-SPIDI\\SPIDI\\data\\SPIDI_0007\\Human\\dat\\processedCartesianData.h5" # filename for preprocessed data 
+b0FileName = paramsGeneral[:fullPathMultiEcho];
+
+# filename for preprocessed data (remove oversampling, permute dimensions wrt MRIReco)
+processedFileName = paramsGeneral[:fullPathProcessedCartesian] 
 
 if makeMaps
 
@@ -38,8 +43,6 @@ if makeMaps
     preprocessCartesianData(r::RawAcquisitionData, saveMaps; fname = processedFileName)
 
 end
-
-# removeOversampling!(r)
 
 # Load preprocessed data!
 dataFileNew = ISMRMRDFile(processedFileName)
@@ -57,6 +60,15 @@ nSlices = numSlices(acqDataCartesian)
 senseCartesian = espirit(acqDataCartesian,(6,6),24,eigThresh_1=0.02, eigThresh_2=0.95)
 sensitivity = senseCartesian
 
+
+# save SENSE maps
+
+if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
+    resolution_mm[1:2] = fieldOfView(acqDataCartesian)[1:2]./size(sensitivity)[1:2]
+    resolution_mm[3] = fieldOfView(acqDataCartesian)[3]; # for 2D only, since FOV[3] is slice thickness then
+    saveSenseMaps(paramsGeneral[:fullPathSaveSense], sensitivity, resolution_mm; doSplitPhase=true)
+end
+
 ## Parameter dictionary definition for reconstruction
 
 @info "Setting Parameters"
@@ -70,8 +82,9 @@ paramsCartesian[:solver] = "cgnr" # inverse problem solver method
 paramsCartesian[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false) # turn on store solutions if you want to see the reconstruction convergence (uses more memory)
 paramsCartesian[:senseMaps] = ComplexF32.(sensitivity) # set sensitivity map array
 # paramsCartesian[:correctionMap] = ComplexF32.(-1im.*b0Maps)
-## Defining array mapping from acquisition number to slice number (indexArray[slice = 1:9] = [acquisitionNumbers])
 
+# TODO@all: is indexArray deprecated?
+## Defining array mapping from acquisition number to slice number (indexArray[slice = 1:9] = [acquisitionNumbers])
 # indexArray = [5,1,6,2,7,3,8,4,9] # for 9 slice phantom
 indexArray = [8,1,9,2,10,3,11,4,12,5,13,6,14,7,15] # for 15 slice phantom
 #indexArray = 1 # for 1 slice phantom
@@ -89,7 +102,7 @@ slices = 1:length(indexArray)
 b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
 b0Maps2 = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,0.00001,true)
 
-@info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps) \n"
+@info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps)"
 pygui(true) # Leave this code till we need plotting.
 # plotSenseMaps(sensitivity,nCoils)
 plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps2, isSliceInterleaved = true, rotateAngle = 270)

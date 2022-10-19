@@ -1,4 +1,4 @@
-using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, Printf
+using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, Printf, NIfTI
 
 ## General Plotting function for the reconstruction
 
@@ -124,7 +124,41 @@ function checkProfiles(rawData)
 
 end
 
+"""
+saveSenseMaps(filename, sense, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
+Saves sensitivity maps as complex NIfTI file
+TODO: split into magnitude/phase file for most viewers
+# Arguments
+* `filename::String`    - string filename with extension .nii, example "sensemap.nii"
+* `sense`               - [nX nY nZ nChannels] 4-D sensitivity map array 
+* `resolution_mm`       - resolution in mm, 3 element vector, e.g., [1.0, 1.0, 2.0]
+* `offset_mm`           - isocenter offset in mm, default: [0.0, 0.0, 0.0]
+"""
+function saveSenseMaps(filename, sense, resolution_mm; offset_mm = [0.0, 0.0, 0.0], doSplitPhase::Bool=false)
+spacing = resolution_mm*Unitful.mm
+offset = offset_mm*Unitful.mm
 
+I = reshape(sense, size(sense,1), size(sense,2), size(sense,3), size(sense,4), 1, 1);
+
+im = AxisArray(I,
+Axis{:x}(range(offset[1], step=spacing[1], length=size(I, 1))),
+Axis{:y}(range(offset[2], step=spacing[2], length=size(I, 2))),
+Axis{:z}(range(offset[3], step=spacing[3], length=size(I, 3))),
+Axis{:coils}(1:size(I, 4)),
+Axis{:echos}(1:size(I, 5)),
+Axis{:repetitions}(1:size(I, 6)))
+
+if doSplitPhase
+    filename_magn = splitext(filename)[1] * "_magn.nii"
+    saveImage(filename_magn, map(abs,im)) # map is needed, because abs.(im) would convert AxisArray back into basic array
+
+    filename_phase = splitext(filename)[1] * "_phase.nii"
+    saveImage(filename_phase, map(angle,im))
+else
+    saveImage(filename, im)
+end
+
+end
 
 """
 plotSenseMaps!(sense, n_channels)
