@@ -10,6 +10,7 @@ paramsGeneral = Dict{Symbol,Any}()
 # laptop home, external drive
 # paramsGeneral[:pathData] = "e:\\SPIDI\\data\\SPIDI_0007\\Phantom\\rawdata"
 
+## Path handling, data/results locations etc.
 paramsGeneral[:pathProject] = "/home/kasperl/SPIDI"
 paramsGeneral[:pathData] = joinpath(paramsGeneral[:pathProject], "data", "SPIDI_0007", "Human", "dat")
 paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "SPIDI_0007", "Human")
@@ -21,7 +22,7 @@ paramsGeneral[:fileNameMultiEcho] = "field_map_132_2.h5"
 paramsGeneral[:fullPathMultiEcho] = joinpath(paramsGeneral[:pathData], paramsGeneral[:fileNameMultiEcho])
 
 paramsGeneral[:fileNameProcessedCartesian] = "processedCartesianData.h5"
-paramsGeneral[:fullPathProcessedCartesian] = joinpath(paramsGeneral[:pathData], paramsGeneral[:fileNameProcessedCartesian])
+paramsGeneral[:fullPathProcessedCartesian] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameProcessedCartesian])
 
 paramsGeneral[:timeStamp] = Dates.format(Dates.now(), "yyyy-mm-dd_HH_MM_SS")
 paramsGeneral[:fileNameSaveRecon] = splitext(paramsGeneral[:fileNameMultiEcho])[1] * "_recon_" * paramsGeneral[:timeStamp] * ".h5"
@@ -32,3 +33,6 @@ paramsGeneral[:fullPathSaveRecon] = joinpath(paramsGeneral[:pathSaveRecon], para
 paramsGeneral[:fullPathSaveSense] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveSense] )
 paramsGeneral[:fullPathSaveB0] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveB0] )
 paramsGeneral[:doSaveRecon] = true
+
+## Additional acquisition information, e.g., slice distance etc.
+paramsGeneral[:sliceDistanceFactor_percent] = 400

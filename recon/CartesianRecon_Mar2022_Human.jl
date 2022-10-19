@@ -1,16 +1,7 @@
-using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients, NIfTI
+using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
 
 include("../utils/Utils.jl")
 include("../utils/fieldMapEstimator.jl")
-
-## function to calculate the B0 maps from the two images with different echo times
-# TODO have the b0 map calculation be capable of handling variable echo times
-function calculateB0Maps(imData,slices,echoTime1,echoTime2)
-
-    # b0Maps = mapslices(x -> rotl90(x),ROMEO.unwrap(angle.(imData[:,:,slices,2,1].*conj(imData[:,:,slices,1,1]))),dims=(1,2))./((7.38-4.92)/1000)
-    b0Maps = mapslices(x -> x, ROMEO.unwrap(angle.(imData[:,:,slices,2,1].*conj(imData[:,:,slices,1,1]))),dims=(1,2))./((echoTime2-echoTime1)/1000)
-
-end
 
 ## Dictionary of frequently changed parameters
 include("ReconConfig.jl")
@@ -56,8 +47,6 @@ nSlices = numSlices(acqDataCartesian)
 
 sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
 
-
-
 ## Don't have to recalculate sense maps for both scans but possibly it could make a
 #  difference in Diffusion scans
 
@@ -65,12 +54,12 @@ sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
 senseCartesian = espirit(acqDataCartesian,(6,6),24,eigThresh_1=0.02, eigThresh_2=0.95)
 sensitivity = senseCartesian
 
+resolution_mm = fieldOfView(acqDataCartesian)./size(sensitivity)[1:3]
+resolution_mm[3] = fieldOfView(acqDataCartesian)[3] *(1 + paramsGeneral[:sliceDistanceFactor_percent]/100.0); # for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
+
 
 # save SENSE maps
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
-    resolution_mm[1:2] = fieldOfView(acqDataCartesian)[1:2]./size(sensitivity)[1:2]
-    resolution_mm[3] = fieldOfView(acqDataCartesian)[3]; # for 2D only, since FOV[3] is slice thickness then
-
     # TODO: use correct slice order everywhere, e.g., when saving/loading maps for spiral recon
     saveMap(paramsGeneral[:fullPathSaveSense], sensitivity[:,:,sliceIndexArray,:], resolution_mm; doSplitPhase=true)
 end
@@ -99,7 +88,7 @@ paramsCartesian[:senseMaps] = ComplexF32.(sensitivity) # set sensitivity map arr
 
 ## Calculate B0 maps from the acquired images (if two TEs)
 
-slices = 1:length(indexArray)
+slices = 1:length(sliceIndexArray)
 
 @info "Calculating B0 Maps"
 # b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
@@ -107,8 +96,6 @@ b0Maps2 = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,0.00001,true)
 
 # save B0 map
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
-    resolution_mm[1:2] = fieldOfView(acqDataCartesian)[1:2]./size(b0Maps2)[1:2]
-    resolution_mm[3] = fieldOfView(acqDataCartesian)[3]; # for 2D only, since FOV[3] is slice thickness then
     saveMap(paramsGeneral[:fullPathSaveB0], b0Maps2[:,:,sliceIndexArray], resolution_mm)
 end
 
