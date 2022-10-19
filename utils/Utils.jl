@@ -124,6 +124,34 @@ function checkProfiles(rawData)
 
 end
 
+
+"""
+getSliceOrder(nSlices, isSliceInterleaved)
+Returns array mapping from acquisition number to slice number (geometric position) (indexArray[slice = 1:9] = [acquisitionNumbers])
+TODO: Add ascending/descending options
+# Arguments
+* `nSlices::Int`                    - number of slices in total acquired stack (FOV)
+* `isSliceInterleaved::Bool=true`   - if true, interleaved slice order is created, otherwise ascending slice order is returned
+"""
+function getSliceOrder(nSlices; isSliceInterleaved::Bool=true)
+sliceIndexArray = 1:nSlices
+reorderedSliceIndexArray = zeros(Int16, size(sliceIndexArray))
+if isSliceInterleaved && nSlices > 1
+    reorderedSliceIndexArray[1:2:end] = sliceIndexArray[1:Int(ceil(nSlices / 2))]
+    reorderedSliceIndexArray[2:2:end] = sliceIndexArray[Int(ceil(nSlices / 2) + 1) : end]
+else
+    reorderedSliceIndexArray = sliceIndexArray
+end
+# TODO@all: is indexArray deprecated?
+## Defining array mapping from acquisition number to slice number (indexArray[slice = 1:9] = [acquisitionNumbers])
+# indexArray = [5,1,6,2,7,3,8,4,9] # for 9 slice phantom
+#indexArray = [8,1,9,2,10,3,11,4,12,5,13,6,14,7,15] # for 15 slice phantom
+#indexArray = 1 # for 1 slice phantom
+
+return reorderedSliceIndexArray
+
+end
+
 """
 saveMap(filename, mapArray, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
 Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)

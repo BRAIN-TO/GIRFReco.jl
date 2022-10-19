@@ -53,6 +53,11 @@ acqDataCartesian= AcquisitionData(rawDataNew, estimateProfileCenter=true)
 nCoils = size(acqDataCartesian.kdata[1],2)
 nSlices = numSlices(acqDataCartesian)
 
+
+sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
+
+
+
 ## Don't have to recalculate sense maps for both scans but possibly it could make a
 #  difference in Diffusion scans
 
@@ -65,7 +70,9 @@ sensitivity = senseCartesian
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
     resolution_mm[1:2] = fieldOfView(acqDataCartesian)[1:2]./size(sensitivity)[1:2]
     resolution_mm[3] = fieldOfView(acqDataCartesian)[3]; # for 2D only, since FOV[3] is slice thickness then
-    saveSenseMaps(paramsGeneral[:fullPathSaveSense], sensitivity, resolution_mm; doSplitPhase=true)
+
+    # TODO: use correct slice order everywhere, e.g., when saving/loading maps for spiral recon
+    saveMap(paramsGeneral[:fullPathSaveSense], sensitivity[:,:,sliceIndexArray,:], resolution_mm; doSplitPhase=true)
 end
 
 ## Parameter dictionary definition for reconstruction
@@ -82,11 +89,8 @@ paramsCartesian[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false) # tu
 paramsCartesian[:senseMaps] = ComplexF32.(sensitivity) # set sensitivity map array
 # paramsCartesian[:correctionMap] = ComplexF32.(-1im.*b0Maps)
 
-# TODO@all: is indexArray deprecated?
-## Defining array mapping from acquisition number to slice number (indexArray[slice = 1:9] = [acquisitionNumbers])
-# indexArray = [5,1,6,2,7,3,8,4,9] # for 9 slice phantom
-indexArray = [8,1,9,2,10,3,11,4,12,5,13,6,14,7,15] # for 15 slice phantom
-#indexArray = 1 # for 1 slice phantom
+
+
 
 ## Call the reconstruction function
 
@@ -105,7 +109,7 @@ b0Maps2 = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,0.00001,true)
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
     resolution_mm[1:2] = fieldOfView(acqDataCartesian)[1:2]./size(b0Maps2)[1:2]
     resolution_mm[3] = fieldOfView(acqDataCartesian)[3]; # for 2D only, since FOV[3] is slice thickness then
-    saveSenseMaps(paramsGeneral[:fullPathSaveB0], b0Maps2, resolution_mm)
+    saveMap(paramsGeneral[:fullPathSaveB0], b0Maps2[:,:,sliceIndexArray], resolution_mm)
 end
 
 
