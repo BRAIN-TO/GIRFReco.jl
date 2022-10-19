@@ -62,7 +62,6 @@ sensitivity = senseCartesian
 
 
 # save SENSE maps
-
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
     resolution_mm[1:2] = fieldOfView(acqDataCartesian)[1:2]./size(sensitivity)[1:2]
     resolution_mm[3] = fieldOfView(acqDataCartesian)[3]; # for 2D only, since FOV[3] is slice thickness then
@@ -99,8 +98,16 @@ indexArray = [8,1,9,2,10,3,11,4,12,5,13,6,14,7,15] # for 15 slice phantom
 slices = 1:length(indexArray)
 
 @info "Calculating B0 Maps"
-b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
+# b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
 b0Maps2 = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,0.00001,true)
+
+# save B0 map
+if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
+    resolution_mm[1:2] = fieldOfView(acqDataCartesian)[1:2]./size(b0Maps2)[1:2]
+    resolution_mm[3] = fieldOfView(acqDataCartesian)[3]; # for 2D only, since FOV[3] is slice thickness then
+    saveSenseMaps(paramsGeneral[:fullPathSaveB0], b0Maps2, resolution_mm)
+end
+
 
 @info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps)"
 pygui(true) # Leave this code till we need plotting.

@@ -125,20 +125,26 @@ function checkProfiles(rawData)
 end
 
 """
-saveSenseMaps(filename, sense, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
-Saves sensitivity maps as complex NIfTI file
-TODO: split into magnitude/phase file for most viewers
+saveMap(filename, mapArray, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
+Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
+For complex-valued data, magnitude and phase can be split into separate files
 # Arguments
-* `filename::String`    - string filename with extension .nii, example "sensemap.nii"
-* `sense`               - [nX nY nZ nChannels] 4-D sensitivity map array 
-* `resolution_mm`       - resolution in mm, 3 element vector, e.g., [1.0, 1.0, 2.0]
-* `offset_mm`           - isocenter offset in mm, default: [0.0, 0.0, 0.0]
+* `filename::String`            - string filename with extension .nii, example "sensemap.nii"
+* `mapArray`                    - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
+* `resolution_mm`               - resolution in mm, 3 element vector, e.g., [1.0, 1.0, 2.0]
+* `offset_mm`                   - isocenter offset in mm, default: [0.0, 0.0, 0.0]
+* `doSplitPhase::Bool=false`    - if true, data is saved in two nifti files with suffix "_magn" and "_phase", respectively
+                                  to enable display in typical NIfTI viewers
 """
-function saveSenseMaps(filename, sense, resolution_mm; offset_mm = [0.0, 0.0, 0.0], doSplitPhase::Bool=false)
+function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0], doSplitPhase::Bool=false)
 spacing = resolution_mm*Unitful.mm
 offset = offset_mm*Unitful.mm
 
-I = reshape(sense, size(sense,1), size(sense,2), size(sense,3), size(sense,4), 1, 1);
+if ndims(calib_map) == 4 # multi-coil calib_map, e.g., sensitivity
+    I = reshape(calib_map, size(calib_map,1), size(calib_map,2), size(calib_map,3), size(calib_map,4), 1, 1);
+else
+    I = reshape(calib_map, size(calib_map,1), size(calib_map,2), size(calib_map,3), 1, 1, 1);
+end
 
 im = AxisArray(I,
 Axis{:x}(range(offset[1], step=spacing[1], length=size(I, 1))),
