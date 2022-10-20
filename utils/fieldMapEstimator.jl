@@ -90,7 +90,7 @@ Processes 3D volume data as output from MRIReco.reconstruction to estimate field
 * `reltol` - early stopping criteria (exit if subsequent cost function change < reltol)
 
 """
-function estimateB0Maps(imData,slices, TE1,TE2,isrotated; β = 5e-4, reltol = 0.001)
+function estimateB0Maps(imData,slices, TE1,TE2,isrotated::Bool=false; β = 5e-4, reltol = 0.001)
 
     b0Maps = Complex.(zeros(size(imData)[1:3]))
 

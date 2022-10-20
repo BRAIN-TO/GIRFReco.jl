@@ -17,10 +17,10 @@ TE2 = 7.38
 
 @info "Loading Data Files"
 
-b0FileName = paramsGeneral[:fullPathMultiEcho];
+b0FileName = paramsGeneral[:fullPathMapScan];
 
 # filename for preprocessed data (remove oversampling, permute dimensions wrt MRIReco)
-processedFileName = paramsGeneral[:fullPathProcessedCartesian] 
+processedFileName = paramsGeneral[:fullPathProcessedMapScan] 
 
 if makeMaps
 
@@ -86,23 +86,30 @@ paramsCartesian[:senseMaps] = ComplexF32.(sensitivity) # set sensitivity map arr
 @info "Performing Reconstruction"
 @time cartesianReco = reconstruction(acqDataCartesian,paramsCartesian)
 
+# save Map recon (multi-echo etc.)
+if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
+    saveMap(paramsGeneral[:fullPathSaveMapRecon], cartesianReco.data[:,:,sliceIndexArray,:,:,:], resolution_mm; doSplitPhase=true)
+end
+
 ## Calculate B0 maps from the acquired images (if two TEs)
 
 slices = 1:length(sliceIndexArray)
 
 @info "Calculating B0 Maps"
 # b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
-b0Maps2 = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,0.00001,true)
+b0Maps = estimateB0Maps(cartesianReco.data,slices,TE1,TE2, true)
 
 # save B0 map
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
-    saveMap(paramsGeneral[:fullPathSaveB0], b0Maps2[:,:,sliceIndexArray], resolution_mm)
+    saveMap(paramsGeneral[:fullPathSaveB0], b0Maps[:,:,sliceIndexArray], resolution_mm)
 end
 
 
-@info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps)"
-pygui(true) # Leave this code till we need plotting.
-# plotSenseMaps(sensitivity,nCoils)
-plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps2, isSliceInterleaved = true, rotateAngle = 270)
+if paramsGeneral[:doPlotRecon]
+    @info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps)"
+    pygui(true) # Leave this code till we need plotting.
+    # plotSenseMaps(sensitivity,nCoils)
+    plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps, isSliceInterleaved = true, rotateAngle = 270)
+end
 
 @info "Successfully Completed CartesianReconstruction"

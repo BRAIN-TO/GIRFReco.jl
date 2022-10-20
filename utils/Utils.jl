@@ -736,9 +736,11 @@ end
 ## Input/Output, File handling
 
 """
-saveMap(filename, mapArray, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
+    saveMap(filename, mapArray, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
+
 Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
 For complex-valued data, magnitude and phase can be split into separate files
+
 # Arguments
 * `filename::String`            - string filename with extension .nii, example "sensemap.nii"
 * `mapArray`                    - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
@@ -751,7 +753,7 @@ function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0]
     spacing = resolution_mm*Unitful.mm
     offset = offset_mm*Unitful.mm
 
-    if ndims(calib_map) == 4 # multi-coil calib_map, e.g., sensitivity
+    if ndims(calib_map) >= 4 # multi-coil calib_map, e.g., sensitivity, or recon, but we can only store the first 4 dims in a Nifti
         I = reshape(calib_map, size(calib_map,1), size(calib_map,2), size(calib_map,3), size(calib_map,4), 1, 1);
     else
         I = reshape(calib_map, size(calib_map,1), size(calib_map,2), size(calib_map,3), 1, 1, 1);

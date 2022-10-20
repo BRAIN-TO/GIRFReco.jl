@@ -87,12 +87,12 @@ cartesianReco = reconstruction(acqDataCartesian,paramsCartesian)
 slices = 1:length(indexArray)
 
 @info "Calculating B0 Maps"
-b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
-b0Maps2 = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,0.00001,true)
+# b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
+b0Maps = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,0.00001,true)
 
 @info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps) \n"
 pygui(true) # Leave this code till we need plotting.
 # plotSenseMaps(sensitivity,nCoils)
-plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps2, isSliceInterleaved = true, rotateAngle = 270)
+plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps, isSliceInterleaved = true, rotateAngle = 270)
 
 @info "Successfully Completed CartesianReconstruction"
