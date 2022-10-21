@@ -12,8 +12,8 @@ paramsGeneral = Dict{Symbol,Any}()
 
 ## General options for recon script
 # update time stamp for new recon, otherwise keep fixed, will create a new recon/<timeStamp> directory
-# paramsGeneral[:timeStamp] = Dates.format(Dates.now(), "yyyy-mm-dd_HH_MM_SS")
-paramsGeneral[:timeStamp] = "2022-10-20_09_07_07"
+paramsGeneral[:timeStamp] = Dates.format(Dates.now(), "yyyy-mm-dd_HH_MM_SS")
+# paramsGeneral[:timeStamp] = "2022-10-20_09_07_07"
 paramsGeneral[:doLoadMaps] = true
 paramsGeneral[:doSaveRecon] = true
 paramsGeneral[:doPlotRecon] = false
