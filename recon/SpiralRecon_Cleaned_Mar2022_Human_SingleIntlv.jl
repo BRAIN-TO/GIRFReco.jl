@@ -132,15 +132,34 @@ end
 ## Sense Map loading
 @info "Validating Sense Maps"
 
+@info "Recalculating Sense Maps \n"
+# sensitivity = espirit(acqDataCartesian,(4,4),12,adjustmentDict[:reconSize],eigThresh_1=0.01, eigThresh_2=0.98)
+
 # Resize sense maps to match encoding size of data matrix
 sensitivity = mapslices(x ->imresize(x, adjustmentDict[:reconSize]), senseCartesian, dims=[1,2])
 
-# ## Plot the sensitivity maps of each coil
+# Plot the sensitivity maps of each coil
 @info "Plotting SENSE Maps"
 
 if paramsGeneral[:doPlotRecon]
     plotSenseMaps(sensitivity,size(sensitivity, 4),sliceIndex = 10)
 end
+
+
+# shift FOV to middle :) 
+shiftksp!(acqDataImaging,[0,-20])
+#changeFOV!(acqDataImaging,[1.5,1.5])
+
+nvcoils = size(sensitivity,4)
+
+doCoilCompression = false
+
+## Do coil compression to make recon faster
+if doCoilCompression
+    nvcoils = 4
+    acqDataImaging, sensitivity = geometricCC_2d(acqDataImaging,sensitivity,nvcoils)
+end
+
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Resizing B0 Maps"

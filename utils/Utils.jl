@@ -777,6 +777,8 @@ function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0]
         saveImage(filename, im)
     end
 
+end
+
 function shiftksp!(acqData,shift)
 
     numSl = numSlices(acqData)
