@@ -18,11 +18,11 @@ reloadSpiralData = true
 reloadGIRFData = true
 
 ## Choose Slice (can be [single number] OR [1,2,3,...])
-sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
-# sliceChoice = [6] # For single-slice
+# sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
+sliceChoice = [6] # For single-slice
 
 ## Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
-reconSize = (220, 220) # for gradient 508, # (112,112) for gradient 511
+reconSize = (200, 200) # for gradient 508, # (112,112) for gradient 511
 
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
 diffusionDirection = 0
@@ -164,7 +164,6 @@ params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
 ## Call to reconstruction
 @info "Performing Reconstruction"
 @time reco = reconstruction(acqDataImaging,params)
-
 #totalRecon = sum(abs2,reco.data,dims=5)
 
 # save Map recon (multi-echo etc.)

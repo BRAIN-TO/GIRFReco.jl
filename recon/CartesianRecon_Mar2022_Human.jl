@@ -2,18 +2,20 @@ using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
 
 include("../utils/Utils.jl")
 include("../utils/fieldMapEstimator.jl")
+include("../utils/shiftksp.jl")
 
 ## Dictionary of frequently changed parameters
 include("ReconConfig.jl")
 
 ## Load data files
-
 makeMaps = true
 saveMaps = true
 
 # Echo times for field map raw data, in ms
 TE1 = 4.92
 TE2 = 7.38 
+
+reconSize = (200,200)
 
 @info "Loading Data Files"
 
@@ -46,12 +48,15 @@ nSlices = numSlices(acqDataCartesian)
 
 
 sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
+# shift FOV to middle :) 
+shiftksp!(acqDataCartesian,[0,-20])
+#changeFOV!(acqDataCartesian,[1.5,1.5])
 
 ## Don't have to recalculate sense maps for both scans but possibly it could make a
 #  difference in Diffusion scans
 
 @info "Calculating Sense Maps"
-senseCartesian = espirit(acqDataCartesian,(6,6),24,eigThresh_1=0.02, eigThresh_2=0.95)
+senseCartesian = espirit(acqDataCartesian,(4,4),12,eigThresh_1=0.01, eigThresh_2=0.98)
 sensitivity = senseCartesian
 
 resolution_mm = fieldOfView(acqDataCartesian)./size(sensitivity)[1:3]
@@ -64,6 +69,10 @@ if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., 
     saveMap(paramsGeneral[:fullPathSaveSense], sensitivity[:,:,sliceIndexArray,:], resolution_mm; doSplitPhase=true)
 end
 
+plotSenseMaps(sensitivity,nCoils)
+
+acqDataCartesian.traj[1].cartesian = false
+acqDataCartesian.traj[2].cartesian = false
 ## Parameter dictionary definition for reconstruction
 
 @info "Setting Parameters"
@@ -97,7 +106,7 @@ slices = 1:length(sliceIndexArray)
 
 @info "Calculating B0 Maps"
 # b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
-b0Maps = estimateB0Maps(cartesianReco.data,slices,TE1,TE2, true)
+b0Maps = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,true; β = 0.5, reltol = 1e-4)
 
 # save B0 map
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
