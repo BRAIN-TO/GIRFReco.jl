@@ -18,8 +18,8 @@ reloadSpiralData = true
 reloadGIRFData = true
 
 ## Choose Slice (can be [single number] OR [1,2,3,...])
-# sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
-sliceChoice = [6] # For single-slice
+sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
+# sliceChoice = [6] # For single-slice
 
 ## Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
 reconSize = (200, 200) # for gradient 508, # (112,112) for gradient 511
@@ -130,10 +130,7 @@ if reloadSpiralData || !(@isdefined acqDataImaging)
 end
 
 ## Sense Map loading
-@info "Validating Sense Maps"
-
-@info "Recalculating Sense Maps \n"
-# sensitivity = espirit(acqDataCartesian,(4,4),12,adjustmentDict[:reconSize],eigThresh_1=0.01, eigThresh_2=0.98)
+@info "Resizing Sense Maps"
 
 # Resize sense maps to match encoding size of data matrix
 sensitivity = mapslices(x ->imresize(x, adjustmentDict[:reconSize]), senseCartesian, dims=[1,2])
@@ -147,17 +144,13 @@ end
 
 
 # shift FOV to middle :) 
-shiftksp!(acqDataImaging,[0,-20])
+shiftksp!(acqDataImaging,paramsGeneral[:fovShift])
 #changeFOV!(acqDataImaging,[1.5,1.5])
 
-nvcoils = size(sensitivity,4)
-
-doCoilCompression = false
 
 ## Do coil compression to make recon faster
-if doCoilCompression
-    nvcoils = 4
-    acqDataImaging, sensitivity = geometricCC_2d(acqDataImaging,sensitivity,nvcoils)
+if paramsGeneral[:doCoilCompression]
+    acqDataImaging, sensitivity = geometricCC_2d(acqDataImaging,sensitivity, paramsGeneral[:nVirtualCoils])
 end
 
 
@@ -190,11 +183,10 @@ if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., 
     resolution_mm = fieldOfView(acqDataImaging)./encodingSize(acqDataImaging)
     resolution_mm[3] = fieldOfView(acqDataImaging)[3] *(1 + paramsGeneral[:sliceDistanceFactor_percent]/100.0); # for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
 
-  #  saveMap(paramsGeneral[:fullPathSaveRecon], reco.data, resolution_mm; doSplitPhase=true)
     # TODO: use slice ordering from cartesian scan directly!
     nSlices = numSlices(acqDataImaging)
     sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
-    saveMap(paramsGeneral[:fullPathSaveRecon], reco.data[:,:,sliceIndexArray], resolution_mm; doSplitPhase=true)
+    saveMap(paramsGeneral[:fullPathSaveRecon], reco.data[:,:,sliceIndexArray], resolution_mm; doSplitPhase=true, doNormalize = false)
 end
 
 if paramsGeneral[:doPlotRecon]

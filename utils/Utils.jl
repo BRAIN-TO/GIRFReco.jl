@@ -749,7 +749,7 @@ For complex-valued data, magnitude and phase can be split into separate files
 * `doSplitPhase::Bool=false`    - if true, data is saved in two nifti files with suffix "_magn" and "_phase", respectively
                                   to enable display in typical NIfTI viewers
 """
-function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0], doSplitPhase::Bool=false)
+function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0], doSplitPhase::Bool=false, doNormalize::Bool=true)
     spacing = resolution_mm*Unitful.mm
     offset = offset_mm*Unitful.mm
 
@@ -757,6 +757,11 @@ function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0]
         I = reshape(calib_map, size(calib_map,1), size(calib_map,2), size(calib_map,3), size(calib_map,4), 1, 1);
     else
         I = reshape(calib_map, size(calib_map,1), size(calib_map,2), size(calib_map,3), 1, 1, 1);
+    end
+
+    # scale to max 1
+    if doNormalize
+        I /= maximum(abs.(I))
     end
 
     im = AxisArray(I,

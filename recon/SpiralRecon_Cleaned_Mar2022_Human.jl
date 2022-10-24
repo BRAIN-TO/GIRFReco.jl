@@ -136,11 +136,13 @@ if doCoilCompression
 end
 
 # ## Plot the sensitivity maps of each coil
-@info "Plotting SENSE Maps \n"
-plotSenseMaps(sensitivity,nvcoils,sliceIndex = 10)
+if paramsGeneral[:doPlotRecon]    
+    @info "Plotting SENSE Maps"
+    plotSenseMaps(sensitivity,nvcoils,sliceIndex = 10)
+end
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
-@info "Resizing B0 Maps \n"
+@info "Resizing B0 Maps"
 resizedB0 = mapslices(x->imresize(x,adjustmentDict[:reconSize]), b0Maps, dims=[1,2])
 
 ## Define Parameter Dictionary for use with reconstruction

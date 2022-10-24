@@ -87,3 +87,10 @@ paramsGeneral[:fullPathSaveRecon] = joinpath(paramsGeneral[:pathSaveRecon], para
 paramsGeneral[:fullPathSaveMapRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveMapRecon] )
 paramsGeneral[:fullPathSaveSense] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveSense] )
 paramsGeneral[:fullPathSaveB0] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveB0] )
+
+
+## Reconstruction Parameter
+
+paramsGeneral[:nVirtualCoils] = 8;
+paramsGeneral[:doCoilCompression] = false;
+paramsGeneral[:fovShift] = [0, -20]; # TODO: identify unit

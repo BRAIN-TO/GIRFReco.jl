@@ -2,7 +2,6 @@ using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
 
 include("../utils/Utils.jl")
 include("../utils/fieldMapEstimator.jl")
-include("../utils/shiftksp.jl")
 
 ## Dictionary of frequently changed parameters
 include("ReconConfig.jl")
@@ -49,7 +48,8 @@ nSlices = numSlices(acqDataCartesian)
 
 sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
 # shift FOV to middle :) 
-shiftksp!(acqDataCartesian,[0,-20])
+#TODO: in MRIReco v0.7, try: correctOffset(acqDataCartesian, [0 -20 0])
+shiftksp!(acqDataCartesian, paramsGeneral[:fovShift])
 #changeFOV!(acqDataCartesian,[1.5,1.5])
 
 ## Don't have to recalculate sense maps for both scans but possibly it could make a
@@ -71,8 +71,8 @@ end
 
 plotSenseMaps(sensitivity,nCoils)
 
-acqDataCartesian.traj[1].cartesian = false
-acqDataCartesian.traj[2].cartesian = false
+#acqDataCartesian.traj[1].cartesian = false
+#acqDataCartesian.traj[2].cartesian = false
 ## Parameter dictionary definition for reconstruction
 
 @info "Setting Parameters"
@@ -110,7 +110,7 @@ b0Maps = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,true; β = 0.5, reltol
 
 # save B0 map
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
-    saveMap(paramsGeneral[:fullPathSaveB0], b0Maps[:,:,sliceIndexArray], resolution_mm)
+    saveMap(paramsGeneral[:fullPathSaveB0], b0Maps[:,:,sliceIndexArray], resolution_mm; doNormalize = false) # no normalization, we want absolute values for offres maps
 end
 
 
