@@ -21,9 +21,6 @@ reloadGIRFData = true
 sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
 # sliceChoice = [6] # For single-slice
 
-## Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
-reconSize = (200, 200) # for gradient 508, # (112,112) for gradient 511
-
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
 diffusionDirection = 0
 
@@ -79,7 +76,7 @@ sliceSelection = excitationList[selectedSlice]
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] = reconSize
+adjustmentDict[:reconSize] = paramsGeneral[:reconSize]
 adjustmentDict[:interleave] = startIndexIntlv
 adjustmentDict[:slices] = 1
 adjustmentDict[:numSamples] = numADCSamples
@@ -186,7 +183,7 @@ if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., 
     # TODO: use slice ordering from cartesian scan directly!
     nSlices = numSlices(acqDataImaging)
     sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
-    saveMap(paramsGeneral[:fullPathSaveRecon], reco.data[:,:,sliceIndexArray], resolution_mm; doSplitPhase=true, doNormalize = false)
+    saveMap(paramsGeneral[:fullPathSaveRecon], reco.data[:,:,sliceIndexArray], resolution_mm; doSplitPhase=true, doNormalize = true)
 end
 
 if paramsGeneral[:doPlotRecon]

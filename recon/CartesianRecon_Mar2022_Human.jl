@@ -7,14 +7,10 @@ include("../utils/fieldMapEstimator.jl")
 include("ReconConfig.jl")
 
 ## Load data files
-makeMaps = true
-saveMaps = true
 
 # Echo times for field map raw data, in ms
 TE1 = 4.92
 TE2 = 7.38 
-
-reconSize = (200,200)
 
 @info "Loading Data Files"
 
@@ -23,7 +19,7 @@ b0FileName = paramsGeneral[:fullPathMapScan];
 # filename for preprocessed data (remove oversampling, permute dimensions wrt MRIReco)
 processedFileName = paramsGeneral[:fullPathProcessedMapScan] 
 
-if makeMaps
+if paramsGeneral[:doProcessMapScan]
 
     # Set the data file name (Change this for your own system)
     dataFileCartesian = ISMRMRDFile(b0FileName)
@@ -31,13 +27,17 @@ if makeMaps
     # read in the raw data from the ISMRMRD file into a RawAcquisitionData object
     r = RawAcquisitionData(dataFileCartesian)
 
+    r.params["reconFOV"] = [230, 230, 2]
+
     # Preprocess Data and save!
-    preprocessCartesianData(r::RawAcquisitionData, saveMaps; fname = processedFileName)
+    preprocessCartesianData(r::RawAcquisitionData, true; fname = processedFileName)
 
 end
 
 # Load preprocessed data!
 dataFileNew = ISMRMRDFile(processedFileName)
+
+
 rawDataNew = RawAcquisitionData(dataFileNew)
 acqDataCartesian= AcquisitionData(rawDataNew, estimateProfileCenter=true)
 
@@ -56,7 +56,15 @@ shiftksp!(acqDataCartesian, paramsGeneral[:fovShift])
 #  difference in Diffusion scans
 
 @info "Calculating Sense Maps"
-senseCartesian = espirit(acqDataCartesian,(4,4),12,eigThresh_1=0.01, eigThresh_2=0.98)
+
+# from reading docstring, min thresholding
+senseCartesian = espirit(acqDataCartesian,(6,6),30,eigThresh_1=0.01, eigThresh_2=0.9)
+
+# from Lars (7T spirals)
+#senseCartesian = espirit(acqDataCartesian,(6,6),30,eigThresh_1=0.02, eigThresh_2=0.98)
+# from Alexander (Phantom?)
+#senseCartesian = espirit(acqDataCartesian,(4,4),12,eigThresh_1=0.01, eigThresh_2=0.98)
+
 sensitivity = senseCartesian
 
 resolution_mm = fieldOfView(acqDataCartesian)./size(sensitivity)[1:3]
@@ -78,16 +86,13 @@ plotSenseMaps(sensitivity,nCoils)
 @info "Setting Parameters"
 paramsCartesian = Dict{Symbol,Any}() # instantiate dictionary
 paramsCartesian[:reco] = "multiCoil" # choose multicoil reconstruction
-paramsCartesian[:reconSize] = (acqDataCartesian.encodingSize[1],acqDataCartesian.encodingSize[2]) # set recon size to be the same as encoded size
+paramsCartesian[:reconSize] = paramsGeneral[:reconSize]
 paramsCartesian[:regularization] = "L2" # choose regularization for the recon algorithm
 paramsCartesian[:λ] = 1.e-2 # recon parameter (there may be more of these, need to dig into code to identify them for solvers other than cgnr)
 paramsCartesian[:iterations] = 20 # number of CG iterations
 paramsCartesian[:solver] = "cgnr" # inverse problem solver method
 paramsCartesian[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false) # turn on store solutions if you want to see the reconstruction convergence (uses more memory)
 paramsCartesian[:senseMaps] = ComplexF32.(sensitivity) # set sensitivity map array
-# paramsCartesian[:correctionMap] = ComplexF32.(-1im.*b0Maps)
-
-
 
 
 ## Call the reconstruction function
@@ -121,4 +126,10 @@ if paramsGeneral[:doPlotRecon]
     plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps, isSliceInterleaved = true, rotateAngle = 270)
 end
 
+# cleanup unused file
+if !paramsGeneral[:doSaveProcessedMapScan] && paramsGeneral[:doProcessMapScan]
+    rm(processedFileName)
+end
+
 @info "Successfully Completed CartesianReconstruction"
+

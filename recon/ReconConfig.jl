@@ -68,6 +68,9 @@ paramsGeneral[:fullPathMapScan] = joinpath(paramsGeneral[:pathData], paramsGener
 # . makes join elementwise, i.e,. every file name (in array) with the same path
 paramsGeneral[:fullPathScan] = joinpath.(paramsGeneral[:pathData], paramsGeneral[:fileNameScan])
 
+paramsGeneral[:doProcessMapScan] = true
+paramsGeneral[:doSaveProcessedMapScan] = false;
+# filename for preprocessed data (remove oversampling, permute dimensions wrt MRIReco)
 paramsGeneral[:fileNameProcessedMapScan] = "processedCartesianData.h5"
 paramsGeneral[:fullPathProcessedMapScan] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameProcessedMapScan])
 
@@ -94,3 +97,6 @@ paramsGeneral[:fullPathSaveB0] = joinpath(paramsGeneral[:pathSaveRecon], paramsG
 paramsGeneral[:nVirtualCoils] = 8;
 paramsGeneral[:doCoilCompression] = false;
 paramsGeneral[:fovShift] = [0, -20]; # TODO: identify unit
+
+# Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
+paramsGeneral[:reconSize] = (200, 200)
