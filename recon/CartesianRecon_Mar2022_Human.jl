@@ -27,6 +27,7 @@ if paramsGeneral[:doProcessMapScan]
     # read in the raw data from the ISMRMRD file into a RawAcquisitionData object
     r = RawAcquisitionData(dataFileCartesian)
 
+    # does not change anything...
     r.params["reconFOV"] = [230, 230, 2]
 
     # Preprocess Data and save!

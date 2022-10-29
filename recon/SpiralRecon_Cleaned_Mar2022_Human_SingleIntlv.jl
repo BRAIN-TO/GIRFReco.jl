@@ -23,9 +23,11 @@ sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
 
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
 diffusionDirection = 0
+idxAverage = 4;
+nDiffusionDirections = 6;
 
 ## Determine to reconstruct single-interleave data, or one interleave out of multi-interleave data.
-isDataSingleIntlv = false
+isDataSingleIntlv = isa(paramsGeneral[:fullPathScan], String)
 
 # Which interleave to be reconstructed. For single-interleave data, it will always be set as 1; for multi-interleave data, the value set here will be used.
 # For multi-interleaved data, this value is ranging from [1:TotNumIntlv] (total number of interleaves), indicating which interleave to be reconstructed
@@ -69,7 +71,7 @@ else
 end
 
 ## The ISMRMRD File contains more than one excitation, so we choose the set corresponding to the b-value 0 images
-excitationList = collect(totalSliceNum*2 + 2 : 2 : totalSliceNum*4) .+ diffusionDirection * totalSliceNum * 2 # DATASET SPECIFIC INDEXING: 15 slices, starting from profile 32
+excitationList = collect(totalSliceNum*2 + 2 : 2 : totalSliceNum*4) .+ diffusionDirection * totalSliceNum * 2 .+ (idxAverage - 1) * totalSliceNum * (nDiffusionDirections + 1) * 2 # DATASET SPECIFIC INDEXING: 15 slices, starting from profile 32
 sliceSelection = excitationList[selectedSlice]
 
 @info "Slice Chosen = $selectedSlice: \n \nExcitations Chosen = $excitationList "
@@ -89,7 +91,7 @@ adjustmentDict[:excitations] = sliceSelection
 
 adjustmentDict[:doMultiInterleave] = !isDataSingleIntlv
 adjustmentDict[:doOddInterleave] = false
-adjustmentDict[:numInterleaves] = isa(adjustmentDict[:interleaveDataFileNames], String) ? 1 : length(adjustmentDict[:interleaveDataFileNames]) # one interleaf per file, count files, if filenames are array of strings (not only one string)
+adjustmentDict[:numInterleaves] = isDataSingleIntlv ? 1 : length(adjustmentDict[:interleaveDataFileNames]) # one interleaf per file, count files, if filenames are array of strings (not only one string)
 
 adjustmentDict[:singleSlice] = !multiSlice
 

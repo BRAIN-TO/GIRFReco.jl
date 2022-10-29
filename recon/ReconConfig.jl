@@ -54,7 +54,9 @@ paramsGeneral[:fileNameMapScan] = "field_map_132_2.h5"
     #fname_spiralIntlv1 = "508_126_2.h5" # Gradient 508, interleave 1, b = 2000, 6 diff directions, 4 averages
     #fname_spiralIntlv2 = "508_128_2.h5" # Gradient 508, interleave 2, b = 2000, 6 diff directions, 4 averages
     #fname_spiralIntlv3 = "508_130_2.h5" # Gradient 508, interleave 3, b = 2000, 6 diff directions, 4 averages
-paramsGeneral[:fileNameScan]=["508_124_2.h5", "508_126_2.h5", "508_128_2.h5", "508_130_2.h5"]
+# paramsGeneral[:fileNameScan]=["508_124_2.h5", "508_126_2.h5", "508_128_2.h5", "508_130_2.h5"]
+paramsGeneral[:fileNameScan]=["508_124_2.h5"]
+
 ## File name for the spiral gradient
 # multi-il gradient file 508, single interleaf gradient file 511
 paramsGeneral[:fullPathGradient] = joinpath(paramsGeneral[:pathGradients], "508", "gradients.txt")
