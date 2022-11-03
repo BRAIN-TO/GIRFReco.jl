@@ -12,11 +12,19 @@ paramsGeneral = Dict{Symbol,Any}()
 
 ## General options for recon script
 # update time stamp for new recon, otherwise keep fixed, will create a new recon/<timeStamp> directory
-paramsGeneral[:timeStamp] = Dates.format(Dates.now(), "yyyy-mm-dd_HH_MM_SS")
+#paramsGeneral[:timeStamp] = Dates.format(Dates.now(), "yyyy-mm-dd_HH_MM_SS")
 # paramsGeneral[:timeStamp] = "2022-10-20_09_07_07"
+paramsGeneral[:timeStamp] = "v1";
 paramsGeneral[:doLoadMaps] = true
 paramsGeneral[:doSaveRecon] = true
 paramsGeneral[:doPlotRecon] = false
+
+## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
+# selector = Dict{Symbol,Any}()
+# selector[:avg] = 4;
+# selector[:seg] = 1;
+# selector[:dif] = 1;
+
 
 ## Scan parameters, Additional acquisition information, e.g., slice distance etc.
 paramsGeneral[:sliceDistanceFactor_percent] = 400
@@ -82,7 +90,7 @@ paramsGeneral[:fileNameSaveB0] = splitext(paramsGeneral[:fileNameMapScan])[1] * 
 
 if isa(paramsGeneral[:fileNameScan], AbstractVector)
     # for multiple files, concatenate recon name from scan file names, e.g., 508_124_2_508_126_2_508_128_2_508_130_2_recon.nii
-    paramsGeneral[:fileNameSaveRecon] = join([(x[1] * "_") for x in splitext.(paramsGeneral[:fileNameScan])]) * "recon.nii"
+    paramsGeneral[:fileNameSaveRecon] = join([(x[1] * "_") for x in splitext.(paramsGeneral[:fileNameScan])]) * "dif$(selector[:dif])_" * "itl$(selector[:seg])_" * "avg$(selector[:avg])_" * "recon.nii"
 else
     # otherwise, just concat _recon.nii to file name
     paramsGeneral[:fileNameSaveRecon] = splitext(paramsGeneral[:fileNameScan])[1] * "_recon.nii"

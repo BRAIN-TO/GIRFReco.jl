@@ -9,8 +9,6 @@ include("../utils/Utils.jl")
 
 ## ----------------------------- User-defined Variables -------------------------- ##
 
-# All data-specific recon parameters
-include("ReconConfig.jl")
 
 ## Set true if we need to reload Cartesian and/or spiral data compulsively.
 reloadCartesianData = true
@@ -21,18 +19,6 @@ reloadGIRFData = true
 sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
 # sliceChoice = [6] # For single-slice
 
-## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
-diffusionDirection = 0
-idxAverage = 4;
-nDiffusionDirections = 6;
-
-## Determine to reconstruct single-interleave data, or one interleave out of multi-interleave data.
-isDataSingleIntlv = isa(paramsGeneral[:fullPathScan], String)
-
-# Which interleave to be reconstructed. For single-interleave data, it will always be set as 1; for multi-interleave data, the value set here will be used.
-# For multi-interleaved data, this value is ranging from [1:TotNumIntlv] (total number of interleaves), indicating which interleave to be reconstructed
-startIndexIntlv = 1
-
 ## Total number of ADC points BEFORE the rewinder at the end of the spiral readout. For gradient 508, use 15655 (out of 16084); for gradient 511, use 15445 (out of 15624).
 numADCSamples = 15504
 # numADCSamples = 15655
@@ -40,6 +26,24 @@ numADCSamples = 15504
 
 ## Gyromagnetic ratio, in unit of Hz
 gamma = 42577478
+
+# All data-specific recon parameters
+include("ReconConfig.jl")
+
+
+## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
+diffusionDirection = selector[:dif]
+idxAverage = selector[:avg]
+nDiffusionDirections = 6
+
+# Which interleave to be reconstructed. For single-interleave data, it will always be set as 1; for multi-interleave data, the value set here will be used.
+# For multi-interleaved data, this value is ranging from [1:TotNumIntlv] (total number of interleaves), indicating which interleave to be reconstructed
+startIndexIntlv = selector[:seg]
+
+
+## Determine to reconstruct single-interleave data, or one interleave out of multi-interleave data.
+isDataSingleIntlv = isa(paramsGeneral[:fullPathScan], String)
+
 
 ## ------------------------------------------------ Calculation Starts Here ---------------------------------------------------------- ##
 
