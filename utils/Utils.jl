@@ -736,14 +736,14 @@ end
 ## Input/Output, File handling
 
 """
-    saveMap(filename, mapArray, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
+    saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
 
 Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
 For complex-valued data, magnitude and phase can be split into separate files
 
 # Arguments
 * `filename::String`            - string filename with extension .nii, example "sensemap.nii"
-* `mapArray`                    - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
+* `calib_map`                   - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
 * `resolution_mm`               - resolution in mm, 3 element vector, e.g., [1.0, 1.0, 2.0]
 * `offset_mm`                   - isocenter offset in mm, default: [0.0, 0.0, 0.0]
 * `doSplitPhase::Bool=false`    - if true, data is saved in two nifti files with suffix "_magn" and "_phase", respectively
@@ -781,6 +781,45 @@ function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0]
     else
         saveImage(filename, im)
     end
+
+end
+
+
+"""
+    loadMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
+
+Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
+For complex-valued data, magnitude and phase can be split into separate files
+
+# Arguments
+* `filename::String`            - string filename with extension .nii, example "sensemap.nii"
+* `doSplitPhase::Bool=false`    - if true, data is saved in two nifti files with suffix "_magn" and "_phase", respectively
+                                  to enable display in typical NIfTI viewers
+
+# Output
+* `calib_map`                    - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
+
+"""
+function loadMap(filename; doSplitPhase::Bool=false)
+    
+    if doSplitPhase
+       filename_magn = splitext(filename)[1] * "_magn.nii"
+       I_magn = loadImage(filename_magn) # map is needed, because abs.(im) would convert AxisArray back into basic array
+
+        filename_phase = splitext(filename)[1] * "_phase.nii"
+        I_phase = loadImage(filename_phase)
+
+        calib_map = (I_magn.data).*exp.(1i.*(I_phase.data))
+    else
+        I = loadImage(filename)
+        calib_map = I.data
+    end
+    
+    # squeeze singleton dimensions of 6-dim array
+    calib_map = dropdims(calib_map, dims = tuple(findall(size(calib_map) .== 1)...))
+
+    return calib_map
+
 
 end
 
