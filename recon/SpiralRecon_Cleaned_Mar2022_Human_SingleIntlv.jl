@@ -11,7 +11,7 @@ include("../utils/Utils.jl")
 
 
 ## Set true if we need to reload Cartesian and/or spiral data compulsively.
-reloadCartesianData = true
+doReconstructCartesianDataAndMaps = false
 reloadSpiralData = true
 reloadGIRFData = true
 
@@ -47,8 +47,15 @@ isDataSingleIntlv = isa(paramsGeneral[:fullPathScan], String)
 
 ## ------------------------------------------------ Calculation Starts Here ---------------------------------------------------------- ##
 
+if paramsGeneral[:doLoadMaps] && isfile(paramsGeneral[:fullPathSaveB0]) # # TODO ask for sense map (but split in magn/phase)
+    @info "Loading SENSE and B0 maps from $(paramsGeneral[:fullPathSaveSense]) and $(paramsGeneral[:fullPathSaveB0])"
+    # load maps, permute slice, sice files have geometric slice order
+    b0Maps = loadMap(paramsGeneral[:fullPathSaveB0])[:,:,invperm(sliceIndexArray)]
+    senseCartesian = loadMap(paramsGeneral[:fullPathSaveSense]; doSplitPhase = true)[:,:,invperm(sliceIndexArray),:]
+end
+
+if doReconstructCartesianDataAndMaps || !((@isdefined senseCartesian) && (@isdefined b0Maps))
 ## Only calculate sensitivity and B0 maps when they have not been done yet, or it's specifically required.
-if reloadCartesianData || !((@isdefined senseCartesian) && (@isdefined b0Maps))
     ## Executing Cartesian recon from which B0/sensitivity maps have been computed
     @info "Running CartesianRecon to retrieve maps (senseCartesian and b0Maps)"
     include("CartesianRecon_Mar2022_Human.jl")

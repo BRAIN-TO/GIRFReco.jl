@@ -23,9 +23,9 @@ paramsGeneral[:doPlotRecon] = false
 # boolean isCalledFromReconLoopGlobal is true, if this RunReconLoop is active
 if !((@isdefined isCalledFromReconLoopGlobal) && isCalledFromReconLoopGlobal)
     global selector = Dict{Symbol,Any}()
-    selector[:avg] = 4;
+    selector[:avg] = 1;
     selector[:seg] = 1;
-    selector[:dif] = 1;
+    selector[:dif] = 0;
 end
 
 ## Scan parameters, Additional acquisition information, e.g., slice distance etc.
