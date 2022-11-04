@@ -20,11 +20,13 @@ paramsGeneral[:doSaveRecon] = true
 paramsGeneral[:doPlotRecon] = false
 
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
-# selector = Dict{Symbol,Any}()
-# selector[:avg] = 4;
-# selector[:seg] = 1;
-# selector[:dif] = 1;
-
+# boolean isCalledFromReconLoopGlobal is true, if this RunReconLoop is active
+if !((@isdefined isCalledFromReconLoopGlobal) && isCalledFromReconLoopGlobal)
+    selector = Dict{Symbol,Any}()
+    selector[:avg] = 4;
+    selector[:seg] = 1;
+    selector[:dif] = 1;
+end
 
 ## Scan parameters, Additional acquisition information, e.g., slice distance etc.
 paramsGeneral[:sliceDistanceFactor_percent] = 400
