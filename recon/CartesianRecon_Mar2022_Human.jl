@@ -67,7 +67,8 @@ senseCartesian = espirit(acqDataCartesian,(6,6),30,eigThresh_1=0.01, eigThresh_2
 #senseCartesian = espirit(acqDataCartesian,(4,4),12,eigThresh_1=0.01, eigThresh_2=0.98)
 
 # normalize for consistency with saving/loading and better ranges of reconstruction values
-sensitivity = senseCartesian / maximum(abs.(senseCartesian))
+senseCartesian /= maximum(abs.(senseCartesian))
+sensitivity = senseCartesian 
 
 resolution_mm = fieldOfView(acqDataCartesian)./size(sensitivity)[1:3]
 resolution_mm[3] = fieldOfView(acqDataCartesian)[3] *(1 + paramsGeneral[:sliceDistanceFactor_percent]/100.0); # for 2D only, since FOV[3] is slice thickness then, but gap has to be observed

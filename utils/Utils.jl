@@ -803,13 +803,13 @@ For complex-valued data, magnitude and phase can be split into separate files
 function loadMap(filename; doSplitPhase::Bool=false)
     
     if doSplitPhase
-       filename_magn = splitext(filename)[1] * "_magn.nii"
-       I_magn = loadImage(filename_magn) # map is needed, because abs.(im) would convert AxisArray back into basic array
+        filename_magn = splitext(filename)[1] * "_magn.nii"
+        I_magn = loadImage(filename_magn) # map is needed, because abs.(im) would convert AxisArray back into basic array
 
         filename_phase = splitext(filename)[1] * "_phase.nii"
         I_phase = loadImage(filename_phase)
 
-        calib_map = (I_magn.data).*exp.(1i.*(I_phase.data))
+        calib_map = (I_magn.data).*exp.(1im.*(I_phase.data))
     else
         I = loadImage(filename)
         calib_map = I.data
