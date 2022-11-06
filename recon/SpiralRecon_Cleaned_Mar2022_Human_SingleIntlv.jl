@@ -20,8 +20,8 @@ sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
 # sliceChoice = [6] # For single-slice
 
 ## Total number of ADC points BEFORE the rewinder at the end of the spiral readout. For gradient 508, use 15655 (out of 16084); for gradient 511, use 15445 (out of 15624).
-numADCSamples = 15504
-# numADCSamples = 15655
+# numADCSamples = 15504
+numADCSamples = 15655
 # numADCSamples = 15445
 
 ## Gyromagnetic ratio, in unit of Hz
@@ -34,7 +34,7 @@ include("ReconConfig.jl")
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
 diffusionDirection = selector[:dif]
 idxAverage = selector[:avg]
-nDiffusionDirections = 6
+nDiffusionDirections = paramsGeneral[:nDiffusionDirections] # TODO: Read from ISMRMRD itself
 
 # Which interleave to be reconstructed. For single-interleave data, it will always be set as 1; for multi-interleave data, the value set here will be used.
 # For multi-interleaved data, this value is ranging from [1:TotNumIntlv] (total number of interleaves), indicating which interleave to be reconstructed
@@ -50,7 +50,12 @@ isDataSingleIntlv = isa(paramsGeneral[:fullPathScan], String)
 if paramsGeneral[:doLoadMaps] && isfile(paramsGeneral[:fullPathSaveB0]) # # TODO ask for sense map (but split in magn/phase)
     @info "Loading SENSE and B0 maps from $(paramsGeneral[:fullPathSaveSense]) and $(paramsGeneral[:fullPathSaveB0])"
     # load maps, permute slice, sice files have geometric slice order
-    b0Maps = loadMap(paramsGeneral[:fullPathSaveB0])[:,:,invperm(sliceIndexArray)]
+    b0Maps = loadMap(paramsGeneral[:fullPathSaveB0])
+    
+    nSlices = size(b0Maps, 3);
+    sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
+
+    b0Maps = b0Maps[:,:,invperm(sliceIndexArray)]
     senseCartesian = loadMap(paramsGeneral[:fullPathSaveSense]; doSplitPhase = true)[:,:,invperm(sliceIndexArray),:]
 end
 
@@ -59,9 +64,8 @@ if doReconstructCartesianDataAndMaps || !((@isdefined senseCartesian) && (@isdef
     ## Executing Cartesian recon from which B0/sensitivity maps have been computed
     @info "Running CartesianRecon to retrieve maps (senseCartesian and b0Maps)"
     include("CartesianRecon_Mar2022_Human.jl")
+    nSlices = size(b0Maps, 3);
 end
-
-totalSliceNum = size(sensitivity, 3)
 
 ## Set figures to be unlocked from the win9ow (i.e use matplotlib backend with controls)
 
@@ -82,7 +86,7 @@ else
 end
 
 ## The ISMRMRD File contains more than one excitation, so we choose the set corresponding to the b-value 0 images
-excitationList = collect(totalSliceNum*2 + 2 : 2 : totalSliceNum*4) .+ diffusionDirection * totalSliceNum * 2 .+ (idxAverage - 1) * totalSliceNum * (nDiffusionDirections + 1) * 2 # DATASET SPECIFIC INDEXING: 15 slices, starting from profile 32
+excitationList = collect(nSlices*2 + 2 : 2 : nSlices*4) .+ diffusionDirection * nSlices * 2 .+ (idxAverage - 1) * nSlices * (nDiffusionDirections + 1) * 2 # DATASET SPECIFIC INDEXING: 15 slices, starting from profile 32
 sliceSelection = excitationList[selectedSlice]
 
 @info "Slice Chosen = $selectedSlice: \n \nExcitations Chosen = $excitationList "
@@ -107,7 +111,7 @@ adjustmentDict[:numInterleaves] = isDataSingleIntlv ? 1 : length(adjustmentDict[
 adjustmentDict[:singleSlice] = !multiSlice
 
 # Defined recon size and parameters for data loading
-@info "Using Parameters:\n\nreconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(adjustmentDict[:slices]) \n coils = $(size(sensitivity, 4)) \n numSamples = $(adjustmentDict[:numSamples])\n\n"
+@info "Using Parameters:\n\nreconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(adjustmentDict[:slices]) \n coils = $(size(senseCartesian, 4)) \n numSamples = $(adjustmentDict[:numSamples])\n\n"
 
 if reloadGIRFData || !(@isdefined gK1) || !(@isdefined gAK1) || !(@isdefined gK0) || !(@isdefined gAK0)
     @info "Loading Gradient Impulse Response Functions"
