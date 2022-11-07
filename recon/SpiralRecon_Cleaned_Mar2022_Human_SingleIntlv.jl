@@ -16,13 +16,13 @@ reloadSpiralData = true
 reloadGIRFData = true
 
 ## Choose Slice (can be [single number] OR [1,2,3,...])
-sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
+sliceChoice = collect(1:60); #[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
 # sliceChoice = [6] # For single-slice
 
 ## Total number of ADC points BEFORE the rewinder at the end of the spiral readout. For gradient 508, use 15655 (out of 16084); for gradient 511, use 15445 (out of 15624).
 # numADCSamples = 15504
-numADCSamples = 15655
-# numADCSamples = 15445
+# numADCSamples = 15655
+numADCSamples = 15445
 
 ## Gyromagnetic ratio, in unit of Hz
 gamma = 42577478

@@ -28,7 +28,7 @@ if paramsGeneral[:doProcessMapScan]
     r = RawAcquisitionData(dataFileCartesian)
 
     # does not change anything...
-    r.params["reconFOV"] = [230, 230, 2]
+    # r.params["reconFOV"] = [230, 230, 2]
 
     # Preprocess Data and save!
     preprocessCartesianData(r::RawAcquisitionData, true; fname = processedFileName)
