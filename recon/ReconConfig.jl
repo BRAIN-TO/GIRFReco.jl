@@ -14,7 +14,7 @@ paramsGeneral = Dict{Symbol,Any}()
 # update time stamp for new recon, otherwise keep fixed, will create a new recon/<timeStamp> directory
 #paramsGeneral[:timeStamp] = Dates.format(Dates.now(), "yyyy-mm-dd_HH_MM_SS")
 # paramsGeneral[:timeStamp] = "2022-10-20_09_07_07"
-paramsGeneral[:timeStamp] = "v4";
+paramsGeneral[:timeStamp] = "v5";
 paramsGeneral[:doLoadMaps] = true
 paramsGeneral[:doSaveRecon] = true
 paramsGeneral[:doPlotRecon] = false
@@ -29,9 +29,9 @@ paramsGeneral[:fovShift] = [0, -20]; # TODO: identify unit
 # Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
 paramsGeneral[:reconSize] = (200, 200)
 
-paramsGeneral[:doCorrectWithGIRFkxyz] = false
-paramsGeneral[:doCorrectWithGIRFk0] = false
 paramsGeneral[:doCorrectWithB0map] = true
+paramsGeneral[:doCorrectWithGIRFkxyz] = true
+paramsGeneral[:doCorrectWithGIRFk0] = false
 
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
 # boolean isCalledFromReconLoopGlobal is true, if this RunReconLoop is active
