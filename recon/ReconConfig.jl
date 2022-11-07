@@ -14,10 +14,24 @@ paramsGeneral = Dict{Symbol,Any}()
 # update time stamp for new recon, otherwise keep fixed, will create a new recon/<timeStamp> directory
 #paramsGeneral[:timeStamp] = Dates.format(Dates.now(), "yyyy-mm-dd_HH_MM_SS")
 # paramsGeneral[:timeStamp] = "2022-10-20_09_07_07"
-paramsGeneral[:timeStamp] = "v2";
+paramsGeneral[:timeStamp] = "v4";
 paramsGeneral[:doLoadMaps] = true
 paramsGeneral[:doSaveRecon] = true
 paramsGeneral[:doPlotRecon] = false
+
+
+## Reconstruction Parameter
+
+paramsGeneral[:nVirtualCoils] = 8;
+paramsGeneral[:doCoilCompression] = false;
+paramsGeneral[:fovShift] = [0, -20]; # TODO: identify unit
+
+# Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
+paramsGeneral[:reconSize] = (200, 200)
+
+paramsGeneral[:doCorrectWithGIRFkxyz] = false
+paramsGeneral[:doCorrectWithGIRFk0] = false
+paramsGeneral[:doCorrectWithB0map] = true
 
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
 # boolean isCalledFromReconLoopGlobal is true, if this RunReconLoop is active
@@ -65,8 +79,16 @@ paramsGeneral[:fileNameMapScan] = "field_map_132_2.h5"
     #fname_spiralIntlv2 = "508_128_2.h5" # Gradient 508, interleave 2, b = 2000, 6 diff directions, 4 averages
     #fname_spiralIntlv3 = "508_130_2.h5" # Gradient 508, interleave 3, b = 2000, 6 diff directions, 4 averages
 # paramsGeneral[:fileNameScan]=["508_124_2.h5", "508_126_2.h5", "508_128_2.h5", "508_130_2.h5"]
-paramsGeneral[:fileNameScan]=["508_142_2.h5"]
-paramsGeneral[:nDiffusionDirections] = 30
+paramsGeneral[:fileNameScan]=["508_124_2.h5"]
+paramsGeneral[:nDiffusionDirections] = 6
+
+# NODDI
+# paramsGeneral[:fileNameScan]=["508_140_2.h5"]
+# paramsGeneral[:nDiffusionDirections] = 10
+# paramsGeneral[:fileNameScan]=["508_142_2.h5"]
+# paramsGeneral[:nDiffusionDirections] = 30
+# paramsGeneral[:fileNameScan]=["508_144_2.h5"]
+# paramsGeneral[:nDiffusionDirections] = 64
 
 ## File name for the spiral gradient
 # multi-il gradient file 508, single interleaf gradient file 511
@@ -104,12 +126,3 @@ paramsGeneral[:fullPathSaveMapRecon] = joinpath(paramsGeneral[:pathSaveRecon], p
 paramsGeneral[:fullPathSaveSense] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveSense] )
 paramsGeneral[:fullPathSaveB0] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveB0] )
 
-
-## Reconstruction Parameter
-
-paramsGeneral[:nVirtualCoils] = 8;
-paramsGeneral[:doCoilCompression] = false;
-paramsGeneral[:fovShift] = [0, -20]; # TODO: identify unit
-
-# Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
-paramsGeneral[:reconSize] = (200, 200)

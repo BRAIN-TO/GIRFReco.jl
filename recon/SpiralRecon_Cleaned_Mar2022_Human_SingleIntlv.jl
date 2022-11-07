@@ -132,11 +132,15 @@ if reloadSpiralData || !(@isdefined acqDataImaging)
     @info "Reading spiral data and merging interleaves"
     acqDataImaging = mergeRawInterleaves(adjustmentDict)
 
-    @info "Correcting For GIRF"
-    applyGIRF!(acqDataImaging, gAk1)
+    if paramsGeneral[:doCorrectWithGIRFkxyz] 
+        @info "Correcting For GIRF"
+        applyGIRF!(acqDataImaging, gAk1)
+    end
 
-    @info "Correcting For k₀"
-    applyK0!(acqDataImaging, gAk0)
+    if paramsGeneral[:doCorrectWithGIRFk0]
+            @info "Correcting For k₀"
+        applyK0!(acqDataImaging, gAk0)
+    end
 
     ## Check the k-space nodes so they don't exceed frequency limits [-0.5, 0.5] (inclusive)
     checkAcquisitionNodes!(acqDataImaging)
@@ -185,7 +189,10 @@ params[:iterations] = 20
 params[:solver] = "cgnr"
 params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
 params[:senseMaps] = ComplexF32.(sensitivity[:,:,selectedSlice,:])
-params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
+
+if paramsGeneral[:doCorrectWithB0map]
+    params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
+end
 
 ## Call to reconstruction
 @info "Performing Reconstruction"
