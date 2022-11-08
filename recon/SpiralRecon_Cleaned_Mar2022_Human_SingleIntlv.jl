@@ -1,5 +1,8 @@
 using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
 
+# All data-specific recon parameters
+include("ReconConfig.jl")
+
 ##
 # Include tools and reader functions for running the spiral reconstruction recipe
 # Note: the files are found relative of the location of the folder, not the
@@ -9,26 +12,21 @@ include("../utils/Utils.jl")
 
 ## ----------------------------- User-defined Variables -------------------------- ##
 
-
 ## Set true if we need to reload Cartesian and/or spiral data compulsively.
 doReconstructCartesianDataAndMaps = false
 reloadSpiralData = true
 reloadGIRFData = true
 
-## Choose Slice (can be [single number] OR [1,2,3,...])
-sliceChoice = collect(1:60); #[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
+# Choose Slice (can be [single number] OR [1,2,3,...])
+# Leave empty ([]) to later select all slices
+sliceChoice = []; # TODO: read from ISMRMRD itself
+#[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
 # sliceChoice = [6] # For single-slice
 
-## Total number of ADC points BEFORE the rewinder at the end of the spiral readout. For gradient 508, use 15655 (out of 16084); for gradient 511, use 15445 (out of 15624).
-# numADCSamples = 15504
-# numADCSamples = 15655
-numADCSamples = 15445
 
 ## Gyromagnetic ratio, in unit of Hz
 gamma = 42577478
 
-# All data-specific recon parameters
-include("ReconConfig.jl")
 
 
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
@@ -72,14 +70,14 @@ end
 ## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction Pipeline"
 
-## Default to single slice selection. Choose multi-slice only if computer is capable.
-multiSlice = true
 
-if length(sliceChoice) > 1
-    multiSlice = true
+if isempty(sliceChoice)
+    sliceChoice = collect(1:nSlices)
 end
 
-if !multiSlice
+isMultiSlice = length(sliceChoice) > 1
+
+if !isMultiSlice
     selectedSlice = sliceChoice
 else
     selectedSlice = sort(vec(sliceChoice))
@@ -96,7 +94,7 @@ adjustmentDict = Dict{Symbol,Any}()
 adjustmentDict[:reconSize] = paramsGeneral[:reconSize]
 adjustmentDict[:interleave] = startIndexIntlv
 adjustmentDict[:slices] = 1
-adjustmentDict[:numSamples] = numADCSamples
+adjustmentDict[:numSamples] = paramsGeneral[:numADCSamples]
 adjustmentDict[:delay] = 0.00000 # naive delay correction
 
 adjustmentDict[:interleaveDataFileNames] = paramsGeneral[:fullPathScan]
@@ -108,7 +106,7 @@ adjustmentDict[:doMultiInterleave] = !isDataSingleIntlv
 adjustmentDict[:doOddInterleave] = false
 adjustmentDict[:numInterleaves] = isDataSingleIntlv ? 1 : length(adjustmentDict[:interleaveDataFileNames]) # one interleaf per file, count files, if filenames are array of strings (not only one string)
 
-adjustmentDict[:singleSlice] = !multiSlice
+adjustmentDict[:singleSlice] = !isMultiSlice
 
 # Defined recon size and parameters for data loading
 @info "Using Parameters:\n\nreconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(adjustmentDict[:slices]) \n coils = $(size(senseCartesian, 4)) \n numSamples = $(adjustmentDict[:numSamples])\n\n"

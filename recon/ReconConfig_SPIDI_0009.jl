@@ -19,22 +19,22 @@ paramsGeneral[:doSaveRecon] = true
 paramsGeneral[:doPlotRecon] = false
 
 ## Reconstruction Parameter
-paramsGeneral[:reconId] = "v6";
+paramsGeneral[:reconId] = "v2";
 paramsGeneral[:doCorrectWithB0map] = true
 paramsGeneral[:doCorrectWithGIRFkxyz] = true
 paramsGeneral[:doCorrectWithGIRFk0] = true
 
 paramsGeneral[:nVirtualCoils] = 8;
 paramsGeneral[:doCoilCompression] = false;
-paramsGeneral[:fovShift] = [0, -20]; # TODO: identify unit
+paramsGeneral[:fovShift] = [0, 0];# [0, -20]; # TODO: identify unit
 ## Scan parameters, Additional acquisition information, e.g., slice distance etc.
-paramsGeneral[:sliceDistanceFactor_percent] = 400
+paramsGeneral[:sliceDistanceFactor_percent] = 000; #400
 ## Total number of ADC points BEFORE the rewinder at the end of the spiral readout. For gradient 508, use 15655 (out of 16084); for gradient 511, use 15445 (out of 15624).
 # numADCSamples = 15504
 # numADCSamples = 15655
-paramsGeneral[:numADCSamples] = 15655
+paramsGeneral[:numADCSamples] = 15445
 # Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
-paramsGeneral[:reconSize] = (200, 200) #(112, 112) #(200, 200)
+paramsGeneral[:reconSize] = (112, 112) #(112, 112) #(200, 200)
 
 
 ## Data selector
@@ -51,49 +51,18 @@ end
 ## Path handling, data/results locations etc.
 paramsGeneral[:pathProject] = "/home/kasperl/SPIDI"
 
-# SPIDI_0007
-# /home/wuz/spiralDiffusion/SPIDI_0011
-paramsGeneral[:pathData] = joinpath(paramsGeneral[:pathProject], "data", "SPIDI_0007", "Human", "dat")
-paramsGeneral[:pathGradients] = joinpath(paramsGeneral[:pathProject], "data", "SPIDI_0007", "gradients")
-paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "SPIDI_0007", "Human")
+# SPIDI_0009
+paramsGeneral[:pathData] = joinpath(paramsGeneral[:pathProject], "data", "SPIDI_0009", "Phantom2", "dat")
+paramsGeneral[:pathGradients] = joinpath(paramsGeneral[:pathProject], "data", "SPIDI_0009", "Phantom2", "gradients")
+paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "SPIDI_0009", "Phantom2")
 paramsGeneral[:pathGIRF] = joinpath(paramsGeneral[:pathProject], "code", "GIRFReco", "data", "GIRF", "GIRF_ISMRM2022")
 paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])
-paramsGeneral[:fileNameMapScan] = "field_map_132_2.h5"
-
-# For single interleave data, use this section
-    # startIndexIntlv = 1 # Should always be 1 for single-interleave data.
-    # fname_spiralIntlv = "511_134_2.h5" # Gradient 511, b = 300, 10 diff directions
-    # fname_spiralIntlv = "511_136_2.h5" # Gradient 511, b = 700, 30 diff directions
-    # fname_spiralIntlv = "511_138_2.h5" # Gradient 511, b = 2500, 64 diff directions
-    # fname_spiralIntlv = "508_140_2.h5" # Gradient 508, interleave 0, b = 300, 10 diff directions
-    # fname_spiralIntlv = "508_142_2.h5" # Gradient 508, interleave 0, b = 700, 30 diff directions
-    # fname_spiralIntlv = "508_144_2.h5" # Gradient 508, interleave 0, b = 2500, 64 diff directions
-
-# Multi-interleave data, needs all 4 file names, but will only read the corresponding one.
-    #fname_spiralIntlv0 = "508_124_2.h5" # Gradient 508, interleave 0, b = 2000, 6 diff directions, 4 averages
-    #fname_spiralIntlv1 = "508_126_2.h5" # Gradient 508, interleave 1, b = 2000, 6 diff directions, 4 averages
-    #fname_spiralIntlv2 = "508_128_2.h5" # Gradient 508, interleave 2, b = 2000, 6 diff directions, 4 averages
-    #fname_spiralIntlv3 = "508_130_2.h5" # Gradient 508, interleave 3, b = 2000, 6 diff directions, 4 averages
-# paramsGeneral[:fileNameScan]=["508_124_2.h5", "508_126_2.h5", "508_128_2.h5", "508_130_2.h5"]
-# SPIDI_0007 MDDW 6
-# paramsGeneral[:fileNameScan]=["508_124_2.h5"]
-# paramsGeneral[:nDiffusionDirections] = 6
-
-# NODDI
-# paramsGeneral[:fileNameScan]=["508_140_2.h5"]
-# paramsGeneral[:nDiffusionDirections] = 10
-# paramsGeneral[:fileNameScan]=["508_142_2.h5"]
-# paramsGeneral[:nDiffusionDirections] = 30
-# paramsGeneral[:fileNameScan]=["508_144_2.h5"]
-# paramsGeneral[:nDiffusionDirections] = 64
-# paramsGeneral[:fileNameScan]=["508_124_2.h5"]
-
-paramsGeneral[:fileNameScan]=["508_124_2.h5"]
+paramsGeneral[:fileNameMapScan] = "meas_MID00189_FID14253_GRE_FieldMap_DualEcho_2mm.mrd"
+paramsGeneral[:fileNameScan]=["meas_MID00193_FID14255_diffSpiral_511_b700_1Avg.mrd"]
 paramsGeneral[:nDiffusionDirections] = 6
-
 # File name for the spiral gradient
 # multi-il gradient file 508, single interleaf gradient file 511
-paramsGeneral[:fullPathGradient] = joinpath(paramsGeneral[:pathGradients], "508", "gradients.txt")
+paramsGeneral[:fullPathGradient] = joinpath(paramsGeneral[:pathGradients], "511", "gradients.txt")
 
 if ~ispath(paramsGeneral[:pathSaveRecon])
     mkpath(paramsGeneral[:pathSaveRecon])
@@ -132,3 +101,4 @@ paramsGeneral[:fullPathSaveRecon] = joinpath(paramsGeneral[:pathSaveRecon], para
 paramsGeneral[:fullPathSaveMapRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveMapRecon] )
 paramsGeneral[:fullPathSaveSense] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveSense] )
 paramsGeneral[:fullPathSaveB0] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveB0] )
+
