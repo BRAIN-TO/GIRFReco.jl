@@ -19,7 +19,7 @@ paramsGeneral[:doPlotRecon] = false
 # update time stamp for new recon, otherwise keep fixed, will create a new recon/<reconId> directory
 #paramsGeneral[:reconId] = Dates.format(Dates.now(), "yyyy-mm-dd_HH_MM_SS") # recon ID is reconId
 # paramsGeneral[:reconId] = "2022-10-20_09_07_07"
-paramsGeneral[:reconId] = "v21";
+paramsGeneral[:reconId] = "v11";
 paramsGeneral[:doCorrectWithB0map] = true
 paramsGeneral[:doCorrectWithGIRFkxyz] = true
 paramsGeneral[:doCorrectWithGIRFk0] = true
@@ -35,7 +35,7 @@ paramsGeneral[:sliceDistanceFactor_percent] = 000
 paramsGeneral[:numADCSamples] = 15655
 # Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
 paramsGeneral[:reconSize] = (200, 200) #(112, 112) #(200, 200)
-paramsGeneral[:b0mapSmoothBeta] = 0.001 # for estimateB0Maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
+paramsGeneral[:b0mapSmoothBeta] = 0.01 # for estimateB0Maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
 
 ## Data selector
 #  Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
@@ -78,7 +78,7 @@ if ~ispath(paramsGeneral[:pathSaveRecon])
 end
 
 # copy this file to the recon path for later checks of parameter functions
-cp("recon/ReconConfig.jl", joinpath(paramsGeneral[:pathSaveRecon], "ReconConfig.jl"); force=true)
+cp("recon/ReconConfig.jl", joinpath(paramsGeneral[:pathSaveRecon], "ReconConfig.jl"); force = true)
 
 # If loaded from other scan, this path might differ
 paramsGeneral[:pathLoadMaps] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])
