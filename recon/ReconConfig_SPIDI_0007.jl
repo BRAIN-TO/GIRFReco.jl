@@ -11,14 +11,14 @@ paramsGeneral = Dict{Symbol,Any}()
 # paramsGeneral[:pathData] = "e:\\SPIDI\\data\\SPIDI_0007\\Phantom\\rawdata"
 
 ## General options for recon script
-# update time stamp for new recon, otherwise keep fixed, will create a new recon/<reconId> directory
-#paramsGeneral[:reconId] = Dates.format(Dates.now(), "yyyy-mm-dd_HH_MM_SS") # recon ID is reconId
-# paramsGeneral[:reconId] = "2022-10-20_09_07_07"
 paramsGeneral[:doLoadMaps] = true
 paramsGeneral[:doSaveRecon] = true
 paramsGeneral[:doPlotRecon] = false
 
 ## Reconstruction Parameter
+# update time stamp for new recon, otherwise keep fixed, will create a new recon/<reconId> directory
+#paramsGeneral[:reconId] = Dates.format(Dates.now(), "yyyy-mm-dd_HH_MM_SS") # recon ID is reconId
+# paramsGeneral[:reconId] = "2022-10-20_09_07_07"
 paramsGeneral[:reconId] = "v6";
 paramsGeneral[:doCorrectWithB0map] = true
 paramsGeneral[:doCorrectWithGIRFkxyz] = true
