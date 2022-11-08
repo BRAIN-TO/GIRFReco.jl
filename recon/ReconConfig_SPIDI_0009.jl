@@ -35,6 +35,7 @@ paramsGeneral[:sliceDistanceFactor_percent] = 000; #400
 paramsGeneral[:numADCSamples] = 15445
 # Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
 paramsGeneral[:reconSize] = (112, 112) #(112, 112) #(200, 200)
+paramsGeneral[:b0mapSmoothBeta] = 0.1 # for estimateB0Maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
 
 
 ## Data selector
@@ -58,6 +59,8 @@ paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "
 paramsGeneral[:pathGIRF] = joinpath(paramsGeneral[:pathProject], "code", "GIRFReco", "data", "GIRF", "GIRF_ISMRM2022")
 paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])
 paramsGeneral[:fileNameMapScan] = "meas_MID00189_FID14253_GRE_FieldMap_DualEcho_2mm.mrd"
+paramsGeneral[:mapTEs_ms] = [4.92,  7.38]
+
 paramsGeneral[:fileNameScan]=["meas_MID00193_FID14255_diffSpiral_511_b700_1Avg.mrd"]
 paramsGeneral[:nDiffusionDirections] = 6
 # File name for the spiral gradient

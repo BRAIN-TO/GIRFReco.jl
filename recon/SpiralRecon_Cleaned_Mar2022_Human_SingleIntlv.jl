@@ -12,8 +12,7 @@ include("../utils/Utils.jl")
 
 ## ----------------------------- User-defined Variables -------------------------- ##
 
-## Set true if we need to reload Cartesian and/or spiral data compulsively.
-doReconstructCartesianDataAndMaps = false
+## Set true if we need to reload raw data compulsively.
 reloadSpiralData = true
 reloadGIRFData = true
 
@@ -55,10 +54,8 @@ if paramsGeneral[:doLoadMaps] && isfile(paramsGeneral[:fullPathSaveB0]) # # TODO
 
     b0Maps = b0Maps[:,:,invperm(sliceIndexArray)]
     senseCartesian = loadMap(paramsGeneral[:fullPathSaveSense]; doSplitPhase = true)[:,:,invperm(sliceIndexArray),:]
-end
-
-if doReconstructCartesianDataAndMaps || !((@isdefined senseCartesian) && (@isdefined b0Maps))
-## Only calculate sensitivity and B0 maps when they have not been done yet, or it's specifically required.
+else
+    ## Only calculate sensitivity and B0 maps when they have not been done yet, or it's specifically required.
     ## Executing Cartesian recon from which B0/sensitivity maps have been computed
     @info "Running CartesianRecon to retrieve maps (senseCartesian and b0Maps)"
     include("CartesianRecon_Mar2022_Human.jl")

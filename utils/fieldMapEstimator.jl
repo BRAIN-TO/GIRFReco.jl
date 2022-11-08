@@ -86,7 +86,7 @@ Processes 3D volume data as output from MRIReco.reconstruction to estimate field
 * `isrotated` - Boolean controlling whether to rotate the B0 maps to match the images or not (legacy feature)
 
 # Keyword Arguments 
-* `β` - Regularization parameter controlling roughness penalty
+* `β` - Regularization parameter controlling roughness penalty (larger = smoother)
 * `reltol` - early stopping criteria (exit if subsequent cost function change < reltol)
 
 """
