@@ -19,7 +19,7 @@ paramsGeneral[:doPlotRecon] = false
 # update time stamp for new recon, otherwise keep fixed, will create a new recon/<reconId> directory
 #paramsGeneral[:reconId] = Dates.format(Dates.now(), "yyyy-mm-dd_HH_MM_SS") # recon ID is reconId
 # paramsGeneral[:reconId] = "2022-10-20_09_07_07"
-paramsGeneral[:reconId] = "v1";
+paramsGeneral[:reconId] = "v11";
 paramsGeneral[:doCorrectWithB0map] = true
 paramsGeneral[:doCorrectWithGIRFkxyz] = true
 paramsGeneral[:doCorrectWithGIRFk0] = true
@@ -75,6 +75,9 @@ paramsGeneral[:fullPathGradient] = joinpath(paramsGeneral[:pathGradients], "508"
 if ~ispath(paramsGeneral[:pathSaveRecon])
     mkpath(paramsGeneral[:pathSaveRecon])
 end
+
+# copy this file to the recon path for later checks of parameter functions
+cp("recon/ReconConfig.jl", joinpath(paramsGeneral[:pathSaveRecon], "ReconConfig.jl"))
 
 # If loaded from other scan, this path might differ
 paramsGeneral[:pathLoadMaps] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])

@@ -1,11 +1,12 @@
 ## Recon loop manipulator dimension selector of what has to be reconstructed
 # Probably the SpiralRecon-Wrapper should be a function to take selector as Argument
 # but then running as a script for debugging might be less convenient
+@info "Starting in $(pwd())"
 
 global selector = Dict{Symbol,Any}()
 global isCalledFromReconLoopGlobal::Bool = true
-for avg = 2:4 #1:4
-    for dif = 0 # 0:30 # 0:6 # 0 is b=0 image
+for avg = 1 #1:4
+    for dif = 1#1:10 # 0:30 # 0:6 # 0 is b=0 image
         selector[:avg] = avg;
         selector[:seg] = 1;
         selector[:dif] = dif;

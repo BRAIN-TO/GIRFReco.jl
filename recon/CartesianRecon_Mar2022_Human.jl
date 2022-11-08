@@ -116,7 +116,7 @@ slices = 1:length(sliceIndexArray)
 
 @info "Calculating B0 Maps"
 # b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
-b0Maps = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,true; β = 0.1, reltol = 1e-4)
+b0Maps = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,true; β = 0.01, reltol = 1e-4)
 
 # save B0 map
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
