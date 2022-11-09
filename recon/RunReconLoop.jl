@@ -5,7 +5,7 @@
 
 global selector = Dict{Symbol,Any}()
 global isCalledFromReconLoopGlobal::Bool = true
-for avg = 1 #1:4
+for avg = 2 #1:4
     for dif = 0:10#1:10 # 0:30 # 0:6 # 0 is b=0 image
         selector[:avg] = avg;
         selector[:seg] = 1;

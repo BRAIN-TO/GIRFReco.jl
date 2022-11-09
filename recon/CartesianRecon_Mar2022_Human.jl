@@ -94,7 +94,7 @@ paramsCartesian[:reco] = "multiCoil" # choose multicoil reconstruction
 paramsCartesian[:reconSize] = (acqDataCartesian.encodingSize[1],acqDataCartesian.encodingSize[2]) # set recon size to be the same as encoded size
 paramsCartesian[:regularization] = "L2" # choose regularization for the recon algorithm
 paramsCartesian[:λ] = 1.e-2 # recon parameter (there may be more of these, need to dig into code to identify them for solvers other than cgnr)
-paramsCartesian[:iterations] = 20 # number of CG iterations
+paramsCartesian[:iterations] =  paramsGeneral[:nReconIterations] # number of CG iterations
 paramsCartesian[:solver] = "cgnr" # inverse problem solver method
 paramsCartesian[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false) # turn on store solutions if you want to see the reconstruction convergence (uses more memory)
 paramsCartesian[:senseMaps] = ComplexF32.(sensitivity) # set sensitivity map array
