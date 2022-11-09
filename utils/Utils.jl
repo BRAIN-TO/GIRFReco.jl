@@ -750,8 +750,9 @@ For complex-valued data, magnitude and phase can be split into separate files
                                   to enable display in typical NIfTI viewers
 """
 function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0], doSplitPhase::Bool=false, doNormalize::Bool=true)
-    spacing = resolution_mm*Unitful.mm
-    offset = offset_mm*Unitful.mm
+    # multiplication with 1000 should no longer be necessary after MRIReco 0.7.1
+    spacing = 1000.0*resolution_mm*Unitful.mm
+    offset = 1000.0*offset_mm*Unitful.mm
 
     if ndims(calib_map) >= 4 # multi-coil calib_map, e.g., sensitivity, or recon, but we can only store the first 4 dims in a Nifti
         I = reshape(calib_map, size(calib_map,1), size(calib_map,2), size(calib_map,3), size(calib_map,4), 1, 1);

@@ -202,7 +202,7 @@ if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., 
     # TODO: use slice ordering from cartesian scan directly!
     nSlices = numSlices(acqDataImaging)
     sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
-    saveMap(paramsGeneral[:fullPathSaveRecon], reco.data[:,:,sliceIndexArray], resolution_mm; doSplitPhase=true, doNormalize = true)
+    saveMap(paramsGeneral[:fullPathSaveRecon], paramsGeneral[:scalingFactorSaveRecon]*reco.data[:,:,sliceIndexArray], resolution_mm; doSplitPhase=true, doNormalize = paramsGeneral[:doNormalizeRecon])
 end
 
 if paramsGeneral[:doPlotRecon]

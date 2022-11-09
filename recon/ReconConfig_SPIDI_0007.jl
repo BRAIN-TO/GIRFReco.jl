@@ -36,6 +36,8 @@ paramsGeneral[:numADCSamples] = 15655
 # Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
 paramsGeneral[:reconSize] = (200, 200) #(112, 112) #(200, 200)
 paramsGeneral[:b0mapSmoothBeta] = 0.1 # for estimateB0Maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
+paramsGeneral[:doNormalizeRecon] = false # set max abs to 1
+paramsGeneral[:scalingFactorSaveRecon] = 1.0e9 # 1 # typical range of recon intensities is 1e-7, rescale when saving, e.g., to 0...1000 roughly for fMRI analysis
 
 
 ## Data selector
