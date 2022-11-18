@@ -23,11 +23,11 @@ The data for the phantom reconstruction (`SpiralRecon_Cleaned.jl`) is publicly a
 
 ## Examples
     
-1.  Interplay of GIRF.jl and MRIReco.jl: Using the julia recon package to reconstruct a spiral image from a structure phantom with a GIRF-predicted trajectory (*presented at [ISMRM 2022, p.2435](https://archive.ismrm.org/2022/2435.html)*)
+1.  **Phantom data** (*presented at [ISMRM 2022, p.2435](https://archive.ismrm.org/2022/2435.html)*): Interplay of GIRF.jl and MRIReco.jl: Using the julia recon package to reconstruct a spiral image from a structure phantom with a GIRF-predicted trajectory 
     ```
     recon/SpiralRecon_Cleaned.jl
     ```   
-2.  Interplay of GIRF.jl and MRIReco.jl: Using the julia recon package to reconstruct a spiral image in-vivo (brain diffusion image) with a GIRF-predicted trajectory (*hopefully to be presented at ISMRM 2023 and the Sedona Workshop on Data Sampling and Reconstruction*)
+2.  **In-vivo brain data** (spiral diffusion, *hopefully to be presented at ISMRM 2023 and the Sedona Workshop on Data Sampling and Reconstruction*): Interplay of GIRF.jl and MRIReco.jl: Using the julia recon package to reconstruct a spiral image in-vivo (brain diffusion image) with a GIRF-predicted trajectory
     - To run an example image reconstruction (one volume, no diffusion weighting): Execute
     ```
     recon/SpiralRecon_Cleaned_Mar2022_Human_SingleIntlv.jl
