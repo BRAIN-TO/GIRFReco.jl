@@ -16,7 +16,7 @@ paramsGeneral[:doSaveProcessedMapScan] = false; # save ISMRMD file of preprocess
 # update time stamp for new recon, otherwise keep fixed, will create a new recon/<reconId> directory
 #paramsGeneral[:reconId] = Dates.format(Dates.now(), "yyyy-mm-dd_HH_MM_SS") # recon ID is reconId
 # paramsGeneral[:reconId] = "2022-10-20_09_07_07"
-paramsGeneral[:reconId] = "v02";
+paramsGeneral[:reconId] = "v999";
 paramsGeneral[:doCorrectWithB0map] = true
 paramsGeneral[:doCorrectWithGIRFkxyz] = true
 paramsGeneral[:doCorrectWithGIRFk0] = true

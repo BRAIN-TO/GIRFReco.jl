@@ -10,7 +10,7 @@ for avg = 1:4 #1:4
         selector[:avg] = avg;
         selector[:seg] = 1;
         selector[:dif] = dif;
-        @info "\n\tReconstructing avg=$(selector[:avg]), seg=$(selector[:seg]), dif=$(selector[:dif])\n\n"
+        @info "\n\n\n\tReconstructing avg=$(selector[:avg]), seg=$(selector[:seg]), dif=$(selector[:dif])\n\n"
         include("SpiralRecon_Cleaned_Mar2022_Human_SingleIntlv.jl")
     end
 end
