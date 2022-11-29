@@ -1,4 +1,4 @@
-using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, Printf, ROMEO, NIfTI
+using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, Printf, ROMEO, NIfTI, Unitful, AxisArrays, ImageUtils
 
 ## General Plotting function for the reconstruction
 
@@ -446,6 +446,14 @@ function preprocessCartesianData(r::RawAcquisitionData, doSave; fname = "data/te
     # permutedims(acqDataCartesian.kdata,[3,2,1])
     raw = RawAcquisitionData(acqDataCartesian)
 
+    # Since the data should generally have 3D information when saved, we make sure 2D data is appropriately stored as 3D data with a singleton dimension
+    if length(raw.params["encodedSize"]) == 2
+        e_sz = raw.params["encodedSize"]
+        raw.params["encodedSize"] = [e_sz[1], e_sz[2], 1]
+    end
+
+    #@info minimalHeader(ntuple(d->acqDataCartesian.encodingSize[d],2), acqDataCartesian.fov, tr_name=string(trajectory(acqDataCartesian,1)))
+
     if doSave
 
         # raw.params = headerCopy
@@ -611,6 +619,13 @@ function applyGIRF!(a::AcquisitionData{T}, g::GirfApplier) where T
     S = a.encodingSize
     F = a.fov
 
+    if length(S) == 2
+        S = (S[1], S[2], 1)
+    end
+    if length(F) == 2
+        F = Float32.(F[1], F[2], 1.0)
+    end
+
     for l = 1:length(a.traj)
         
         nProfiles = a.traj[l].numProfiles
@@ -660,6 +675,13 @@ function applyK0!(a::AcquisitionData{T},g::GirfApplier) where T
     # Read parameters for gradient and node conversion
     S = a.encodingSize
     F = a.fov
+
+    if length(S) == 2
+        S = (S[1], S[2], 1)
+    end
+    if length(F) == 2
+        F = (F[1], F[2], 1.0)
+    end
 
     for l = 1:length(a.traj)
         
@@ -751,8 +773,8 @@ For complex-valued data, magnitude and phase can be split into separate files
 """
 function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0], doSplitPhase::Bool=false, doNormalize::Bool=true)
     # multiplication with 1000 should no longer be necessary after MRIReco 0.7.1
-    spacing = 1000.0*resolution_mm*Unitful.mm
-    offset = 1000.0*offset_mm*Unitful.mm
+    spacing = 1000.0 .*resolution_mm .*Unitful.mm
+    offset = 1000.0 .*offset_mm .*Unitful.mm
 
     if ndims(calib_map) >= 4 # multi-coil calib_map, e.g., sensitivity, or recon, but we can only store the first 4 dims in a Nifti
         I = reshape(calib_map, size(calib_map,1), size(calib_map,2), size(calib_map,3), size(calib_map,4), 1, 1);

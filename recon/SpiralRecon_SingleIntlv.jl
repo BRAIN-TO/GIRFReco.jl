@@ -1,7 +1,7 @@
-using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
+using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients, FileIO, MRIFiles, MRICoilSensitivities, RegularizedLeastSquares
 
 # All data-specific recon parameters
-include("ReconConfig.jl")
+include("ReconConfig_SPIDI_0007.jl")
 
 ##
 # Include tools and reader functions for running the spiral reconstruction recipe
@@ -141,7 +141,7 @@ end
 @info "Resizing Sense Maps"
 
 # Resize sense maps to match encoding size of data matrix
-sensitivity = mapslices(x ->imresize(x, adjustmentDict[:reconSize]), senseCartesian, dims=[1,2])
+sensitivity = mapslices(x ->imresize(x, adjustmentDict[:reconSize][1:2]), senseCartesian, dims=[1,2])
 
 # Plot the sensitivity maps of each coil
 @info "Plotting SENSE Maps"
@@ -164,7 +164,7 @@ end
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Resizing B0 Maps"
-resizedB0 = mapslices(x->imresize(x,adjustmentDict[:reconSize]), b0Maps, dims=[1,2])
+resizedB0 = mapslices(x->imresize(x,adjustmentDict[:reconSize][1:2]), b0Maps, dims=[1,2])
 
 ## Define Parameter Dictionary for use with reconstruction
 # CAST TO ComplexF32 if you're using current MRIReco.jl
@@ -172,7 +172,7 @@ resizedB0 = mapslices(x->imresize(x,adjustmentDict[:reconSize]), b0Maps, dims=[1
 @info "Setting Parameters"
 params = Dict{Symbol,Any}()
 params[:reco] = "multiCoil"
-params[:reconSize] = adjustmentDict[:reconSize]
+params[:reconSize] = adjustmentDict[:reconSize][1:2]
 params[:regularization] = "L2"
 params[:λ] = 1e-2 # CHANGE THIS TO GET BETTER OR WORSE RECONSTRUCTION RESULTS
 params[:iterations] = paramsGeneral[:nReconIterations]
@@ -191,8 +191,8 @@ end
 
 # save Map recon (multi-echo etc.)
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
-    resolution_mm = fieldOfView(acqDataImaging)./encodingSize(acqDataImaging)
-    resolution_mm[3] = fieldOfView(acqDataImaging)[3] *(1 + paramsGeneral[:sliceDistanceFactor_percent]/100.0); # for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
+    resolution_tmp = fieldOfView(acqDataImaging)[1:2]./encodingSize(acqDataImaging)
+    resolution_mm = (resolution_tmp[1],resolution_tmp[2],fieldOfView(acqDataImaging)[3] *(1 + paramsGeneral[:sliceDistanceFactor_percent]/100.0)) # for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
 
     # TODO: use slice ordering from cartesian scan directly!
     nSlices = numSlices(acqDataImaging)
