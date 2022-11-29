@@ -40,11 +40,12 @@ paramsGeneral[:scalingFactorSaveRecon] = 1.0e9 # 1 # typical range of recon inte
 # Data selector
 #  Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
 # boolean isCalledFromReconLoopGlobal is true, if this RunReconLoop is active
-if !((@isdefined isCalledFromReconLoopGlobal) && isCalledFromReconLoopGlobal)
+# If isCalledFromReconLoopGlobal is false or not defined, the data selector needs to be defined here.
+if !(@isdefined isCalledFromReconLoopGlobal) || !isCalledFromReconLoopGlobal
     global selector = Dict{Symbol,Any}()
-    selector[:avg] = 1;
-    selector[:seg] = 1;
-    selector[:dif] = 0;
+    selector[:avg] = 1
+    selector[:seg] = 1
+    selector[:dif] = 0
 end
 
 
