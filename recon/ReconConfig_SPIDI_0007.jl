@@ -23,7 +23,7 @@ paramsGeneral[:doCorrectWithGIRFk0] = true
 
 paramsGeneral[:nVirtualCoils] = 8;
 paramsGeneral[:doCoilCompression] = false;
-paramsGeneral[:fovShift] = [0, -20]; # TODO: identify unit
+paramsGeneral[:fovShift] = [0, -20]; # Unit: number of voxels
 
 ## Scan parameters, Additional acquisition information, e.g., slice distance etc.
 paramsGeneral[:sliceDistanceFactor_percent] = 400 # 000
