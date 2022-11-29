@@ -80,17 +80,11 @@ if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., 
     saveMap(paramsGeneral[:fullPathSaveSense], sensitivity[:,:,sliceIndexArray,:], resolution_mm; doSplitPhase=true)
 end
 
-plotSenseMaps(sensitivity,nCoils)
-
-#acqDataCartesian.traj[1].cartesian = false
-#acqDataCartesian.traj[2].cartesian = false
 ## Parameter dictionary definition for reconstruction
 
 @info "Setting Parameters"
 paramsCartesian = Dict{Symbol,Any}() # instantiate dictionary
 paramsCartesian[:reco] = "multiCoil" # choose multicoil reconstruction
-
-# TODO: make recon size and FOV variable!
 paramsCartesian[:reconSize] = (acqDataCartesian.encodingSize[1],acqDataCartesian.encodingSize[2]) # set recon size to be the same as encoded size
 paramsCartesian[:regularization] = "L2" # choose regularization for the recon algorithm
 paramsCartesian[:λ] = 1.e-2 # recon parameter (there may be more of these, need to dig into code to identify them for solvers other than cgnr)
