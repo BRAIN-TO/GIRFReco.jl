@@ -1,4 +1,4 @@
-using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, Printf
+using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, Printf, ROMEO, NIfTI
 
 ## General Plotting function for the reconstruction
 
@@ -124,8 +124,6 @@ function checkProfiles(rawData)
 
 end
 
-
-
 """
 plotSenseMaps!(sense, n_channels)
 Plots coil sensitivity maps from the channels, for a total of n_channels plots
@@ -168,6 +166,49 @@ end
 
 ## PREPROCESSING
 
+"""
+    calculateB0Maps(imData,slices,echoTime1,echoTime2)
+
+Calculate  B0 map from the two images with different echo times via their phase difference (obtained from imTE2.*conj(imTE1))
+
+TODO have the b0 map calculation be capable of handling variable echo times
+TODO2: Do we need this basic B0 map calculation or is it superseded by estimateB0Maps?
+
+# Arguments
+* `imdata`                          - [nX nY nZ 2 nCoils] 5D image array, 4th dim echo time
+* `slices::NTuple{nSlices,Int}`     - slice index vector (tuple?) for which map is computed
+* `echoTime1::AbstractFloat`        - TE1 [ms]
+* `echoTime2::AbstractFloat`        - TE2 [ms]
+"""
+function calculateB0Maps(imData,slices,echoTime1,echoTime2)
+
+    # b0Maps = mapslices(x -> rotl90(x),ROMEO.unwrap(angle.(imData[:,:,slices,2,1].*conj(imData[:,:,slices,1,1]))),dims=(1,2))./((7.38-4.92)/1000)
+    b0Maps = mapslices(x -> x, ROMEO.unwrap(angle.(imData[:,:,slices,2,1].*conj(imData[:,:,slices,1,1]))),dims=(1,2))./((echoTime2-echoTime1)/1000)
+
+end
+
+"""
+    getSliceOrder(nSlices, isSliceInterleaved)
+Returns array mapping from acquisition number to slice number (geometric position) (indexArray[slice = 1:9] = [acquisitionNumbers])
+TODO: Add ascending/descending options
+# Arguments
+* `nSlices::Int`                    - number of slices in total acquired stack (FOV)
+* `isSliceInterleaved::Bool=true`   - if true, interleaved slice order is created, otherwise ascending slice order is returned
+"""
+function getSliceOrder(nSlices; isSliceInterleaved::Bool=true)
+    
+    sliceIndexArray = 1:nSlices
+    reorderedSliceIndexArray = zeros(Int16, size(sliceIndexArray))
+    if isSliceInterleaved && nSlices > 1
+        reorderedSliceIndexArray[1:2:end] = sliceIndexArray[1:Int(ceil(nSlices / 2))]
+        reorderedSliceIndexArray[2:2:end] = sliceIndexArray[Int(ceil(nSlices / 2) + 1) : end]
+    else
+        reorderedSliceIndexArray = sliceIndexArray
+    end
+
+    return reorderedSliceIndexArray
+
+end
 
 """
 syncTrajAndData!(a::AcquisitionData)
@@ -691,3 +732,111 @@ end
 #     end
 
 # end
+
+## Input/Output, File handling
+
+"""
+    saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
+
+Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
+For complex-valued data, magnitude and phase can be split into separate files
+
+# Arguments
+* `filename::String`            - string filename with extension .nii, example "sensemap.nii"
+* `calib_map`                   - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
+* `resolution_mm`               - resolution in mm, 3 element vector, e.g., [1.0, 1.0, 2.0]
+* `offset_mm`                   - isocenter offset in mm, default: [0.0, 0.0, 0.0]
+* `doSplitPhase::Bool=false`    - if true, data is saved in two nifti files with suffix "_magn" and "_phase", respectively
+                                  to enable display in typical NIfTI viewers
+"""
+function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0], doSplitPhase::Bool=false, doNormalize::Bool=true)
+    # multiplication with 1000 should no longer be necessary after MRIReco 0.7.1
+    spacing = 1000.0*resolution_mm*Unitful.mm
+    offset = 1000.0*offset_mm*Unitful.mm
+
+    if ndims(calib_map) >= 4 # multi-coil calib_map, e.g., sensitivity, or recon, but we can only store the first 4 dims in a Nifti
+        I = reshape(calib_map, size(calib_map,1), size(calib_map,2), size(calib_map,3), size(calib_map,4), 1, 1);
+    else
+        I = reshape(calib_map, size(calib_map,1), size(calib_map,2), size(calib_map,3), 1, 1, 1);
+    end
+
+    # scale to max 1
+    if doNormalize
+        I /= maximum(abs.(I))
+    end
+
+    im = AxisArray(I,
+    Axis{:x}(range(offset[1], step=spacing[1], length=size(I, 1))),
+    Axis{:y}(range(offset[2], step=spacing[2], length=size(I, 2))),
+    Axis{:z}(range(offset[3], step=spacing[3], length=size(I, 3))),
+    Axis{:coils}(1:size(I, 4)),
+    Axis{:echos}(1:size(I, 5)),
+    Axis{:repetitions}(1:size(I, 6)))
+
+    if doSplitPhase
+        filename_magn = splitext(filename)[1] * "_magn.nii"
+        saveImage(filename_magn, map(abs,im)) # map is needed, because abs.(im) would convert AxisArray back into basic array
+
+        filename_phase = splitext(filename)[1] * "_phase.nii"
+        saveImage(filename_phase, map(angle,im))
+    else
+        saveImage(filename, im)
+    end
+
+end
+
+
+"""
+    loadMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
+
+Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
+For complex-valued data, magnitude and phase can be split into separate files
+
+# Arguments
+* `filename::String`            - string filename with extension .nii, example "sensemap.nii"
+* `doSplitPhase::Bool=false`    - if true, data is saved in two nifti files with suffix "_magn" and "_phase", respectively
+                                  to enable display in typical NIfTI viewers
+
+# Output
+* `calib_map`                    - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
+
+"""
+function loadMap(filename; doSplitPhase::Bool=false)
+    
+    if doSplitPhase
+        filename_magn = splitext(filename)[1] * "_magn.nii"
+        I_magn = loadImage(filename_magn) # map is needed, because abs.(im) would convert AxisArray back into basic array
+
+        filename_phase = splitext(filename)[1] * "_phase.nii"
+        I_phase = loadImage(filename_phase)
+
+        calib_map = (I_magn.data).*exp.(1im.*(I_phase.data))
+    else
+        I = loadImage(filename)
+        calib_map = I.data
+    end
+    
+    # squeeze singleton dimensions of 6-dim array
+    calib_map = dropdims(calib_map, dims = tuple(findall(size(calib_map) .== 1)...))
+
+    return calib_map
+
+
+end
+
+function shiftksp!(acqData,shift)
+
+    numSl = numSlices(acqData)
+    numRep, numContr = numRepetitions(acqData), numContrasts(acqData)
+
+    smat = prod(exp.(1im .* acqData.traj[1].nodes[:,acqData.subsampleIndices[1]] .* shift .* 2 .* pi),dims=1)
+
+    for slice = 1:numSl
+        for contr = 1:numContr
+            for rep = 1:numRep                    
+                acqData.kdata[contr,slice,rep] = acqData.kdata[contr,slice,rep] .* smat'                    
+            end
+        end
+    end
+
+end

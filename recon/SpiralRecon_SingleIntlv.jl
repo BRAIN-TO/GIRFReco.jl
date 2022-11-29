@@ -17,15 +17,11 @@ reloadSpiralData = true
 reloadGIRFData = true
 
 # Choose Slice (can be [single number] OR [1,2,3,...])
-# Leave empty ([]) to later select all slices
+# Leave empty ([]) or remove this line to later select all slices
 sliceChoice = []; # TODO: read from ISMRMRD itself
-#[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
-# sliceChoice = [6] # For single-slice
-
 
 ## Gyromagnetic ratio, in unit of Hz
 gamma = 42577478
-
 
 
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
@@ -58,17 +54,17 @@ else
     ## Only calculate sensitivity and B0 maps when they have not been done yet, or it's specifically required.
     ## Executing Cartesian recon from which B0/sensitivity maps have been computed
     @info "Running CartesianRecon to retrieve maps (senseCartesian and b0Maps)"
-    include("CartesianRecon_Mar2022_Human.jl")
+    include("CartesianRecon.jl")
     nSlices = size(b0Maps, 3);
 end
 
-## Set figures to be unlocked from the win9ow (i.e use matplotlib backend with controls)
+## Set figures to be unlocked from the window (i.e use matplotlib backend with controls)
 
 ## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction Pipeline"
 
 
-if isempty(sliceChoice)
+if isempty(sliceChoice) || !(@isdefined sliceChoice)
     sliceChoice = collect(1:nSlices)
 end
 
@@ -90,7 +86,6 @@ sliceSelection = excitationList[selectedSlice]
 adjustmentDict = Dict{Symbol,Any}()
 adjustmentDict[:reconSize] = paramsGeneral[:reconSize]
 adjustmentDict[:interleave] = startIndexIntlv
-adjustmentDict[:slices] = 1
 adjustmentDict[:numSamples] = paramsGeneral[:numADCSamples]
 adjustmentDict[:delay] = 0.00000 # naive delay correction
 
@@ -106,7 +101,7 @@ adjustmentDict[:numInterleaves] = isDataSingleIntlv ? 1 : length(adjustmentDict[
 adjustmentDict[:singleSlice] = !isMultiSlice
 
 # Defined recon size and parameters for data loading
-@info "Using Parameters:\n\nreconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(adjustmentDict[:slices]) \n coils = $(size(senseCartesian, 4)) \n numSamples = $(adjustmentDict[:numSamples])\n\n"
+@info "Using Parameters:\n\nreconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(sliceChoice) \n coils = $(size(senseCartesian, 4)) \n numSamples = $(adjustmentDict[:numSamples])\n\n"
 
 if reloadGIRFData || !(@isdefined gK1) || !(@isdefined gAK1) || !(@isdefined gK0) || !(@isdefined gAK0)
     @info "Loading Gradient Impulse Response Functions"
