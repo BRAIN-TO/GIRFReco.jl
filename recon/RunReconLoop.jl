@@ -11,7 +11,7 @@ for avg = 1:4 #1:4
         selector[:seg] = 1;
         selector[:dif] = dif;
         @info "\n\n\n\tReconstructing avg=$(selector[:avg]), seg=$(selector[:seg]), dif=$(selector[:dif])\n\n"
-        include("SpiralRecon_Cleaned_Mar2022_Human_SingleIntlv.jl")
+        include("SpiralRecon_SingleIntlv.jl")
     end
 end
 isCalledFromReconLoopGlobal = false;
