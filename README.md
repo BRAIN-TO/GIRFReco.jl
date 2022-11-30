@@ -1,5 +1,14 @@
 # GIRFReco.jl: An open-source pipeline for spiral MRI Reconstruction in Julia
 
+### 0.7.1 Requirements
+* `dev MRIReco`
+* `dev MRIFiles`
+* `dev MRIBase`
+* `add ImageUtils`
+* `add MRICoilSensitivities`
+* `add FileIO`
+* ... more to come when debugging works 
+
 This package provides an image reconstruction pipeline for real-world MRI use cases, such as spiral diffusion imaging. It is completely implemented in Julia using original code and external packages, e.g., [MRIReco.jl](https://magneticresonanceimaging.github.io/MRIReco.jl/latest/) for the main iterative reconstruction tasks and [MRIGradients.jl](https://github.com/BRAIN-TO/MRIGradients.jl) for the corrections of system imperfections via the Gradient Impulse Response Function (GIRF).
 
 This repository includes a working example for spiral reconstruction with GIRF correction of trajectory (kx-ky-kz, dubbed as k1) and B0 eddy currents (k0), iterative reconstruction (cg-SENSE) and a Cartesian reconstruction example for coil sensitivity and off-resonance map calculation.
