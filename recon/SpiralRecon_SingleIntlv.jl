@@ -84,7 +84,7 @@ sliceSelection = excitationList[selectedSlice]
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] = paramsGeneral[:reconSize]
+adjustmentDict[:reconSize] = Tuple(paramsGeneral[:reconSize])
 adjustmentDict[:interleave] = startIndexIntlv
 adjustmentDict[:numSamples] = paramsGeneral[:numADCSamples]
 adjustmentDict[:delay] = 0.00000 # naive delay correction
@@ -141,7 +141,7 @@ end
 @info "Resizing Sense Maps"
 
 # Resize sense maps to match encoding size of data matrix
-sensitivity = mapslices(x ->imresize(x, adjustmentDict[:reconSize][1:2]), senseCartesian, dims=[1,2])
+sensitivity = mapslices(x ->imresize(x, adjustmentDict[:reconSize][1],adjustmentDict[:reconSize][2]), senseCartesian, dims=[1,2])
 
 # Plot the sensitivity maps of each coil
 @info "Plotting SENSE Maps"
@@ -153,7 +153,7 @@ end
 
 # shift FOV to middle :) 
 shiftksp!(acqDataImaging,paramsGeneral[:fovShift])
-#changeFOV!(acqDataImaging,[1.5,1.5])
+# changeFOV!(acqDataImaging,[0.99, 0.99])
 
 
 ## Do coil compression to make recon faster
@@ -164,7 +164,7 @@ end
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Resizing B0 Maps"
-resizedB0 = mapslices(x->imresize(x,adjustmentDict[:reconSize][1:2]), b0Maps, dims=[1,2])
+resizedB0 = mapslices(x->imresize(x,adjustmentDict[:reconSize][1],adjustmentDict[:reconSize][2]), b0Maps, dims=[1,2])
 
 ## Define Parameter Dictionary for use with reconstruction
 # CAST TO ComplexF32 if you're using current MRIReco.jl
@@ -202,7 +202,7 @@ end
 
 if paramsGeneral[:doPlotRecon]
     @info "Plotting Reconstruction"
-    pygui(true)
+    #pygui(true)
     plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice], figHandles=["Original Magnitude", "Original Phase", "B0"], isSliceInterleaved=true, rotateAngle=270)
 end
 

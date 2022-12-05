@@ -120,8 +120,7 @@ end
 
 if paramsGeneral[:doPlotRecon]
     @info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps)"
-    pygui(true) # Leave this code till we need plotting.
-    # plotSenseMaps(sensitivity,nCoils)
+    plotSenseMaps(sensitivity,nCoils)
     plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps, isSliceInterleaved = true, rotateAngle = 270)
 end
 
