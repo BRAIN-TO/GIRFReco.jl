@@ -454,20 +454,16 @@ function preprocessCartesianData(r::RawAcquisitionData, doSave; fname = "data/te
     ## Properly arrange data from the converted siemens file
     validateAcqData!(acqDataCartesian)
 
-    # # Need to permute the dimensions of kdata to match the convention of MRIReco.jl
-    # permutedims(acqDataCartesian.kdata,[3,2,1])
-    raw = RawAcquisitionData(acqDataCartesian)
-
-    # Since the data should generally have 3D information when saved, we make sure 2D data is appropriately stored as 3D data with a singleton dimension
-    if length(raw.params["encodedSize"]) == 2
-        e_sz = raw.params["encodedSize"]
-        raw.params["encodedSize"] = [e_sz[1], e_sz[2], 1]
-    end
-
-    #@info minimalHeader(ntuple(d->acqDataCartesian.encodingSize[d],2), acqDataCartesian.fov, tr_name=string(trajectory(acqDataCartesian,1)))
-
     if doSave
 
+        raw = RawAcquisitionData(acqDataCartesian)
+
+        # Since the data should generally have 3D information when saved, we make sure 2D data is appropriately stored as 3D data with a singleton dimension
+        if length(raw.params["encodedSize"]) == 2
+            e_sz = raw.params["encodedSize"]
+            raw.params["encodedSize"] = [e_sz[1], e_sz[2], 1]
+        end
+        
         # raw.params = headerCopy
         fout = ISMRMRDFile(fname)
         save(fout, raw)

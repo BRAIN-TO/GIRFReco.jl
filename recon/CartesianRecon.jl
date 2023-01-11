@@ -70,9 +70,10 @@ senseCartesian = espirit(acqDataCartesian,(6,6),30,eigThresh_1=0.01, eigThresh_2
 senseCartesian /= maximum(abs.(senseCartesian))
 sensitivity = senseCartesian 
 
-resolution_tmp = (fieldOfView(acqDataCartesian)./ size(sensitivity)[1:3])[1:2]
-resolution_mm = (resolution_tmp[1],resolution_tmp[2],fieldOfView(acqDataCartesian)[3] .*(1 + paramsGeneral[:sliceDistanceFactor_percent]./100.0)) # for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
-
+res_x = fieldOfView(acqDataCartesian)[1]./ size(sensitivity)[1]
+res_y = fieldOfView(acqDataCartesian)[2]./ size(sensitivity)[2]
+res_z = fieldOfView(acqDataCartesian)[3] .*(1 + paramsGeneral[:sliceDistanceFactor_percent]./100.0) # for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
+resolution_mm = (res_x, res_y, res_z)
 
 # save SENSE maps
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
