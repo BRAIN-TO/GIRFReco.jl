@@ -1,4 +1,7 @@
-using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, Printf, ROMEO, NIfTI
+using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, Printf, ROMEO, NIfTI, Unitful, AxisArrays, ImageUtils, Plots
+
+## Choose plotting backend to be PlotlyJS!
+plotlyjs()
 
 ## General Plotting function for the reconstruction
 
@@ -17,7 +20,7 @@ Plots the magnitude and phase of the reconstructed images for a given slice or s
 * `rotateAngle::Int` - Counterclock-wise rotation angle for each slice, should be a value from 0, 90, 180, 270 degrees
 """
 function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInterleaved = false, rotateAngle = 0)
-
+    # plot()
     ## If we need to re-order all slices
     sliceNum = length(slicesIndex)
     reorderSliceIndex = zeros(Int16, size(slicesIndex))
@@ -35,13 +38,13 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
 
     # Plot magnitude images (normalize)
-    if length(figHandles) < 1
-        figure("Magnitude Images")
-    else
-        figure(figHandles[1])
-    end
+    # if length(figHandles) < 1
+    #     figure("Magnitude Images")
+    # else
+    #     figure(figHandles[1])
+    # end
 
-    clf()
+    # clf()
 
     absData = mapslices(x -> abs.(x) ./ maximum(abs.(x)), images[:, :, reorderSliceIndex], dims = [1,2])
     if rotateAngle == 90
@@ -53,20 +56,19 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     absMosaic = mosaicview(absData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    imshow(absMosaic, cmap = "gray")
-    colorbar()
+    heatmap(absMosaic,show=true, plot_title="|Images|",plot_titlevspan=0.1)
 
-    gcf().suptitle("|Images|")
+    #gcf().suptitle("|Images|")
 
     # Plot phase images
-    if length(figHandles) < 2
-        figure("Phase Images")
-    else
-        figure(figHandles[2])
-    end
+    # if length(figHandles) < 2
+    #     figure("Phase Images")
+    # else
+    #     figure(figHandles[2])
+    # end
 
-    clf()
-
+    #clf()
+    # plot()
     # phaseData = mapslices(x -> ROMEO.unwrap(x), angle.(images[:, :, reorderSliceIndex, 1, 1]), dims = [1,2])
     phaseData = angle.(images[:, :, reorderSliceIndex, 1, 1])
     if rotateAngle == 90
@@ -78,20 +80,20 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     phaseMosaic = mosaicview(phaseData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    imshow(phaseMosaic, cmap = "inferno", vmax = pi, vmin = -pi)
-    colorbar()
+    heatmap(phaseMosaic,show=true,plot_title="∠ Images",plot_titlevspan=0.1)
+    #colorbar()
 
-    gcf().suptitle("∠Images")
+    #gcf().suptitle("∠Images")
 
-    # Plot B0 maps
-    if length(figHandles) < 3
-        figure("B₀ Map Images")
-    else
-        figure(figHandles[3])
-    end
+    # # Plot B0 maps
+    # if length(figHandles) < 3
+    #     figure("B₀ Map Images")
+    # else
+    #     figure(figHandles[3])
+    # end
 
-    clf()
-
+    # clf()
+    # plot()
     b0Data = mapslices(x -> x, b0, dims = [1,2])
     if rotateAngle == 90
         b0Data = mapslices(x -> rotr90(x), b0, dims = [1,2])
@@ -102,10 +104,12 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     b0Mosaic = mosaicview(b0Data[:, :, reorderSliceIndex], nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    imshow(b0Mosaic, cmap = "inferno", vmax = 500, vmin = -500)
-    colorbar()
+    heatmap(b0Mosaic,show=true, plot_title="B₀ Map Images",plot_titlevspan=0.1)
+    # colorbar()
 
-    gcf().suptitle("B₀ Maps [rad/s]")
+    # gcf().suptitle("B₀ Maps [rad/s]")
+    
+    1
 
 end
 
@@ -115,11 +119,8 @@ function checkProfiles(rawData)
     numProfiles2 = 128 # Set to the number of profiles that you would like to see
 
     for l = 1:numProfiles2
-        figure("Profile $l")
-        subplot(2,1,1)
-        plot(abs.(rawData.profiles[l].data[:,1]))
-        subplot(2,1,2)
-        plot(angle.(rawData.profiles[l].data[:,1]))
+        p1 = plot(abs.(rawData.profiles[l].data[:,1]))
+        p2 = plot(angle.(rawData.profiles[l].data[:,1]))
     end
 
 end
@@ -139,15 +140,23 @@ function plotSenseMaps(sense,n_channels; sliceIndex = 1)
         error(errMsg)
     end
 
-    # Magnitude maps
-    figure(@sprintf("Sensitivity Map Magnitude of Slice %d / %d", sliceIndex, sliceNum)); clf(); for ch in 1:n_channels; subplot(8,4,ch); imshow((abs.(sense[:,:,1,ch])), cmap = "gray"); end;
-    subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
-    gcf()
+    # # Magnitude maps
+    # figure(@sprintf("Sensitivity Map Magnitude of Slice %d / %d", sliceIndex, sliceNum)); clf(); for ch in 1:n_channels; subplot(8,4,ch); imshow((abs.(sense[:,:,sliceIndex,ch])), cmap = "gray"); end;
+    # subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
+    # gcf()
 
-    # Phase maps
-    figure(@sprintf("Sensitivity Map Phase of Slice %d / %d", sliceIndex, sliceNum)); clf(); for ch in 1:n_channels; subplot(8,4,ch); imshow(angle.(sense[:,:,1,ch]), cmap = "gray"); end;
-    subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
-    gcf()
+    magMosaic = mosaicview((abs.(sense[:,:,sliceIndex,:])), nrow = Int(floor(sqrt(n_channels))), npad = 5, rowmajor = true, fillvalue = 0)
+    heatmap(magMosaic, show=true, plot_title="|Sensitivity|",plot_titlevspan=0.1)
+
+    # # Phase maps
+    # figure(@sprintf("Sensitivity Map Phase of Slice %d / %d", sliceIndex, sliceNum)); clf(); for ch in 1:n_channels; subplot(8,4,ch); imshow(angle.(sense[:,:,sliceIndex,ch]), cmap = "gray"); end;
+    # subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
+    # gcf()
+
+    phaseMosaic = mosaicview((angle.(sense[:,:,sliceIndex,:])), nrow = Int(floor(sqrt(n_channels))), npad = 5, rowmajor = true, fillvalue = 0)
+    heatmap(phaseMosaic,show=true, plot_title="∠ Sensitivity",plot_titlevspan=0.1)
+
+    1
 
 end
 
@@ -306,12 +315,15 @@ function do_k0_correction!(rawData,k0_phase_modulation, interleave)
         # modulate the data by the k0 modulation by multiplying with e^(i*k0) where k0 is in radians
         rawData.profiles[l].data = rawData.profiles[l].data.* exp.(1im .* k0_interpolated)
 
-        # Visualization of Phase Modulation
-        figure("Phase Modulation")
-        plot(t_s, angle.(exp.(1im .* k0_interpolated)))
-        xlabel("Time [s]")
-        ylabel("k₀ [rad]")
-        title("B₀ Eddy Current Fluctuation During Readout ")
+        # # Visualization of Phase Modulation
+        # figure("Phase Modulation")
+        # plot(t_s, angle.(exp.(1im .* k0_interpolated)))
+        # xlabel("Time [s]")
+        # ylabel("k₀ [rad]")
+        # title("B₀ Eddy Current Fluctuation During Readout ")
+
+        plot(t_s, angle.(exp.(1im .* k0_interpolated)),show=true,title="B₀ Eddy Current Fluctuation During Readout ")
+
 
     end
 
@@ -442,12 +454,16 @@ function preprocessCartesianData(r::RawAcquisitionData, doSave; fname = "data/te
     ## Properly arrange data from the converted siemens file
     validateAcqData!(acqDataCartesian)
 
-    # # Need to permute the dimensions of kdata to match the convention of MRIReco.jl
-    # permutedims(acqDataCartesian.kdata,[3,2,1])
-    raw = RawAcquisitionData(acqDataCartesian)
-
     if doSave
 
+        raw = RawAcquisitionData(acqDataCartesian)
+
+        # Since the data should generally have 3D information when saved, we make sure 2D data is appropriately stored as 3D data with a singleton dimension
+        if length(raw.params["encodedSize"]) == 2
+            e_sz = raw.params["encodedSize"]
+            raw.params["encodedSize"] = [e_sz[1], e_sz[2], 1]
+        end
+        
         # raw.params = headerCopy
         fout = ISMRMRDFile(fname)
         save(fout, raw)
@@ -611,6 +627,13 @@ function applyGIRF!(a::AcquisitionData{T}, g::GirfApplier) where T
     S = a.encodingSize
     F = a.fov
 
+    if length(S) == 2
+        S = (S[1], S[2], 1)
+    end
+    if length(F) == 2
+        F = Float32.(F[1], F[2], 1.0)
+    end
+
     for l = 1:length(a.traj)
         
         nProfiles = a.traj[l].numProfiles
@@ -661,6 +684,13 @@ function applyK0!(a::AcquisitionData{T},g::GirfApplier) where T
     S = a.encodingSize
     F = a.fov
 
+    if length(S) == 2
+        S = (S[1], S[2], 1)
+    end
+    if length(F) == 2
+        F = (F[1], F[2], 1.0)
+    end
+
     for l = 1:length(a.traj)
         
         nProfiles = a.traj[l].numProfiles
@@ -697,6 +727,8 @@ function applyK0!(a::AcquisitionData{T},g::GirfApplier) where T
             # xlabel("Time [s]")
             # ylabel("k₀ [rad]")
             # title("B₀ Eddy Current Fluctuation During Readout ")
+
+            plot(ilTimes, angle.(exp.(1im .* finalCorrection')),show=true,title="B₀ Eddy Current Fluctuation During Readout ")
             
         end
     
@@ -751,8 +783,8 @@ For complex-valued data, magnitude and phase can be split into separate files
 """
 function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0], doSplitPhase::Bool=false, doNormalize::Bool=true)
     # multiplication with 1000 should no longer be necessary after MRIReco 0.7.1
-    spacing = 1000.0*resolution_mm*Unitful.mm
-    offset = 1000.0*offset_mm*Unitful.mm
+    spacing = 1000.0 .*resolution_mm .*Unitful.mm
+    offset = 1000.0 .*offset_mm .*Unitful.mm
 
     if ndims(calib_map) >= 4 # multi-coil calib_map, e.g., sensitivity, or recon, but we can only store the first 4 dims in a Nifti
         I = reshape(calib_map, size(calib_map,1), size(calib_map,2), size(calib_map,3), size(calib_map,4), 1, 1);

@@ -6,9 +6,9 @@ using Dates
 paramsGeneral = Dict{Symbol,Any}()
 
 ## General options for recon script
-paramsGeneral[:doLoadMaps] = true               # if true, reloads B0/SENSE maps instead of recalculating
+paramsGeneral[:doLoadMaps] = false               # if true, reloads B0/SENSE maps instead of recalculating
 paramsGeneral[:doSaveRecon] = true              # if true, saves reconstruction and all auxiliary image data (maps) as NIfTI files
-paramsGeneral[:doPlotRecon] = false             # if true, plots intermediate debugging and output recon figures (needs graphics, not recommended in multi-thread mode due to PyPlot)
+paramsGeneral[:doPlotRecon] = true             # if true, plots intermediate debugging and output recon figures (needs graphics, not recommended in multi-thread mode due to PyPlot)
 paramsGeneral[:doProcessMapScan] = true         # if true, compute sensitivity and B0 maps from reconstructed Cartesian scan   
 paramsGeneral[:doSaveProcessedMapScan] = false; # save ISMRMD file of preprocessed Cartesian data (before recon)
 
@@ -31,7 +31,7 @@ paramsGeneral[:sliceDistanceFactor_percent] = 400 # 000
 #Total number of ADC points BEFORE the rewinder at the end of the spiral readout. For gradient 508, use 15655 (out of 16084); for gradient 511, use 15445 (out of 15624).
 paramsGeneral[:numADCSamples] = 15655 # 15504
 # Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
-paramsGeneral[:reconSize] = (200, 200) #(112, 112) #(200, 200)
+paramsGeneral[:reconSize] = [200, 200,1] #(112, 112) #(200, 200)
 paramsGeneral[:nReconIterations] = 20; # number of recon iterations (for both Cartesian and Spiral recon)
 paramsGeneral[:b0mapSmoothBeta] = 0.1 # for estimateB0Maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
 paramsGeneral[:doNormalizeRecon] = false # set max abs to 1
@@ -57,7 +57,8 @@ end
 # Gadgetron Server
 # laptop home, external drive
 # paramsGeneral[:pathData] = "e:\\SPIDI\\data\\SPIDI_0007\\Phantom\\rawdata"
-paramsGeneral[:pathProject] = "/home/kasperl/SPIDI"
+#paramsGeneral[:pathProject] = "/home/kasperl/SPIDI"
+paramsGeneral[:pathProject] = "/srv/data/ajaffray/TORONTO_COLLAB"
 
 # SPIDI_0011
 
