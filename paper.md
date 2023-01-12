@@ -28,6 +28,17 @@ With GIRFReco.jl, we provide a self-contained, open-source spiral image reconstr
 
 ## Functionality
 
+### Required Inputs
+
+_GIRFReco.jl_ requires raw MR (k-space) data (in ISMRMRD or Siemens raw data) of the following scans as input:
+
+1. Multi-echo Gradient-echo spin-warp (Cartesian) scan
+    - at least two echo times (e.g., xx and yy (water fat in-phase at 3T))
+2. Spiral scan
+    - single or multi-interleaf
+
+At the moment, the slice geometries of (1) and (2) must match.
+
 ### Overview of Components
 
 The following components are utilized within the spiral reconstruction pipeline of _GIRFReco.jl_ (Fig. 1), and separated into different (sub-)packages.
