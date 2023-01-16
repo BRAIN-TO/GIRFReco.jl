@@ -107,5 +107,4 @@ Higher Order Reconstruction for MRI," Magn. Reson. Med., vol. 65, no. 6, pp. 169
 22. Z. Wu, A. Jaffray, J. Vannesjo, K. Uludag, and L. Kasper, “MR System Stability and Quality Control using Gradient Impulse Response Functions (GIRF),” in Proc. Intl. Soc. Mag. Reson. Med. 30, London, UK, p. 0641. [Online]. Available: https://index.mirasmart.com/ISMRM2022/PDFfiles/0641.html
 
 
-9. M. Lustig, S.-J. Kim, and J. M. Pauly, "A fast method for designing time-optimal gradient waveforms for arbitrary k-space trajectories," IEEE Trans. Med. Imaging, vol. 27, no. 6, pp. 866-873, Jun. 2008, doi: 10.1109/TM1.2008.922699.
 
