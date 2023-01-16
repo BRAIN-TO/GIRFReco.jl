@@ -1,4 +1,4 @@
-using DelimitedFiles, MRIReco, PyPlot, Dierckx, MAT, DSP
+using DelimitedFiles, MRIReco, Dierckx, MAT, DSP
 
 export read_gradient_txt_file
 

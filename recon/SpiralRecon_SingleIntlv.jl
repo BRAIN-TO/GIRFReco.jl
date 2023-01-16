@@ -1,7 +1,7 @@
-using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
+using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients, FileIO, MRIFiles, MRICoilSensitivities, RegularizedLeastSquares
 
 # All data-specific recon parameters
-include("ReconConfig.jl")
+include("ReconConfig_SPIDI_0007.jl")
 
 ##
 # Include tools and reader functions for running the spiral reconstruction recipe
@@ -17,15 +17,11 @@ reloadSpiralData = true
 reloadGIRFData = true
 
 # Choose Slice (can be [single number] OR [1,2,3,...])
-# Leave empty ([]) to later select all slices
+# Leave empty ([]) or remove this line to later select all slices
 sliceChoice = []; # TODO: read from ISMRMRD itself
-#[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # For multi-slice
-# sliceChoice = [6] # For single-slice
-
 
 ## Gyromagnetic ratio, in unit of Hz
 gamma = 42577478
-
 
 
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
@@ -58,17 +54,17 @@ else
     ## Only calculate sensitivity and B0 maps when they have not been done yet, or it's specifically required.
     ## Executing Cartesian recon from which B0/sensitivity maps have been computed
     @info "Running CartesianRecon to retrieve maps (senseCartesian and b0Maps)"
-    include("CartesianRecon_Mar2022_Human.jl")
+    include("CartesianRecon.jl")
     nSlices = size(b0Maps, 3);
 end
 
-## Set figures to be unlocked from the win9ow (i.e use matplotlib backend with controls)
+## Set figures to be unlocked from the window (i.e use matplotlib backend with controls)
 
 ## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction Pipeline"
 
 
-if isempty(sliceChoice)
+if isempty(sliceChoice) || !(@isdefined sliceChoice)
     sliceChoice = collect(1:nSlices)
 end
 
@@ -88,9 +84,8 @@ sliceSelection = excitationList[selectedSlice]
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] = paramsGeneral[:reconSize]
+adjustmentDict[:reconSize] = Tuple(paramsGeneral[:reconSize])
 adjustmentDict[:interleave] = startIndexIntlv
-adjustmentDict[:slices] = 1
 adjustmentDict[:numSamples] = paramsGeneral[:numADCSamples]
 adjustmentDict[:delay] = 0.00000 # naive delay correction
 
@@ -106,7 +101,7 @@ adjustmentDict[:numInterleaves] = isDataSingleIntlv ? 1 : length(adjustmentDict[
 adjustmentDict[:singleSlice] = !isMultiSlice
 
 # Defined recon size and parameters for data loading
-@info "Using Parameters:\n\nreconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(adjustmentDict[:slices]) \n coils = $(size(senseCartesian, 4)) \n numSamples = $(adjustmentDict[:numSamples])\n\n"
+@info "Using Parameters:\n\nreconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(sliceChoice) \n coils = $(size(senseCartesian, 4)) \n numSamples = $(adjustmentDict[:numSamples])\n\n"
 
 if reloadGIRFData || !(@isdefined gK1) || !(@isdefined gAK1) || !(@isdefined gK0) || !(@isdefined gAK0)
     @info "Loading Gradient Impulse Response Functions"
@@ -146,7 +141,7 @@ end
 @info "Resizing Sense Maps"
 
 # Resize sense maps to match encoding size of data matrix
-sensitivity = mapslices(x ->imresize(x, adjustmentDict[:reconSize]), senseCartesian, dims=[1,2])
+sensitivity = mapslices(x ->imresize(x, adjustmentDict[:reconSize][1],adjustmentDict[:reconSize][2]), senseCartesian, dims=[1,2])
 
 # Plot the sensitivity maps of each coil
 @info "Plotting SENSE Maps"
@@ -158,7 +153,7 @@ end
 
 # shift FOV to middle :) 
 shiftksp!(acqDataImaging,paramsGeneral[:fovShift])
-#changeFOV!(acqDataImaging,[1.5,1.5])
+# changeFOV!(acqDataImaging,[0.99, 0.99])
 
 
 ## Do coil compression to make recon faster
@@ -169,7 +164,7 @@ end
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Resizing B0 Maps"
-resizedB0 = mapslices(x->imresize(x,adjustmentDict[:reconSize]), b0Maps, dims=[1,2])
+resizedB0 = mapslices(x->imresize(x,adjustmentDict[:reconSize][1],adjustmentDict[:reconSize][2]), b0Maps, dims=[1,2])
 
 ## Define Parameter Dictionary for use with reconstruction
 # CAST TO ComplexF32 if you're using current MRIReco.jl
@@ -177,7 +172,7 @@ resizedB0 = mapslices(x->imresize(x,adjustmentDict[:reconSize]), b0Maps, dims=[1
 @info "Setting Parameters"
 params = Dict{Symbol,Any}()
 params[:reco] = "multiCoil"
-params[:reconSize] = adjustmentDict[:reconSize]
+params[:reconSize] = adjustmentDict[:reconSize][1:2]
 params[:regularization] = "L2"
 params[:λ] = 1e-2 # CHANGE THIS TO GET BETTER OR WORSE RECONSTRUCTION RESULTS
 params[:iterations] = paramsGeneral[:nReconIterations]
@@ -196,8 +191,8 @@ end
 
 # save Map recon (multi-echo etc.)
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
-    resolution_mm = fieldOfView(acqDataImaging)./encodingSize(acqDataImaging)
-    resolution_mm[3] = fieldOfView(acqDataImaging)[3] *(1 + paramsGeneral[:sliceDistanceFactor_percent]/100.0); # for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
+    resolution_tmp = fieldOfView(acqDataImaging)[1:2]./encodingSize(acqDataImaging)
+    resolution_mm = (resolution_tmp[1],resolution_tmp[2],fieldOfView(acqDataImaging)[3] *(1 + paramsGeneral[:sliceDistanceFactor_percent]/100.0)) # for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
 
     # TODO: use slice ordering from cartesian scan directly!
     nSlices = numSlices(acqDataImaging)
@@ -207,7 +202,7 @@ end
 
 if paramsGeneral[:doPlotRecon]
     @info "Plotting Reconstruction"
-    pygui(true)
+    #pygui(true)
     plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice], figHandles=["Original Magnitude", "Original Phase", "B0"], isSliceInterleaved=true, rotateAngle=270)
 end
 
