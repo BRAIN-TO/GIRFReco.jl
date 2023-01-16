@@ -6,10 +6,8 @@ plotlyjs()
 ## General Plotting function for the reconstruction
 
 "Mosaic-plots reconstruction for selected slices and corresponding B0 map"
-
 """
 plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInterleaved = false)
-
 Plots the magnitude and phase of the reconstructed images for a given slice or slices, along with a B₀ map if applicable
 # Arguments
 * `images` - Complex-valued images reconstructed using MRIReco.jl
@@ -176,13 +174,10 @@ end
 ## PREPROCESSING
 
 """
-    calculateB0Maps(imData,slices,echoTime1,echoTime2)
-
+calculateB0Maps(imData,slices,echoTime1,echoTime2)
 Calculate  B0 map from the two images with different echo times via their phase difference (obtained from imTE2.*conj(imTE1))
-
 TODO have the b0 map calculation be capable of handling variable echo times
 TODO2: Do we need this basic B0 map calculation or is it superseded by estimateB0Maps?
-
 # Arguments
 * `imdata`                          - [nX nY nZ 2 nCoils] 5D image array, 4th dim echo time
 * `slices::NTuple{nSlices,Int}`     - slice index vector (tuple?) for which map is computed
@@ -197,7 +192,7 @@ function calculateB0Maps(imData,slices,echoTime1,echoTime2)
 end
 
 """
-    getSliceOrder(nSlices, isSliceInterleaved)
+getSliceOrder(nSlices, isSliceInterleaved)
 Returns array mapping from acquisition number to slice number (geometric position) (indexArray[slice = 1:9] = [acquisitionNumbers])
 TODO: Add ascending/descending options
 # Arguments
@@ -503,10 +498,8 @@ end
 """
 mergeRawInterleaves(params)
 Merges multiple interleave data together from individually acquired interleave scans
-
 # Arguments
 * `params`          - Dictionary
-
 """
 function mergeRawInterleaves(params)
 
@@ -768,11 +761,9 @@ end
 ## Input/Output, File handling
 
 """
-    saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
-
+saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
 Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
 For complex-valued data, magnitude and phase can be split into separate files
-
 # Arguments
 * `filename::String`            - string filename with extension .nii, example "sensemap.nii"
 * `calib_map`                   - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
@@ -819,19 +810,15 @@ end
 
 
 """
-    loadMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
-
+loadMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
 Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
 For complex-valued data, magnitude and phase can be split into separate files
-
 # Arguments
 * `filename::String`            - string filename with extension .nii, example "sensemap.nii"
 * `doSplitPhase::Bool=false`    - if true, data is saved in two nifti files with suffix "_magn" and "_phase", respectively
                                   to enable display in typical NIfTI viewers
-
 # Output
 * `calib_map`                    - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
-
 """
 function loadMap(filename; doSplitPhase::Bool=false)
     
