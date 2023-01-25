@@ -10,7 +10,7 @@ authors:
   - name: Alexander Jaffray
     orcid: 0000-0000-0000-0000
     equal-contrib: False
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
+    affiliation: 1 # (Multiple affiliations must be quoted)
   - name: Author2
     equal-contrib: False # (This is how you can denote equal contributions between multiple authors)
     corresponding: True # (This is how to denote the corresponding author)
