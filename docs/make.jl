@@ -1,6 +1,6 @@
 push!(LOAD_PATH,"../")
 
-using Documenter
+using Documenter, GIRFReco
 
 makedocs(sitename="GIRFReco Documentation",
     modules = [GIRFReco],
