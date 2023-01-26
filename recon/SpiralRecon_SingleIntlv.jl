@@ -1,14 +1,7 @@
-using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients, FileIO, MRIFiles, MRICoilSensitivities, RegularizedLeastSquares
+using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients, FileIO, MRIFiles, MRICoilSensitivities, RegularizedLeastSquares, GIRFReco, MosaicViews, Plots, Images
 
 # All data-specific recon parameters
 include("ReconConfig_SPIDI_0007.jl")
-
-##
-# Include tools and reader functions for running the spiral reconstruction recipe
-# Note: the files are found relative of the location of the folder, not the
-# environment current folder
-include("../io/GradientReader.jl")
-include("../utils/Utils.jl")
 
 ## ----------------------------- User-defined Variables -------------------------- ##
 
@@ -23,7 +16,6 @@ sliceChoice = []; # TODO: read from ISMRMRD itself
 ## Gyromagnetic ratio, in unit of Hz
 gamma = 42577478
 
-
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
 diffusionDirection = selector[:dif]
 idxAverage = selector[:avg]
@@ -32,7 +24,6 @@ nDiffusionDirections = paramsGeneral[:nDiffusionDirections] # TODO: Read from IS
 # Which interleave to be reconstructed. For single-interleave data, it will always be set as 1; for multi-interleave data, the value set here will be used.
 # For multi-interleaved data, this value is ranging from [1:TotNumIntlv] (total number of interleaves), indicating which interleave to be reconstructed
 startIndexIntlv = selector[:seg]
-
 
 ## Determine to reconstruct single-interleave data, or one interleave out of multi-interleave data.
 isDataSingleIntlv = isa(paramsGeneral[:fullPathScan], String)

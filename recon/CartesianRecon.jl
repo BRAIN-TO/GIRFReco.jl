@@ -1,6 +1,5 @@
 using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients, MRIFiles
 
-include("../utils/Utils.jl")
 include("../utils/fieldMapEstimator.jl")
 
 ## Dictionary of frequently changed parameters

@@ -15,9 +15,14 @@ using Unitful
 using AxisArrays
 using ImageUtils
 using Plots
-# using PlotlyJS
 using MRIGradients
+using DelimitedFiles
+using MAT
+using FileIO
+using MRIFiles
+using MosaicViews
 
 include("../utils/Utils.jl")
+include("../io/GradientReader.jl")
 
 end # module
