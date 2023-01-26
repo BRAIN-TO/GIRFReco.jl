@@ -4,7 +4,7 @@ name: Documentation
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["PaperPreparation"]
+    branches: ["main"]
 
   pull_request:
 
