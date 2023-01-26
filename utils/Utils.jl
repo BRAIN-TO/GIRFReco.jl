@@ -1,14 +1,16 @@
-using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, Printf, ROMEO, NIfTI, Unitful, AxisArrays, ImageUtils, Plots
+# using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, Printf, ROMEO, NIfTI, Unitful, AxisArrays, ImageUtils, Plots, PlotlyJS
+# using Plots
 
 ## Choose plotting backend to be PlotlyJS!
-plotlyjs()
+# plotlyjs()
 
 ## General Plotting function for the reconstruction
 
-"Mosaic-plots reconstruction for selected slices and corresponding B0 map"
+# "Mosaic-plots reconstruction for selected slices and corresponding B0 map"
 """
-plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInterleaved = false)
+    plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInterleaved = false)
 Plots the magnitude and phase of the reconstructed images for a given slice or slices, along with a B₀ map if applicable
+
 # Arguments
 * `images` - Complex-valued images reconstructed using MRIReco.jl
 * `slicesIndex::Vector{Int}` - slices to plot
@@ -124,8 +126,9 @@ function checkProfiles(rawData)
 end
 
 """
-plotSenseMaps!(sense, n_channels)
+    plotSenseMaps!(sense, n_channels)
 Plots coil sensitivity maps from the channels, for a total of n_channels plots
+
 # Arguments
 * `sense` - sensitivity maps
 * `n_channels::Int` - number of coils (usually last dimension of sense)
@@ -174,10 +177,12 @@ end
 ## PREPROCESSING
 
 """
-calculateB0Maps(imData,slices,echoTime1,echoTime2)
+    calculateB0Maps(imData,slices,echoTime1,echoTime2)
+
 Calculate  B0 map from the two images with different echo times via their phase difference (obtained from imTE2.*conj(imTE1))
 TODO have the b0 map calculation be capable of handling variable echo times
 TODO2: Do we need this basic B0 map calculation or is it superseded by estimateB0Maps?
+
 # Arguments
 * `imdata`                          - [nX nY nZ 2 nCoils] 5D image array, 4th dim echo time
 * `slices::NTuple{nSlices,Int}`     - slice index vector (tuple?) for which map is computed
@@ -192,9 +197,11 @@ function calculateB0Maps(imData,slices,echoTime1,echoTime2)
 end
 
 """
-getSliceOrder(nSlices, isSliceInterleaved)
+    getSliceOrder(nSlices, isSliceInterleaved)
+
 Returns array mapping from acquisition number to slice number (geometric position) (indexArray[slice = 1:9] = [acquisitionNumbers])
 TODO: Add ascending/descending options
+
 # Arguments
 * `nSlices::Int`                    - number of slices in total acquired stack (FOV)
 * `isSliceInterleaved::Bool=true`   - if true, interleaved slice order is created, otherwise ascending slice order is returned
@@ -215,8 +222,9 @@ function getSliceOrder(nSlices; isSliceInterleaved::Bool=true)
 end
 
 """
-syncTrajAndData!(a::AcquisitionData)
+    syncTrajAndData!(a::AcquisitionData)
 Synchronizes k-space trajectory and sampled data as they do not usually have a common sampling rate
+
 # Arguments
 * `rawData::RawAcquisitionData` - RawAcquisitionData object
 * `traj::Trajectory` - Trajectory object to be synchronized with data contained in rawData
@@ -271,8 +279,9 @@ end
 
 
 """
-do_k0_correction!(rawData, k0_phase_modulation, interleave)
+    do_k0_correction!(rawData, k0_phase_modulation, interleave)
 Applies phase modulation due to 0th-order field fluctuations during the acquisition
+
 # Arguments
 * `rawData::RawAcquisitionData` - RawAcquisitionData object
 * `k0_phase_modulation::Matrix{Complex{T}}` - Vector containing phase modulation measurements
@@ -326,8 +335,9 @@ end
 
 
 """
-adjustHeader!(raw::RawAcquisitionData, reconSize, numSamples, interleaveNumber, singleSlice)
+    adjustHeader!(raw::RawAcquisitionData, reconSize, numSamples, interleaveNumber, singleSlice)
 Adjusts the header data for each interleave and slice of spiral diffusion RawAcquisitionData
+
 # Arguments
 * `raw::RawAcquisitionData` - RawAcquisitionData object
 * `reconSize::Vector` - Reconstruction matrix size
@@ -379,8 +389,9 @@ function adjustHeader!(raw, reconSize, numSamples, interleaveNumber, singleSlice
 end
 
 """
-checkAcquisitionNodes!(a::AcquisitionData)
-Validates processed AcquisitionData object to make sure that |kᵢ| < 0.5 ∀ i ∈ [1, Nₛ] 
+    checkAcquisitionNodes!(a::AcquisitionData)
+Validates processed AcquisitionData object to make sure that |kᵢ| < 0.5 ∀ i ∈ [1, Nₛ]
+
 # Arguments
 * `a::AcquisitionData` - AcquisitionData object
 """
@@ -392,8 +403,9 @@ end
 
 
 """
-validateSiemensMRD!(r::RawAcquisitionData)
-Validates RawAcquisitionData object created from ISMRMRD format object 
+    validateSiemensMRD!(r::RawAcquisitionData)
+Validates RawAcquisitionData object created from ISMRMRD format object
+
 # Arguments
 * `r::RawAcquisitionData` - RawAcquisitionData object
 """
@@ -413,8 +425,9 @@ function validateSiemensMRD!(r::RawAcquisitionData)
 end
 
 """
-validateAcqData!(a::AcquisitionData)
+    validateAcqData!(a::AcquisitionData)
 Validates processed AcquisitionData object after manipulation, etc...
+
 # Arguments
 * `a::AcquisitionData` - AcquisitionData object
 """
@@ -432,8 +445,9 @@ function validateAcqData!(a::AcquisitionData)
 end
 
 """
-preprocessCartesianData!(raw::RawAcquisitionData; dims = 1)
-prepares Cartesian for reconstruction
+    preprocessCartesianData!(raw::RawAcquisitionData; dims = 1)
+Prepares Cartesian for reconstruction
+
 # Arguments
 * `r::RawAcquisitionData{T}`          - RawAcquisitionData object
 * `fname`                             - filename to save the preprocessed data to
@@ -470,8 +484,9 @@ function preprocessCartesianData(r::RawAcquisitionData, doSave; fname = "data/te
 end
 
 """
-removeOversampling!(raw::RawAcquisitionData; dims = 1)
-removes 2x readout oversampling in specified raw data dimensions by iFFT, cropping FOV and FFT
+    removeOversampling!(raw::RawAcquisitionData; dims = 1)
+Removes 2x readout oversampling in specified raw data dimensions by iFFT, cropping FOV and FFT
+
 # Arguments
 * `raw::RawAcquisitionData{T}`          - RawAcquisitionData object
 * `dims`                                - dimension alongside which oversampling is removed (default: 1)
@@ -496,8 +511,9 @@ end
 
 
 """
-mergeRawInterleaves(params)
+    mergeRawInterleaves(params)
 Merges multiple interleave data together from individually acquired interleave scans
+
 # Arguments
 * `params`          - Dictionary
 """
@@ -607,8 +623,9 @@ function mergeRawInterleaves(params)
 end
 
 """
-applyGIRF!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
+    applyGIRF!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
 Applies the GIRF to the trajectories inside of a::AcquisitionData
+
 # Arguments
 * `a::AcquisitionData{T}`          - AcquisitionData object
 * `freq::AbstractVector`           - Vector containing frequencies of GIRF data
@@ -664,8 +681,9 @@ function applyGIRF!(a::AcquisitionData{T}, g::GirfApplier) where T
 end
 
 """
-applyK0!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
+    applyK0!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
 Applies the K0 modulation due to imaging gradients to the data inside of a::AcquisitionData
+
 # Arguments
 * `a::AcquisitionData{T}`          - AcquisitionData object
 * `freq::AbstractVector`           - Vector containing frequencies of GIRF data
@@ -761,8 +779,9 @@ end
 ## Input/Output, File handling
 
 """
-saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
+    saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
 Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
+
 For complex-valued data, magnitude and phase can be split into separate files
 # Arguments
 * `filename::String`            - string filename with extension .nii, example "sensemap.nii"
@@ -810,8 +829,9 @@ end
 
 
 """
-loadMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
+    loadMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
 Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
+
 For complex-valued data, magnitude and phase can be split into separate files
 # Arguments
 * `filename::String`            - string filename with extension .nii, example "sensemap.nii"
