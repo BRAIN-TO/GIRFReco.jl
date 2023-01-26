@@ -1,7 +1,7 @@
 using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients, FileIO, MRIFiles, MRICoilSensitivities, RegularizedLeastSquares
 
 # All data-specific recon parameters
-include("ReconConfig_SPIDI_0007.jl")
+include("ReconConfig_joss_demo.jl")
 
 ##
 # Include tools and reader functions for running the spiral reconstruction recipe
@@ -23,7 +23,6 @@ sliceChoice = []; # TODO: read from ISMRMRD itself
 ## Gyromagnetic ratio, in unit of Hz
 gamma = 42577478
 
-
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
 diffusionDirection = selector[:dif]
 idxAverage = selector[:avg]
@@ -33,10 +32,8 @@ nDiffusionDirections = paramsGeneral[:nDiffusionDirections] # TODO: Read from IS
 # For multi-interleaved data, this value is ranging from [1:TotNumIntlv] (total number of interleaves), indicating which interleave to be reconstructed
 startIndexIntlv = selector[:seg]
 
-
 ## Determine to reconstruct single-interleave data, or one interleave out of multi-interleave data.
 isDataSingleIntlv = isa(paramsGeneral[:fullPathScan], String)
-
 
 ## ------------------------------------------------ Calculation Starts Here ---------------------------------------------------------- ##
 
@@ -148,10 +145,9 @@ if paramsGeneral[:doPlotRecon]
 end
 
 
-# shift FOV to middle :) 
+# shift FOV to middle 
 shiftksp!(acqDataImaging,paramsGeneral[:fovShift])
 # changeFOV!(acqDataImaging,[0.99, 0.99])
-
 
 ## Do coil compression to make recon faster
 if paramsGeneral[:doCoilCompression]
@@ -199,7 +195,6 @@ end
 
 if paramsGeneral[:doPlotRecon]
     @info "Plotting Reconstruction"
-    #pygui(true)
     plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice], figHandles=["Original Magnitude", "Original Phase", "B0"], isSliceInterleaved=true, rotateAngle=270)
 end
 
