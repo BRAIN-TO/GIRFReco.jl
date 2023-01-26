@@ -1,4 +1,4 @@
-using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients, FileIO, MRIFiles, MRICoilSensitivities, RegularizedLeastSquares
+using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients, FileIO, MRIFiles, MRICoilSensitivities, RegularizedLeastSquares, GIRFReco, MosaicViews, Plots, Images
 
 # All data-specific recon parameters
 include("ReconConfig_joss_demo.jl")

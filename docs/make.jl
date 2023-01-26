@@ -1,4 +1,6 @@
 push!(LOAD_PATH,"../src")
+push!(LOAD_PATH,"../recon/")
+push!(LOAD_PATH,"../utils/")
 
 using Documenter, GIRFReco
 

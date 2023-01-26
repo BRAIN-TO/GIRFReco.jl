@@ -57,18 +57,6 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
 
     heatmap(absMosaic,show=true, plot_title="|Images|",plot_titlevspan=0.1)
 
-    #gcf().suptitle("|Images|")
-
-    # Plot phase images
-    # if length(figHandles) < 2
-    #     figure("Phase Images")
-    # else
-    #     figure(figHandles[2])
-    # end
-
-    #clf()
-    # plot()
-    # phaseData = mapslices(x -> ROMEO.unwrap(x), angle.(images[:, :, reorderSliceIndex, 1, 1]), dims = [1,2])
     phaseData = angle.(images[:, :, reorderSliceIndex, 1, 1])
     if rotateAngle == 90
         phaseData = mapslices(x -> rotr90(x), phaseData, dims = [1,2])
