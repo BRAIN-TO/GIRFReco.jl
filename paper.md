@@ -5,14 +5,16 @@ tags:
   - Magnetic Resonance Imaging
   - Non-Cartesian Image Reconstruction
   - Gradient Impulse Response Function (GIRF)
-  - Off-resonance Field Correction
+  - Off-resonance Correction
 authors:
   - name: Alexander Jaffray
     orcid: 0000-0000-0000-0000
-    equal-contrib: False
-    affiliation: 1 # (Multiple affiliations must be quoted)
+    equal-contrib: True
+    corresponding: True
+    affiliation: 1
   - name: Author2
-    equal-contrib: False # (This is how you can denote equal contributions between multiple authors)
+    orcid: 0000-0000-0000-0000
+    equal-contrib: True # (This is how you can denote equal contributions between multiple authors)
     corresponding: True # (This is how to denote the corresponding author)
     affiliation: 2
   - name: Author3
@@ -22,7 +24,7 @@ authors:
   - name: Senior Author
     equal-contrib: False # (This is how you can denote equal contributions between multiple authors)
     corresponding: False # (This is how to denote the corresponding author)
-    affiliation: "1, 3" # (Multiple affiliations must be quoted)
+    affiliation: "2, 3" # (Multiple affiliations must be quoted)
 affiliations:
  - name: MRI Research Centre, University of British Columbia, Vancouver, Canada
    index: 1
@@ -41,25 +43,25 @@ bibliography: paper/paper.bib
 
 # Summary
 
-Magnetic Resonance Imaging (MRI) acquires data in the frequency domain (k-space) using a specific trajectory to traverse it. Due to the low intrinsic signal-to-noise ratio (SNR), MRI is notoriously slow, and non-Cartesian (i.e., non-rectilinear) trajectories, such as spiral readouts, offer considerable acceleration due their high rate of measured samples per time (acquisition efficiency) [@lee_signalnoise_2021].
+Magnetic Resonance Imaging (MRI) acquires data in the frequency domain (k-space) with various possibilities of trajectories to traverse it. Traditional Cartesian MRI is notoriously slow since it's using a line-by-line pattern to cover k-space due to its intrinsically low signal-to-noise ratio (SNR). On the other hand, non-Cartesian (i.e., non-rectilinear) trajectories, such as spiral readouts, offer considerable acceleration due their high rate of measured samples per time (acquisition efficiency) [@lee_signalnoise_2021].
 
 However, the actual k-space trajectory during MRI scanning deviates from the theoretical one due to hardware imperfections, which induces image artifacts such as ghosting, blurring or geometric distortion. This problem is exacerbated in many non-Cartesian trajectories, including spiral readouts, because these fast imaging protocols place high demands on the hardware of the MRI system [@block_spiral_2005].
 
-In this case, an accurate characterization of the system hardware for k-space trajectory correction, for example, via a gradient impulse response function (GIRF) [@vannesjo_gradient_2013], is often required for high-quality MRI reconstruction. 
+In this case, an accurate characterization of the system hardware for k-space trajectory correction, for example, via a gradient impulse response function (GIRF) [@vannesjo_gradient_2013], is particularly needed for high-quality MRI reconstruction. 
 
-Furthermore, acquisition can be further accelerated by acquiring a larger proportion of k-space per excitation (single of few interleave scanning), prolonging readout duration and increasing the impact of static off-resonance (B<sub>0</sub>) inhomogeneity. For non-Cartesian imaging, the resulting artifacts can be accounted for by incorporating off-resonance maps into the image reconstruction [@sutton_fast_2003].
+Furthermore, MRI acquisition can be further accelerated by acquiring a larger proportion of k-space per excitation in which each readout duration is prolonged, thus is more susceptible to the impact of static off-resonance (or field inhomogeneity, B<sub>0</sub>). For non-Cartesian imaging, the resulting artifacts can be accounted for by incorporating off-resonance maps into the image reconstruction [@sutton_fast_2003].
 
-This package, __GIRFReco.jl__, provides an open-source, single ecosystem implementation (in Julia [@bezanson_julia_2017]) of a state-of-the-art approaches of image reconstruction for spiral MRI [@wilm_higher_2011;@wilm_diffusion_2015]. The reconstruction procedure uses an expanded signal model incorporating both system imperfections and off-resonance maps in combination with parallel imaging acceleration and the respective iterative non-Cartesian image reconstruction algorithms (e.g., CG-SENSE [@pruessmann_advances_2001]). In particular, to enable robust and fast MRI with spiral gradient waveforms, __GIRFReco.jl__ is designed as an end-to-end signal processing pipeline from raw open-standard MR data ([ISMR]MRD [@inati_ismrm_2017]) to final reconstructed images (NIfTI format commonly used in processing packages for neuroimaging). It integrates system characterization via GIRF for accurate representation of the encoding fields, calibration data (coil sensitivity and static off-resonance maps) and non-Cartesian iterative parallel imaging reconstruction [@vannesjo_image_2016].
+This software package, `GIRFReco.jl`, provides an open-source, single ecosystem implementation (in Julia [@bezanson_julia_2017]) of a state-of-the-art image reconstruction for spiral MRI [@wilm_higher_2011;@wilm_diffusion_2015] with a reutilization of core reconstruction implementations in `MRIReco.jl`, a comprehensive open-source image reconstruction toolbox also in Julia. The reconstruction procedure uses a signal model with additional terms represent system imperfections and off-resonance in combination with parallel imaging acceleration and the respective iterative non-Cartesian image reconstruction algorithms (e.g., CG-SENSE [@pruessmann_advances_2001]). In particular, to enable robust and fast MRI with spiral gradient waveforms, `GIRFReco.jl` is designed as an end-to-end signal processing pipeline from raw open-standard MR data ([ISMR]MRD [@inati_ismrm_2017]) to final reconstructed images (NIfTI format commonly used in processing packages for neuroimaging). It integrates system characterization via GIRF for accurate representation of the encoding fields, calibration data (coil sensitivity and static off-resonance maps) and non-Cartesian iterative parallel imaging reconstruction [@vannesjo_image_2016].
 
 # Statement of Need
 
-Currently available open-source implementations for the correction of system imperfections and static off-resonance in MRI often depend upon mature image reconstruction suites such as MRecon (https://www.gyrotools.com/gt/index.php/products/reconframe), Gadgetron [@hansen_gadgetron_2013] or BART [@blumenthal_mrireconbart_2022].
+Currently available open-source implementations for the correction of system imperfections and static off-resonance in MRI are often implemented within the framework of mature image reconstruction suites such as MRecon (https://www.gyrotools.com/gt/index.php/products/reconframe), Gadgetron [@hansen_gadgetron_2013] or BART [@blumenthal_mrireconbart_2022].
 
-However, the aforementioned complexity of the image reconstruction task for spiral MRI currently necessitates the integration of multiple tools from different software suites, which can be developed in multiple programming languages (e.g., C, C++, Python, Matlab) to establish a performant and comprehensive image reconstruction workflow [@veldmann_opensource_2022]. Extending such frameworks requires simultaneous expertise across languages and environments, adding significant overhead and complexity to development. This presents a significant barrier to efficient and reproducible image reconstruction and limits software accessibility and sustainability, especially for non-technical users such as radiologists and other physicians.
+However, the aforementioned complexity of the image reconstruction task for spiral MRI currently necessitates the integration of multiple software tools developed in multiple programming languages (C for BART, C++ for Gadgetron, MATLAB for MRecon, etc.) to establish a performant and comprehensive image reconstruction workflow [@veldmann_opensource_2022] that maximize the advantages of each language while minimizing their drawbacks. Extending such pipeline of image reconstruction requires cross-language expertise and knowledge, adding significant overhead and complexity to development. This presents a significant barrier to efficient and reproducible image reconstruction and limits software accessibility and sustainability, especially for non-technical users such as radiologists and other physicians.
 
-The programming language Julia [@bezanson_julia_2017] provides a means to solve this multiple-language problem by providing a high-level interface to low-level compiled code, i.e., enabling fast prototyping with limited resources in an academic setting, while delivering performant execution times without code rewriting, all within a single developing environment.
+The programming language Julia [@bezanson_julia_2017] provides a solution to this multiple-language problem by using a high-level interface to low-level compiled code, i.e., enabling fast prototyping with limited resources in an academic setting, while delivering performant execution times without code rewriting, all within a single developing environment.
 
-In this work, we developed __GIRFReco.jl__ package (initial version introduced at the annual meeting of ISMRM 2022 [@jaffray_open-source_2022]), which implements an end-to-end, self-contained processing and image reconstruction pipeline for spiral MR data completely in Julia, incorporating the different model and correction components [@sutton_fast_2003;@wilm_higher_2011;@wilm_diffusion_2015;@pruessmann_advances_2001;@vannesjo_image_2016] to achieve a high-quality spiral MRI reconstruction. To be more specific, this reconstruction pipeline consists of several major steps: (1) ESPIRiT coil sensitivity map estimation [@uecker_espirit-eigenvalue_2014]; (2) Robust off-resonance (B<sub>0</sub>) map estimation [@funai_regularized_2008]; (3) GIRF Correction to the theoretical non-Cartesian k-space trajectory [@vannesjo_gradient_2013;@vannesjo_image_2016]; (4) Iterative non-Cartesian MRI reconstruction with off-resonance correction [@knopp_iterative_2009]. Considering software re-usabulity and sustainbility, (1) and (4) of the abovementioned steps are handeled by `MRIReco.jl`, a comprehensive lower-level open-source image reconstruction toolbox also in Julia. In step (3), the GIRF correction was implemented through our another package [`MRIGradients.jl`](https://github.com/MRI-gradient) [@jaffray_open-source_2022], which is a major refactoring of a MATLAB implementation of the original authors.
+In this work, we developed the `GIRFReco.jl`, an image reconstruction pipeline(initial version introduced at the annual meeting of ISMRM 2022 [@jaffray_open-source_2022]) based on the established `MRIReco.jl` package, which implements an end-to-end, self-contained processing and image reconstruction pipeline for spiral MR data completely in Julia, incorporating the different model and correction components [@sutton_fast_2003;@wilm_higher_2011;@wilm_diffusion_2015;@pruessmann_advances_2001;@vannesjo_image_2016] to achieve a high-quality spiral MRI reconstruction. In detail, this reconstruction pipeline consists of several major steps: (1) ESPIRiT coil sensitivity map estimation [@uecker_espirit-eigenvalue_2014]; (2) Robust off-resonance (B<sub>0</sub>) map estimation [@funai_regularized_2008]; (3) GIRF Correction to the theoretical non-Cartesian k-space trajectory [@vannesjo_gradient_2013;@vannesjo_image_2016]; (4) Iterative non-Cartesian MRI reconstruction with off-resonance correction [@knopp_iterative_2009]. Considering software reusabulity and sustainability, (1) and (4) of the abovementioned steps are handeled by `MRIReco.jl`, a comprehensive lower-level open-source image reconstruction toolbox also in Julia. In step (3), the GIRF correction was implemented through our another package [`MRIGradients.jl`](https://github.com/MRI-gradient) [@jaffray_open-source_2022], which is a major refactoring of a MATLAB implementation of the original authors.
 
 <!-- 
 In the spirit of software re-usabulity and sustainbility, __GIRFReco.jl__'s core image reconstruction routines are handled by __MRIReco.jl__ [15], a comprehensive open-source image reconstruction toolbox also in Julia. In particular, __GIRFReco.jl__ utilizes __MRIReco.jl__'s iterative non-Cartesian image reconstruction [7], ESPIRiT estimation of coil sensitivity maps [16], and off-resonance correction [17], as well as open-source handling of MR raw data ([ISMR]MRD, [9]). In the course of this work, we implemented robust off-resonance map estimation [18] as a submodule (__MRIFieldmaps.jl__) under __MRIReco.jl__.
@@ -71,18 +73,18 @@ With __GIRFReco.jl__, we provide a self-contained, open-source spiral MRI recons
 
 ## Required Inputs
 
-__GIRFReco.jl__ requires raw MR (k-space) data (in [ISMR]MRD format [@inati_ismrm_2017]) of the following scans as input:
+`GIRFReco.jl` requires raw MR (k-space) data (in [ISMR]MRD format [@inati_ismrm_2017]) of the following scans as input:
 
 1. Multi-echo Gradient-echo spin-warp (Cartesian) scan
     - at least two echo times (e.g., **TODO: xx and yy (water fat in-phase at 3T)**)
 2. Spiral scan
-    - single or multi-interleaf
+    - single or multi-interleave
 
-At the moment, the slice geometries of the Cartesian and spiral scans must match.
+At the moment, the slice geometries (thickness, field-of-view, and direction) of the Cartesian and spiral scans needs to be matched with each other.
 
 ## Overview of Components
 
-The following components are utilized within the spiral reconstruction pipeline of __GIRFReco.jl__ (Fig. 1), and separated into different (sub-)packages.
+The following components are utilized within the spiral reconstruction pipeline of `GIRFReco.jl` (Fig. 1), and separated into different (sub-)packages.
 
 1. Core iterative image reconstruction, using Julia package `MRIReco.jl`
     - CG-SENSE [@pruessmann_advances_2001] algorithm
@@ -91,15 +93,15 @@ The following components are utilized within the spiral reconstruction pipeline 
     - Smoothed B<sub>0</sub> map estimation, custom implementation of [@funai_regularized_2008] in `MRIFieldMaps.jl`
     - Static B<sub>0</sub> map correction, accelerated by time-segmented implementation in `MRIReco.jl` [@knopp_mrirecojl_2021]
     - Gradient impulse response function (GIRF) [@vannesjo_gradient_2013]
-        - measured in phantom [@graedel_comparison_2017]
-        - open-source computation [@wu_mr_2022]
-        - prediction implemented in custom package `MRIGradients.jl` [@jaffray_open-source_2022]
+        - Measured on a phantom [@graedel_comparison_2017]
+        - Open-source computation [@wu_mr_2022]
+        - Prediction implemented in our customized package `MRIGradients.jl` [@jaffray_open-source_2022]
 
 ![Figure 1](paper/GIRFReco_Components.png?raw=true "GIRFReco.jl Components")
 
 ## Detailed Processing Pipeline
 
-__GIRFReco.jl__ executes the required steps for spiral diffusion reconstruction (shown in Figure 2) in the following order:
+`GIRFReco.jl` executes the required steps for spiral diffusion reconstruction (shown in Figure 2) in the following order:
 
 1. Conversion of proprietary format, vendor-specific raw image data to an open-source raw data format ([ISMR]MRD, [@inati_ismrm_2017])
 2. Synchronization of the data and the k-space trajectory
@@ -112,15 +114,17 @@ __GIRFReco.jl__ executes the required steps for spiral diffusion reconstruction 
 
 ## Quality of Life Features
 
-In addition to providing an end-to-end reconstruction workflow, __GIRFReco.jl__ provides intermediate methods for plotting images and calibration data using PlotlyJS, as well as the capability to also export intermediate reconstruction results (such as calculated coil sensitivity maps and B<sub>0</sub> maps) in the interest of reproducibility.
+In addition to providing an end-to-end reconstruction workflow, `GIRFReco.jl` provides intermediate methods for plotting images and calibration data using PlotlyJS, as well as the capability to export intermediate reconstruction results (such as calculated coil sensitivity maps and B<sub>0</sub> maps).
 
 # Getting Started
 
-Up-to-date information about how to install __GIRFReco.jl__, run example reconstructions and apply it to your own data can be found in the README.md provided in the GitHub repository. Further technical documentation about the API is provided at **TODO: link to documenter results**, automatically generated by [`Documenter.jl`](https://github.com/JuliaDocs/Documenter.jl).
+Up-to-date information about how to install `GIRFReco.jl`, run example reconstructions and apply it to your own data can be found in the README.md provided in the GitHub repository. Further technical documentation about the API is provided at **TODO: link to documenter results**, automatically generated by [`Documenter.jl`](https://github.com/JuliaDocs/Documenter.jl).
 
 # Conclusion and Outlook
 
-The presented package, __GIRFReco.jl__, is an open-source end-to-end toolbox for spiral MRI reconstruction. It is developed solely in Julia, allowing users to obtain final images directly from raw MR data acquired by spiral k-space trajectories. Following best practices of software sustainability and accessibility, we re-use code of the established MR image reconstruction package `MRIReco.jl` in our package, while extending its capability to handle the more complex use case of multiple model-based corrections, necessary for high-quality spiral MRI. Without loss of generality, __GIRFReco.jl__ can be easily extended to allow model-based MRI reconstruction with GIRF and off-resonance corrections for data acquired under arbitrary non-Cartesian k-space trajectories besides spirals.
+The presented package, `GIRFReco.jl`, is an open-source end-to-end toolbox for spiral MRI reconstruction. It is developed in Julia, allowing users to obtain final images directly from raw MR data acquired by spiral k-space trajectories. Following best practices of software sustainability and accessibility, we re-use code of the established MR image reconstruction package `MRIReco.jl` in our package, while extending its capability to handle the more complex use case of multiple model-based corrections, necessary for high-quality spiral MRI.
+
+Without loss of generality, besides spiral imaging, `GIRFReco.jl` can be easily extended to a workflow of model-based MR image reconstruction for data acquired under arbitrary non-Cartesian k-space trajectories. With the established functions for GIRF and off-resonance corrections, k-space raw data acquired by other non-Cartesian trajectories (such as radial) will also benefit from high-quality reconstruction by `GIRFReco.jl`.
 
 # References
 
