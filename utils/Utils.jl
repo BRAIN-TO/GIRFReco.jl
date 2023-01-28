@@ -100,7 +100,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
 
 end
 
-# "Function plots all profiles in the acquisition to check consistency with ISMRMRD file"
+"Function plots all profiles in the acquisition to check consistency with ISMRMRD file"
 function checkProfiles(rawData)
 
     numProfiles2 = 128 # Set to the number of profiles that you would like to see
