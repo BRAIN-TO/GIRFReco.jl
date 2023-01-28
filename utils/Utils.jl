@@ -100,7 +100,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
 
 end
 
-"Function plots all profiles in the acquisition to check consistency with ISMRMRD file"
+# "Function plots all profiles in the acquisition to check consistency with ISMRMRD file"
 function checkProfiles(rawData)
 
     numProfiles2 = 128 # Set to the number of profiles that you would like to see
@@ -148,7 +148,7 @@ function plotSenseMaps(sense,n_channels; sliceIndex = 1)
 
 end
 
-"WIP: Plots trajectory and Data, doesn't work currently"
+# "WIP: Plots trajectory and Data, doesn't work currently"
 function plotTrajAndData(acq)
 
     for l in 1:length(acq.traj)
