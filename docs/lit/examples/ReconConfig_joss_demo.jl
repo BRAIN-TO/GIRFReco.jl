@@ -5,6 +5,9 @@ using Dates
 
 paramsGeneral = Dict{Symbol,Any}()
 
+# Gyromagnetic ratio, in unit of Hz
+paramsGeneral[:gamma] = 42577478
+
 ## General options for recon script
 paramsGeneral[:doLoadMaps] = false               # if true, reloads B0/SENSE maps instead of recalculating
 paramsGeneral[:doSaveRecon] = true              # if true, saves reconstruction and all auxiliary image data (maps) as NIfTI files
@@ -60,26 +63,32 @@ end
 # Gadgetron Server
 # laptop home, external drive
 # paramsGeneral[:pathData] = "e:\\SPIDI\\data\\SPIDI_0007\\Phantom\\rawdata"
-#paramsGeneral[:pathProject] = "/home/kasperl/SPIDI"
-paramsGeneral[:pathProject] = "/srv/data/ajaffray/TORONTO_COLLAB"
+paramsGeneral[:pathProject] = "/home/kasperl/SPIDI"
+# paramsGeneral[:pathProject] = "/srv/data/ajaffray/TORONTO_COLLAB"
 
 ## Paths (user-dependent)
-paramsGeneral[:pathData] = joinpath(paramsGeneral[:pathProject], "data", "joss_demo", "Human", "dat")
-paramsGeneral[:pathGradients] = joinpath(paramsGeneral[:pathProject], "data", "joss_demo", "gradients")
-paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "joss_demo", "Human")
+# paramsGeneral[:pathData] = joinpath(paramsGeneral[:pathProject], "data", "joss_demo", "Human", "dat")
+# paramsGeneral[:pathGradients] = joinpath(paramsGeneral[:pathProject], "data", "joss_demo", "gradients")
+# paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "joss_demo", "Human")
+# paramsGeneral[:pathGIRF] = joinpath(paramsGeneral[:pathProject], "code", "GIRFReco", "data", "GIRF", "GIRF_ISMRM2022")
+# paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])
+
+paramsGeneral[:pathData] = joinpath(paramsGeneral[:pathProject], "data", "SPIDI_0007", "Human", "dat")
+paramsGeneral[:pathGradients] = joinpath(paramsGeneral[:pathProject], "data", "SPIDI_0007", "gradients")
+paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "SPIDI_0007", "Human")
 paramsGeneral[:pathGIRF] = joinpath(paramsGeneral[:pathProject], "code", "GIRFReco", "data", "GIRF", "GIRF_ISMRM2022")
 paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])
 
 ## Files (user-dependent)
 # Map scan file (Cartesian multi-echo file)
-paramsGeneral[:fileNameMapScan] = "field_map.h5"
+paramsGeneral[:fileNameMapScan] = "field_map_132_2.h5"
 paramsGeneral[:mapTEs_ms] = [4.92,  7.38]
 
 paramsGeneral[:fileNameGIRF] = ["2021Nov_PosNeg_Gx.mat", "2021Nov_PosNeg_Gy.mat", "2021Nov_PosNeg_Gz.mat"]
 
 # File name for the spiral gradient
 # multi-il (high-res 1.1mm) gradient file 508, single interleaf (low-res 2.6mm) gradient file 511
-paramsGeneral[:fileNameGradient] = joinpath("gradients.txt")
+paramsGeneral[:fileNameGradient] = joinpath("508", "gradients.txt")
 
 # non-Cartesian (Spiral) scan file: MDDW 6
 # paramsGeneral[:fileNameScan]=["meas_MID00083_FID14976_diffSpiral_508_Intl0_b2k_4Avg.mrd"]
@@ -103,7 +112,7 @@ paramsGeneral[:fileNameGradient] = joinpath("gradients.txt")
 # paramsGeneral[:fileNameScan]=["508_124_2.h5", "508_126_2.h5", "508_128_2.h5", "508_130_2.h5"]
 # paramsGeneral[:nDiffusionDirections] = 6
 # SPIDI_0007 MDDW 6
-paramsGeneral[:fileNameScan]=["spiral_data.h5"]
+paramsGeneral[:fileNameScan]=["508_124_2.h5"]
 paramsGeneral[:nDiffusionDirections] = 6
 
 # NODDI
