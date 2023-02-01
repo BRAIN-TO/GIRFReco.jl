@@ -7,7 +7,7 @@ This page demonstrates an example script for using GIRFReco.jl
 
 This page was generated from the following Julia file: [joss_demo.jl](@__REPO_ROOT_URL__/doc/lit/examples/joss_demo.jl)
 
-The configuration file is [ReconConfig_joss_demo.jl](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl)
+The configuration file is [ReconConfig<ins>_</ins>joss<ins>_</ins>demo.jl](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl)
 =#
 
 #=
@@ -31,7 +31,7 @@ using MRIReco, FileIO, MRIFiles, MRICoilSensitivities
 #=
 ## 2. Configurations for reconstruction
 
-The following file, [ReconConfig_joss_demo.jl](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl),
+The following file, [ReconConfig<ins>_</ins>joss<ins>_</ins>demo.jl](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl),
 includes general configuration for spiral reconstruction.
 It is necessary to execute this file to make sure all parameters are loaded.
 =#
@@ -39,14 +39,14 @@ include("ReconConfig_joss_demo.jl")
 
 
 # Two user defined parameters, just for this script.
-reloadSpiralData = true # Set true if we need to reload raw data compulsively.
-reloadGIRFData = true # Set true if we need to reload GIRF data compulsively.
+reloadSpiralData = true; # Set true if we need to reload raw data compulsively.
+reloadGIRFData = true; # Set true if we need to reload GIRF data compulsively.
 
 #=
 Choose Slice ([single number] OR [1,2,31,...]）
 Leave empty ([]) or remove this line to later select all slices
 =#
-sliceChoice = []
+sliceChoice = [];
 
 #=
 Choose which diffusion directions and averages to be processed. 
@@ -72,9 +72,9 @@ startIndexIntlv = selector[:seg]
 
 The steps of image reconstruction starts here.
 
-### 3.1 Calculation of B<sub>0<\sub> and Coil Sensitivity Maps
+### 3.1 Calculation of B0 and Coil Sensitivity Maps
 
-The first step in reconstruction pipeline is to calculate the off-resonance (B<sub>0</sub>) maps `b0Maps` 
+The first step in reconstruction pipeline is to calculate the off-resonance (B0) maps `b0Maps` 
 and coil sensitivity maps `senseCartesian` through the Cartesian reconstruction script 
 [CartesianRecon.jl](@__REPO_ROOT_URL__/recon/CartesianRecon.jl). 
 Ideally this script is execute once and the calculated maps are 
@@ -100,7 +100,7 @@ end
 #=
 ### 3.2 Preparation of Spiral Reconstruction
 
-With off-resonance (B<sub>0</sub>) maps and coil sensitivity maps calculated, 
+With off-resonance (B0) maps and coil sensitivity maps calculated, 
 before the reconstruction of spiral images, there are necessary steps to prepare for 
 the related data. 
 
@@ -179,8 +179,6 @@ This step is done through the function `mergeRawInterleaves`, which can be viewe
 Note that we only do these steps when they have not been done yet or it's specifically required.
 =#
 if reloadSpiralData || !(@isdefined acqDataImaging)
-    ## Convert raw to AcquisitionData
-
     @info "Reading spiral data and merging interleaves"
     acqDataImaging = mergeRawInterleaves(paramsSpiral)
 end
@@ -243,9 +241,9 @@ if paramsGeneral[:doCoilCompression]
 end
 
 #=
-#### 3.2.6 Processing Off-Resonance (B<sub>0</sub>) Maps
+#### 3.2.6 Processing Off-Resonance (B0) Maps
 
-We need to resize the B<sub>0</sub> maps to the size of output encoding matrix size.
+We need to resize the B0 maps to the size of output encoding matrix size.
 =#
 resizedB0 = mapslices(x->imresize(x,paramsSpiral[:reconSize][1],paramsSpiral[:reconSize][2]), b0Maps, dims=[1,2])
 
@@ -255,10 +253,10 @@ resizedB0 = mapslices(x->imresize(x,paramsSpiral[:reconSize][1],paramsSpiral[:re
 Here we start the spiral image reconstruction.
 
 First we need to set necessary parameters for reconstruction, 
-including iterative solver's setting, coil maps, B<sub>0</sub> maps, etc. 
+including iterative solver's setting, coil maps, B0 maps, etc. 
 These parameters are held under the dictionary `paramsRecon`.
 
-Note that it is safer to cast B<sub>0</sub> maps to ComplexF32 if you're using current MRIReco.jl
+Note that it is safer to cast B0 maps to ComplexF32 if the current version of MRIReco.jl is used.
 =#
 
 @info "Setting Reconstruction Parameters"
@@ -285,9 +283,13 @@ to perform final spiral image reconstruction.
 
 
 #=
-(Optional) ## 4. Plot the Results
+(Optional) ## 4. Save and Plot the Results
+
+All results could be saved into NIfTI files using the `saveMap` function 
+and be plotted using the `plotReconstruction` function, both located in 
+the file [Utils.jl](@__REPO_ROOT_URL__/utils/Utils.jl).
+
 =#
-#save Map recon (multi-echo etc.)
 if paramsGeneral[:doSaveRecon] #TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
     resolution_tmp = fieldOfView(acqDataImaging)[1:2]./encodingSize(acqDataImaging)
     resolution_mm = (resolution_tmp[1],resolution_tmp[2],fieldOfView(acqDataImaging)[3] *(1 + paramsGeneral[:sliceDistanceFactor_percent]/100.0)) #for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
