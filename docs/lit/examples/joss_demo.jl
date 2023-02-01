@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------------
-# # GIRFReco.jl Example Script
+# # [GIRFReco.jl Example Script](@id example_script)
 #-----------------------------------------------------------------------------------
 
 #=
@@ -7,7 +7,7 @@ This page demonstrates an example script for using GIRFReco.jl
 
 This page was generated from the following Julia file: [joss_demo.jl](@__REPO_ROOT_URL__/doc/lit/examples/joss_demo.jl)
 
-The configuration file is [ReconConfig<ins>_</ins>joss<ins>_</ins>demo.jl](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl)
+The configuration file is [ReconConfig\\_joss\\_demo.jl](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl)
 =#
 
 #=
@@ -31,7 +31,7 @@ using MRIReco, FileIO, MRIFiles, MRICoilSensitivities
 #=
 ## 2. Configurations for reconstruction
 
-The following file, [ReconConfig<ins>_</ins>joss<ins>_</ins>demo.jl](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl),
+The following file, [ReconConfig\\_joss\\_demo.jl](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl),
 includes general configuration for spiral reconstruction.
 It is necessary to execute this file to make sure all parameters are loaded.
 =#
@@ -53,8 +53,8 @@ Choose which diffusion directions and averages to be processed.
 Diffusion direction index starts from 0 (b=0) to the total number in MDDW protocol (e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs). 
 Index for average starts from 1.
 =#
-diffusionDirection = selector[:dif]
-idxAverage = selector[:avg]
+diffusionDirection = 0
+idxAverage = 1
 nTotalDiffDir = paramsGeneral[:nDiffusionDirections]
 
 ## Determine to reconstruct single-interleave data, or one interleave out of multi-interleave data.
@@ -72,9 +72,9 @@ startIndexIntlv = selector[:seg]
 
 The steps of image reconstruction starts here.
 
-### 3.1 Calculation of B0 and Coil Sensitivity Maps
+### 3.1 Calculation of B\_0 and Coil Sensitivity Maps
 
-The first step in reconstruction pipeline is to calculate the off-resonance (B0) maps `b0Maps` 
+The first step in reconstruction pipeline is to calculate the off-resonance (B\_0) maps `b0Maps` 
 and coil sensitivity maps `senseCartesian` through the Cartesian reconstruction script 
 [CartesianRecon.jl](@__REPO_ROOT_URL__/recon/CartesianRecon.jl). 
 Ideally this script is execute once and the calculated maps are 
@@ -100,7 +100,7 @@ end
 #=
 ### 3.2 Preparation of Spiral Reconstruction
 
-With off-resonance (B0) maps and coil sensitivity maps calculated, 
+With off-resonance (B\_0) maps and coil sensitivity maps calculated, 
 before the reconstruction of spiral images, there are necessary steps to prepare for 
 the related data. 
 
@@ -130,13 +130,14 @@ Next we select the data we would like to reconstruct from the ISMRMRD file.
 
 The ISMRMRD data are stored in the following loops:
 
-Slice 1  Slice 2 ... Slice N   Slice 1  Slice 2 ... Slice N     Slice 1  Slice 2 ... Slice N ... 
+Slice 1, Slice 2 ... Slice N   Slice 1, Slice 2 ... Slice N     Slice 1, Slice 2 ... Slice N ... 
 
-|_______ Diff Dir 1 _______|   |_______ Diff Dir 2 _______| ... |_______ Diff Dir N _______| ... 
+|______ Diff Dir 1 ______|   |______ Diff Dir 2 ______| ... |______ Diff Dir N ______| ... 
 
-|_______________________________________ Average 1 ________________________________________| ... |___ Average N___| 
+|_________________________________ Average 1 ___________________________________| ... |___ Average N___| 
 
 Here we chose the set corresponding to the b-value = 0 images under the first average as the example.
+There is a constant shift due to pre-scan data that we want to skip, which is why the data starts from `nSlices*2`.
 =#
 excitationList = collect(nSlices*2 + 2 : 2 : nSlices*4) .+ diffusionDirection * nSlices * 2 .+ (idxAverage - 1) * nSlices * (nTotalDiffDir + 1) * 2
 sliceSelection = excitationList[selectedSlice]
@@ -241,9 +242,9 @@ if paramsGeneral[:doCoilCompression]
 end
 
 #=
-#### 3.2.6 Processing Off-Resonance (B0) Maps
+#### 3.2.6 Processing Off-Resonance (B\_0) Maps
 
-We need to resize the B0 maps to the size of output encoding matrix size.
+We need to resize the B\_0 maps to the size of output encoding matrix size.
 =#
 resizedB0 = mapslices(x->imresize(x,paramsSpiral[:reconSize][1],paramsSpiral[:reconSize][2]), b0Maps, dims=[1,2])
 
@@ -253,10 +254,10 @@ resizedB0 = mapslices(x->imresize(x,paramsSpiral[:reconSize][1],paramsSpiral[:re
 Here we start the spiral image reconstruction.
 
 First we need to set necessary parameters for reconstruction, 
-including iterative solver's setting, coil maps, B0 maps, etc. 
+including iterative solver's setting, coil maps, B\_0 maps, etc. 
 These parameters are held under the dictionary `paramsRecon`.
 
-Note that it is safer to cast B0 maps to ComplexF32 if the current version of MRIReco.jl is used.
+Note that it is safer to cast B\_0 maps to ComplexF32 if the current version of MRIReco.jl is used.
 =#
 
 @info "Setting Reconstruction Parameters"
@@ -283,7 +284,7 @@ to perform final spiral image reconstruction.
 
 
 #=
-(Optional) ## 4. Save and Plot the Results
+## 4. Save and Plot the Results (Optional)
 
 All results could be saved into NIfTI files using the `saveMap` function 
 and be plotted using the `plotReconstruction` function, both located in 
@@ -302,6 +303,7 @@ end
 
 if paramsGeneral[:doPlotRecon]
     @info "Plotting Reconstruction"
+    plotlyjs()
     plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice], figHandles=["Original Magnitude", "Original Phase", "B0"], isSliceInterleaved=true, rotateAngle=270)
 end
 

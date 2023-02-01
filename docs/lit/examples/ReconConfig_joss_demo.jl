@@ -1,8 +1,6 @@
 ## This ReconConfig.jl file describes all reconstruction parameters, as well as data locations and selections for an iterative non-Cartesian reconstruction that relies 
 #  on an external reference scan (Cartesian) to estimate calibration maps (coil sensitivities, B0 maps)
 
-using Dates
-
 paramsGeneral = Dict{Symbol,Any}()
 
 # Gyromagnetic ratio, in unit of Hz
@@ -14,11 +12,6 @@ paramsGeneral[:doSaveRecon] = true              # if true, saves reconstruction 
 paramsGeneral[:doPlotRecon] = true             # if true, plots intermediate debugging and output recon figures (needs graphics, not recommended in multi-thread mode due to PyPlot)
 paramsGeneral[:doProcessMapScan] = true         # if true, compute sensitivity and B0 maps from reconstructed Cartesian scan   
 paramsGeneral[:doSaveProcessedMapScan] = false; # save ISMRMD file of preprocessed Cartesian data (before recon)
-
-## Reconstruction Parameters
-# update time stamp for new recon, otherwise keep fixed, will create a new recon/<reconId> directory
-#paramsGeneral[:reconId] = Dates.format(Dates.now(), "yyyy-mm-dd_HH_MM_SS") # recon ID is reconId
-# paramsGeneral[:reconId] = "2022-10-20_09_07_07"
 
 paramsGeneral[:reconId] = "vDemo";
 paramsGeneral[:doCorrectWithB0map] = true
@@ -55,13 +48,6 @@ end
 
 # Set recon file paths (tell GIRFReco where to find things)
 
-## Data parameters (Path handling, data/results locations etc.)
-# UHN work
-# paramsGeneral[:pathProject] = "C:\\Users\\Lars Kasper\\UHN\\Brain-TO - MRP-SPIDI - MRP-SPIDI\\SPIDI"
-# Laptop home, one drive sync
-# paramsGeneral[:pathProject] = "C:\\Users\\kasperla\\UHN\\Brain-TO - MRP-SPIDI - MRP-SPIDI\\SPIDI"
-# Gadgetron Server
-# laptop home, external drive
 # paramsGeneral[:pathData] = "e:\\SPIDI\\data\\SPIDI_0007\\Phantom\\rawdata"
 paramsGeneral[:pathProject] = "/home/kasperl/SPIDI"
 # paramsGeneral[:pathProject] = "/srv/data/ajaffray/TORONTO_COLLAB"
@@ -90,39 +76,9 @@ paramsGeneral[:fileNameGIRF] = ["2021Nov_PosNeg_Gx.mat", "2021Nov_PosNeg_Gy.mat"
 # multi-il (high-res 1.1mm) gradient file 508, single interleaf (low-res 2.6mm) gradient file 511
 paramsGeneral[:fileNameGradient] = joinpath("508", "gradients.txt")
 
-# non-Cartesian (Spiral) scan file: MDDW 6
-# paramsGeneral[:fileNameScan]=["meas_MID00083_FID14976_diffSpiral_508_Intl0_b2k_4Avg.mrd"]
-# paramsGeneral[:nDiffusionDirections] = 6
-
-#  non-Cartesian (Spiral) scan file: MDDW30
-# For single interleave data, use this section
-    # startIndexIntlv = 1 # Should always be 1 for single-interleave data.
-    # fname_spiralIntlv = "511_134_2.h5" # Gradient 511, b = 300, 10 diff directions
-    # fname_spiralIntlv = "511_136_2.h5" # Gradient 511, b = 700, 30 diff directions
-    # fname_spiralIntlv = "511_138_2.h5" # Gradient 511, b = 2500, 64 diff directions
-    # fname_spiralIntlv = "508_140_2.h5" # Gradient 508, interleave 0, b = 300, 10 diff directions
-    # fname_spiralIntlv = "508_142_2.h5" # Gradient 508, interleave 0, b = 700, 30 diff directions
-    # fname_spiralIntlv = "508_144_2.h5" # Gradient 508, interleave 0, b = 2500, 64 diff directions
-
-# Multi-interleave data, needs all 4 file names, but will only read the corresponding one.
-    #fname_spiralIntlv0 = "508_124_2.h5" # Gradient 508, interleave 0, b = 2000, 6 diff directions, 4 averages
-    #fname_spiralIntlv1 = "508_126_2.h5" # Gradient 508, interleave 1, b = 2000, 6 diff directions, 4 averages
-    #fname_spiralIntlv2 = "508_128_2.h5" # Gradient 508, interleave 2, b = 2000, 6 diff directions, 4 averages
-    #fname_spiralIntlv3 = "508_130_2.h5" # Gradient 508, interleave 3, b = 2000, 6 diff directions, 4 averages
-# paramsGeneral[:fileNameScan]=["508_124_2.h5", "508_126_2.h5", "508_128_2.h5", "508_130_2.h5"]
-# paramsGeneral[:nDiffusionDirections] = 6
 # SPIDI_0007 MDDW 6
 paramsGeneral[:fileNameScan]=["508_124_2.h5"]
 paramsGeneral[:nDiffusionDirections] = 6
-
-# NODDI
-# paramsGeneral[:fileNameScan]=["508_140_2.h5"]
-# paramsGeneral[:nDiffusionDirections] = 10
-# paramsGeneral[:fileNameScan]=["508_142_2.h5"]
-# paramsGeneral[:nDiffusionDirections] = 30
-# paramsGeneral[:fileNameScan]=["508_144_2.h5"]
-# paramsGeneral[:nDiffusionDirections] = 64
-# paramsGeneral[:fileNameScan]=["508_124_2.h5"]
 
 ## Final, Automatic operations (dependent on previous sections, usually no need to change)
 
