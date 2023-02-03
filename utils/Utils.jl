@@ -55,7 +55,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     absMosaic = mosaicview(absData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    heatmap(absMosaic,show=true, plot_title="|Images|",plot_titlevspan=0.1)
+    heatmap(absMosaic,show=true, plot_title="|Images|",plot_titlevspan=0.1,color=:grays)
 
     phaseData = angle.(images[:, :, reorderSliceIndex, 1, 1])
     if rotateAngle == 90
@@ -67,7 +67,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     phaseMosaic = mosaicview(phaseData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    heatmap(phaseMosaic,show=true,plot_title="∠ Images",plot_titlevspan=0.1)
+    heatmap(phaseMosaic,show=true,plot_title="∠ Images",plot_titlevspan=0.1,color=:plasma)
     #colorbar()
 
     #gcf().suptitle("∠Images")
@@ -91,7 +91,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     b0Mosaic = mosaicview(b0Data[:, :, reorderSliceIndex], nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    heatmap(b0Mosaic,show=true, plot_title="B₀ Map Images",plot_titlevspan=0.1)
+    heatmap(b0Mosaic,show=true, plot_title="B₀ Map Images",plot_titlevspan=0.1,color=:plasma)
     # colorbar()
 
     # gcf().suptitle("B₀ Maps [rad/s]")
@@ -134,7 +134,7 @@ function plotSenseMaps(sense,n_channels; sliceIndex = 1)
     # gcf()
 
     magMosaic = mosaicview((abs.(sense[:,:,sliceIndex,:])), nrow = Int(floor(sqrt(n_channels))), npad = 5, rowmajor = true, fillvalue = 0)
-    heatmap(magMosaic, show=true, plot_title="|Sensitivity|",plot_titlevspan=0.1)
+    heatmap(magMosaic, show=true, plot_title="|Sensitivity|",plot_titlevspan=0.1,color=:gnuplot2)
 
     # # Phase maps
     # figure(@sprintf("Sensitivity Map Phase of Slice %d / %d", sliceIndex, sliceNum)); clf(); for ch in 1:n_channels; subplot(8,4,ch); imshow(angle.(sense[:,:,sliceIndex,ch]), cmap = "gray"); end;
@@ -142,7 +142,7 @@ function plotSenseMaps(sense,n_channels; sliceIndex = 1)
     # gcf()
 
     phaseMosaic = mosaicview((angle.(sense[:,:,sliceIndex,:])), nrow = Int(floor(sqrt(n_channels))), npad = 5, rowmajor = true, fillvalue = 0)
-    heatmap(phaseMosaic,show=true, plot_title="∠ Sensitivity",plot_titlevspan=0.1)
+    heatmap(phaseMosaic,show=true, plot_title="∠ Sensitivity",plot_titlevspan=0.1,color=:plasma)
 
     1
 
