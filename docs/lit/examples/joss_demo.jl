@@ -17,7 +17,7 @@ The necessary Julia packages needed for spiral reconstruction.
 =#
 
 #Base packages for computation
-using HDF5, LinearAlgebra, Dierckx, DSP, FourierTools, RegularizedLeastSquares
+using HDF5, LinearAlgebra, Dierckx, DSP, FourierTools, RegularizedLeastSquares, ImageUtils
 
 #Packages for figure displaying
 using MosaicViews, Plots, Images
@@ -66,7 +66,7 @@ For multi-interleave data, the range of this value is [1:nTotalNumIntlv] (total 
 For single-interleave data, it should always be set as 1; for multi-interleave data, the value set here will be used, indicating which interleaves to be merged and reconstructed.
 =#
 startIndexIntlv = selector[:seg]
-
+@info 2
 #===================================================
 ## 3. Image Reconstruction
 

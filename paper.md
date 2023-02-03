@@ -8,30 +8,39 @@ tags:
   - Off-resonance Correction
 authors:
   - name: Alexander Jaffray
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0002-9571-1838
     equal-contrib: True
     corresponding: True
     affiliation: 1
-  - name: Author2
+  - name: Zhe Wu
     orcid: 0000-0000-0000-0000
     equal-contrib: True # (This is how you can denote equal contributions between multiple authors)
     corresponding: True # (This is how to denote the corresponding author)
     affiliation: 2
-  - name: Author3
+  - name: S. Johanna Vannesjo
+    orcid: 0000-0000-0000-0000
     equal-contrib: False # (This is how you can denote equal contributions between multiple authors)
     corresponding: False # (This is how to denote the corresponding author)
-    affiliation: 2
-  - name: Senior Author
+    affiliation: 3
+  - name: Kamil Uludag
+    orcid: 0000-0000-0000-0000
     equal-contrib: False # (This is how you can denote equal contributions between multiple authors)
     corresponding: False # (This is how to denote the corresponding author)
-    affiliation: "2, 3" # (Multiple affiliations must be quoted)
+    affiliation: "2, 4" # (Multiple affiliations must be quoted)
+  - name: Lars Kasper
+    orcid: 0000-0000-0000-0000
+    equal-contrib: False # (This is how you can denote equal contributions between multiple authors)
+    corresponding: False # (This is how to denote the corresponding author)
+    affiliation: "2, 4" # (Multiple affiliations must be quoted)
 affiliations:
  - name: MRI Research Centre, University of British Columbia, Vancouver, Canada
    index: 1
  - name: Techna Institute, University Health Network, Ontario, Canada
    index: 2
- - name: Department of Medical Biophysics, University of Toronto, Canada
+ - name: Department of Physics, Norwegian University of Science and Technology, Trondheim, Norway
    index: 3
+ - name: Department of Medical Biophysics, University of Toronto, Canada
+   index: 4
 date: 31 January 2023
 bibliography: paper/paper.bib
 

@@ -1,6 +1,8 @@
 ## This ReconConfig.jl file describes all reconstruction parameters, as well as data locations and selections for an iterative non-Cartesian reconstruction that relies 
 #  on an external reference scan (Cartesian) to estimate calibration maps (coil sensitivities, B0 maps)
 
+using Dates
+
 paramsGeneral = Dict{Symbol,Any}()
 
 # Gyromagnetic ratio, in unit of Hz
@@ -49,8 +51,8 @@ end
 # Set recon file paths (tell GIRFReco where to find things)
 
 # paramsGeneral[:pathData] = "e:\\SPIDI\\data\\SPIDI_0007\\Phantom\\rawdata"
-paramsGeneral[:pathProject] = "/home/kasperl/SPIDI"
-# paramsGeneral[:pathProject] = "/srv/data/ajaffray/TORONTO_COLLAB"
+# paramsGeneral[:pathProject] = "/home/kasperl/SPIDI"
+paramsGeneral[:pathProject] = "/srv/data/ajaffray/TORONTO_COLLAB"
 
 ## Paths (user-dependent)
 # paramsGeneral[:pathData] = joinpath(paramsGeneral[:pathProject], "data", "joss_demo", "Human", "dat")
