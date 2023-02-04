@@ -13,7 +13,7 @@ authors:
     corresponding: True
     affiliation: 1
   - name: Zhe Wu
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0002-2079-5977
     equal-contrib: True # (This is how you can denote equal contributions between multiple authors)
     corresponding: True # (This is how to denote the corresponding author)
     affiliation: 2
