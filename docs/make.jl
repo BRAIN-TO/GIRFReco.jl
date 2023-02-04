@@ -8,17 +8,18 @@ using Documenter, Literate, GIRFReco
 lit = joinpath(@__DIR__, "lit", "examples")
 gen = joinpath(@__DIR__, "src", "generated")
 
-ipath = joinpath(lit, "joss_demo.jl")
+ipath_script = joinpath(lit, "joss_demo.jl")
+ipath_config = joinpath(lit, "ReconConfig_joss_demo.jl")
 opath = gen
-
-Literate.markdown(ipath, opath; documenter = true)
+Literate.markdown(ipath_script, opath; documenter = true)
+Literate.markdown(ipath_config, opath; documenter = true)
 
 makedocs(sitename="GIRFReco Documentation",
     modules = [GIRFReco],
     pages = [
         "Home" => "index.md",
         "Utilities" => "Utilities.md",
-        "Examples" => joinpath("generated/", "joss_demo.md")
+        "Examples" => [joinpath("generated/", "joss_demo.md"), joinpath("generated/", "ReconConfig_joss_demo.md")]
     ],
 )
 

@@ -2,7 +2,10 @@
 # # [GIRFReco.jl Example Configuration File](@id example_config)
 #-----------------------------------------------------------------------------------
 
-#= This ReconConfig.jl file describes all general reconstruction parameters, 
+#=
+## Introduction
+
+This ReconConfig.jl file describes all general reconstruction parameters, 
 as well as data locations and selections for an iterative non-Cartesian reconstruction that relies 
 on an external reference scan (Cartesian) to estimate calibration maps (coil sensitivities, B0 maps).
 
@@ -25,23 +28,30 @@ paramsGeneral[:doCorrectWithB0map] = true       # whether perform off-resonance 
 paramsGeneral[:doCorrectWithGIRFkxyz] = true    # whether perform 1st order GIRF correction
 paramsGeneral[:doCorrectWithGIRFk0] = true      # whether perform 1st order GIRF correction
 paramsGeneral[:doCoilCompression] = false       # whether perform coil compression
-paramsGeneral[:nVirtualCoils] = 8;              # if perform coil compression, the number of coils to be compressed to
-paramsGeneral[:fovShift] = [0, -20];            # amount of FOV shift; in unit of number of voxels in [x,y] direction
+paramsGeneral[:doNormalizeRecon] = false        # if true, set the range of magnitude image as [0 1]
+
+# General parameters for reconstruction
+paramsGeneral[:numADCSamples] = 15655             # total number of ADC points BEFORE the rewinder at the end of the spiral readout. Need to check with data. # 15504
+paramsGeneral[:reconSize] = [200, 200, 1]         # the matrix size of the reconstructed images. Needs to specify 1 on Z dimension for 2D images
+paramsGeneral[:nReconIterations] = 20;            # number of recon iterations (for both Cartesian and Spiral recon)
+paramsGeneral[:b0mapSmoothBeta] = 0.1             # for estimateB0Maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
+paramsGeneral[:scalingFactorSaveRecon] = 1.0e9    # typical range of recon intensities is 1e-7, rescale when saving, e.g., to 0...1000 roughly for fMRI analysis
+paramsGeneral[:nVirtualCoils] = 8;                # if perform coil compression, the number of coils to be compressed to
+paramsGeneral[:fovShift] = [0, -20];              # amount of FOV shift; in unit of number of voxels in [x,y] direction
 paramsGeneral[:sliceDistanceFactor_percent] = 400 # Scan parameters, Additional acquisition information, e.g., slice distance etc.
+paramsGeneral[:nDiffusionDirections] = 6          # Need to specify total diffusion directions included in the raw data
+#=
+## Data selector
 
-#Total number of ADC points BEFORE the rewinder at the end of the spiral readout. For gradient 508, use 15655 (out of 16084); for gradient 511, use 15445 (out of 15624).
-paramsGeneral[:numADCSamples] = 15655 # 15504
-# Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
-paramsGeneral[:reconSize] = [200, 200,1] #(112, 112) #(200, 200)
-paramsGeneral[:nReconIterations] = 20;          # number of recon iterations (for both Cartesian and Spiral recon)
-paramsGeneral[:b0mapSmoothBeta] = 0.1           # for estimateB0Maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
-paramsGeneral[:doNormalizeRecon] = false        # set max abs to 1
-paramsGeneral[:scalingFactorSaveRecon] = 1.0e9 # 1 # typical range of recon intensities is 1e-7, rescale when saving, e.g., to 0...1000 roughly for fMRI analysis
+See details in the page Advanced Usage.
 
-# Data selector
-#  Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
-# boolean isCalledFromReconLoopGlobal is true, if this RunReconLoop is active
-# If isCalledFromReconLoopGlobal is false or not defined, the data selector needs to be defined here.
+Data selector is designed for calling the script repetitively through [`RunReconLoop.jl`](@__REPO_ROOT_URL__/recon/RunReconLoop.jl) 
+for e.g. different diffusion directions and/or different averages. 
+Note that the index of diffusion direction starts from 0 (b=0) to the total number in MDDW protocol, 
+e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs. 
+`boolean isCalledFromReconLoopGlobal` should be set as true if this `RunReconLoop.jl` is active.
+If isCalledFromReconLoopGlobal is false or not defined, the data selector needs to be defined in the following code block.
+=#
 if !(@isdefined isCalledFromReconLoopGlobal) || !isCalledFromReconLoopGlobal
     global selector = Dict{Symbol,Any}()
     selector[:avg] = 1
@@ -50,9 +60,14 @@ if !(@isdefined isCalledFromReconLoopGlobal) || !isCalledFromReconLoopGlobal
 end
 
 
-# Set recon file paths (tell GIRFReco where to find things)
+#=
+## Directories and File Names
 
-# Set paths for input and output files
+We set directories for data reading in and results writing in this section. 
+
+### Specifying Directories
+=#
+
 paramsGeneral[:pathProject] = rootProjPath # Root path for the project
 
 #src # Paths (user-dependent)
@@ -62,72 +77,73 @@ paramsGeneral[:pathProject] = rootProjPath # Root path for the project
 #src # paramsGeneral[:pathGIRF] = joinpath(paramsGeneral[:pathProject], "code", "GIRFReco", "data", "GIRF", "GIRF_ISMRM2022")
 #src # paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])
 
-#Path to ISMRMRD files (raw k-space data)
+#Path to ISMRMRD files (raw k-space data) [Input]
 paramsGeneral[:pathData] = joinpath(paramsGeneral[:pathProject], "data", "SPIDI_0007", "Human", "dat")
-#Path to spiral readout gradient files
+#Path to spiral readout gradient files [Input]
 paramsGeneral[:pathGradients] = joinpath(paramsGeneral[:pathProject], "data", "SPIDI_0007", "gradients")
-#Path to GIRF files
+#Path to GIRF files [Input]
 paramsGeneral[:pathGIRF] = joinpath(paramsGeneral[:pathProject], "code", "GIRFReco", "data", "GIRF", "GIRF_ISMRM2022")
-
-#Path to middle results (coil and B0 maps) files
+#Path to middle results (coil and B0 maps) files [Output]
 paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "SPIDI_0007", "Human")
-#Path to final reconstructed spiral images
+#Path to final reconstructed spiral images [Output]
 paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])
 
+#=
+### Specifying File Names
+=#
+paramsGeneral[:fileNameMapScan] = "field_map_132_2.h5" # Cartesian dual-echo file, for coil and B0 maps calculation [Input]
+paramsGeneral[:mapTEs_ms] = [4.92,  7.38] # Two echo times, in ms
+paramsGeneral[:fileNameGIRF] = 
+["2021Nov_PosNeg_Gx.mat", "2021Nov_PosNeg_Gy.mat", "2021Nov_PosNeg_Gz.mat"] # Calculated GIRF for each gradient axis [Input]
+paramsGeneral[:fileNameGradient] = joinpath("508", "gradients.txt") # File name for the spiral gradient [Input]
+paramsGeneral[:fileNameScan]=["508_124_2.h5"] # ISMRMRD Raw k-space data for spiral acquisition [Input]
+paramsGeneral[:fileNameProcessedMapScan] = "processed_cartesian_data.h5" # file name for preprocessed data (remove oversampling, permute dimensions wrt MRIReco) [Output]
+paramsGeneral[:fileNameSaveMapRecon] = splitext(paramsGeneral[:fileNameMapScan])[1] * "_reconmap.nii" # File name for reconstructed dual-echo Cartesian images [Output]
+paramsGeneral[:fileNameSaveSense] = splitext(paramsGeneral[:fileNameMapScan])[1] * "_sensemap.nii" # File name for calculated coil sensitivity maps [Output]
+paramsGeneral[:fileNameSaveB0] = splitext(paramsGeneral[:fileNameMapScan])[1] * "_b0map.nii" # File name for calculated off-resonance (B0) maps [Output]
 
-# Map scan file (Cartesian multi-echo file)
-paramsGeneral[:fileNameMapScan] = "field_map_132_2.h5"
-paramsGeneral[:mapTEs_ms] = [4.92,  7.38]
-
-paramsGeneral[:fileNameGIRF] = ["2021Nov_PosNeg_Gx.mat", "2021Nov_PosNeg_Gy.mat", "2021Nov_PosNeg_Gz.mat"]
-
-# File name for the spiral gradient
-# multi-il (high-res 1.1mm) gradient file 508, single interleaf (low-res 2.6mm) gradient file 511
-paramsGeneral[:fileNameGradient] = joinpath("508", "gradients.txt")
-
-# SPIDI_0007 MDDW 6
-paramsGeneral[:fileNameScan]=["508_124_2.h5"]
-paramsGeneral[:nDiffusionDirections] = 6
-
-## Final, Automatic operations (dependent on previous sections, usually no need to change)
-
-paramsGeneral[:fullPathGradient] = joinpath(paramsGeneral[:pathGradients], paramsGeneral[:fileNameGradient])
-
-# NOTE: If loaded from other reconId, this path might differ
-paramsGeneral[:pathLoadMaps] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])
-
-# . makes join elementwise, i.e,. every file name (in array) with the same path
-paramsGeneral[:fullPathGIRF] = joinpath.(paramsGeneral[:pathGIRF], paramsGeneral[:fileNameGIRF])
-
-paramsGeneral[:fullPathMapScan] = joinpath(paramsGeneral[:pathData], paramsGeneral[:fileNameMapScan])
-# . makes join elementwise, i.e,. every file name (in array) with the same path
-paramsGeneral[:fullPathScan] = joinpath.(paramsGeneral[:pathData], paramsGeneral[:fileNameScan])
-
-# filename for preprocessed data (remove oversampling, permute dimensions wrt MRIReco)
-paramsGeneral[:fileNameProcessedMapScan] = "processed_cartesian_data.h5"
-paramsGeneral[:fullPathProcessedMapScan] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameProcessedMapScan])
-
-paramsGeneral[:fileNameSaveMapRecon] = splitext(paramsGeneral[:fileNameMapScan])[1] * "_reconmap.nii"
-paramsGeneral[:fileNameSaveSense] = splitext(paramsGeneral[:fileNameMapScan])[1] * "_sensemap.nii"
-paramsGeneral[:fileNameSaveB0] = splitext(paramsGeneral[:fileNameMapScan])[1] * "_b0map.nii"
-
+#=
+File name for the final reconstructed spiral image.
+If we reconstructing multiple spiral data files (e.g. multiple interleaves) through `RunReconLoop.jl`, 
+the file name for the final reconstructed image is concatenated from multiple scan file names. 
+Otherwise, just append `_recon.nii` as suffix to file name.
+=#
 if isa(paramsGeneral[:fileNameScan], AbstractVector)
-    # for multiple files, concatenate recon name from scan file names, e.g., 508_124_2_508_126_2_508_128_2_508_130_2_recon.nii
     paramsGeneral[:fileNameSaveRecon] = join([(x[1] * "_") for x in splitext.(paramsGeneral[:fileNameScan])]) * "dif$(selector[:dif])_" * "itl$(selector[:seg])_" * "avg$(selector[:avg])_" * "recon.nii"
 else
-    # otherwise, just concat _recon.nii to file name
     paramsGeneral[:fileNameSaveRecon] = splitext(paramsGeneral[:fileNameScan])[1] * "_recon.nii"
 end
 
-paramsGeneral[:fullPathSaveRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveRecon] )
-paramsGeneral[:fullPathSaveMapRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveMapRecon] )
-paramsGeneral[:fullPathSaveSense] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveSense] )
-paramsGeneral[:fullPathSaveB0] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveB0] )
+#=
+### Assembling Full Paths
 
+Assembling directories and file names for final full pathes. 
+These are automated operations.
+=#
+paramsGeneral[:fullPathGradient] = joinpath(paramsGeneral[:pathGradients], paramsGeneral[:fileNameGradient]) # Full paths of spiral readout gradients
+#src # paramsGeneral[:pathLoadMaps] = 
+#src # joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId]) # NOTE: If loaded from other reconId, this path might differ
+paramsGeneral[:fullPathGIRF] = joinpath.(paramsGeneral[:pathGIRF], paramsGeneral[:fileNameGIRF]) # Full paths of GIRF files
+paramsGeneral[:fullPathMapScan] = joinpath(paramsGeneral[:pathData], paramsGeneral[:fileNameMapScan]) # Full path of dual-echo Cartesian data
+paramsGeneral[:fullPathScan] = joinpath.(paramsGeneral[:pathData], paramsGeneral[:fileNameScan]) # Full paths of raw k-space data files of spiral acquisition
+paramsGeneral[:fullPathProcessedMapScan] = 
+joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameProcessedMapScan]) # Full paths of pre-processed Cartesian dual-echo data [Output]
+paramsGeneral[:fullPathSaveRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveRecon] ) # Full paths of the reconstructed spiral image [Output]
+paramsGeneral[:fullPathSaveMapRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveMapRecon] ) # Full paths of reconstructed dual-echo Cartesian images [Output]
+paramsGeneral[:fullPathSaveSense] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveSense] ) # Full paths of calculated coil sensitivity maps [Output]
+paramsGeneral[:fullPathSaveB0] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveB0] ) # Full paths of calculated off-resonance (B0) maps [Output]
+
+#=
+## Final Steps
+
+If the path for results writing is not existing, create it.
+
+As the last step of configuration, copy this config file 
+to the recon path for further checking and debugging purposes.
+=#
 if ~ispath(paramsGeneral[:pathSaveRecon])
     mkpath(paramsGeneral[:pathSaveRecon])
 end
 
-# copies this config file to the recon path for later checks of parameter functions
 cp("recon/ReconConfig.jl", joinpath(paramsGeneral[:pathSaveRecon], "ReconConfig.jl"); force = true)
 

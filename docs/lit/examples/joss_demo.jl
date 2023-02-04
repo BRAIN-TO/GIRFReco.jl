@@ -5,9 +5,9 @@
 #=
 This page demonstrates an example script for using GIRFReco.jl
 
-This page was generated from the following Julia file: [joss_demo.jl](@__REPO_ROOT_URL__/doc/lit/examples/joss_demo.jl)
+This page was generated from the following Julia file: [`joss_demo.jl`](@__REPO_ROOT_URL__/doc/lit/examples/joss_demo.jl)
 
-The configuration file is [ReconConfig\\_joss\\_demo.jl](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl)
+The configuration file is [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl)
 =#
 
 #=
@@ -31,7 +31,7 @@ using MRIReco, FileIO, MRIFiles, MRICoilSensitivities
 #=
 ## 2. Configurations for reconstruction
 
-The following file, [ReconConfig\\_joss\\_demo.jl](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl),
+The following file, [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl),
 includes general configuration for spiral reconstruction.
 It is necessary to execute this file to make sure all parameters are loaded.
 =#
@@ -73,9 +73,9 @@ startIndexIntlv = 1
 
 The steps of image reconstruction starts here.
 
-### 3.1 Calculation of B\\_0 and Coil Sensitivity Maps
+### 3.1 Calculation of B0 and Coil Sensitivity Maps
 
-The first step in reconstruction pipeline is to calculate the off-resonance (B\\_0) maps `b0Maps` 
+The first step in reconstruction pipeline is to calculate the off-resonance (B0) maps `b0Maps` 
 and coil sensitivity maps `senseCartesian` through the Cartesian reconstruction script 
 [CartesianRecon.jl](@__REPO_ROOT_URL__/recon/CartesianRecon.jl). 
 Ideally this script is execute once and the calculated maps are 
@@ -101,7 +101,7 @@ end
 #=
 ### 3.2 Preparation of Spiral Reconstruction
 
-With off-resonance (B\\_0) maps and coil sensitivity maps calculated, 
+With off-resonance (B0) maps and coil sensitivity maps calculated, 
 before the reconstruction of spiral images, there are necessary steps to prepare for 
 the related data. 
 
@@ -243,9 +243,9 @@ if paramsGeneral[:doCoilCompression]
 end
 
 #=
-#### 3.2.6 Processing Off-Resonance (B\\_0) Maps
+#### 3.2.6 Processing Off-Resonance (B0) Maps
 
-We need to resize the B\\_0 maps to the size of output encoding matrix size.
+We need to resize the B0 maps to the size of output encoding matrix size.
 =#
 resizedB0 = mapslices(x->imresize(x,paramsSpiral[:reconSize][1],paramsSpiral[:reconSize][2]), b0Maps, dims=[1,2])
 
@@ -255,10 +255,10 @@ resizedB0 = mapslices(x->imresize(x,paramsSpiral[:reconSize][1],paramsSpiral[:re
 Here we start the spiral image reconstruction.
 
 First we need to set necessary parameters for reconstruction, 
-including iterative solver's setting, coil maps, B\\_0 maps, etc. 
+including iterative solver's setting, coil maps, B0 maps, etc. 
 These parameters are held under the dictionary `paramsRecon`.
 
-Note that it is safer to cast B\\_0 maps to ComplexF32 if the current version of MRIReco.jl is used.
+Note that it is safer to cast B0 maps to ComplexF32 if the current version of MRIReco.jl is used.
 =#
 
 @info "Setting Reconstruction Parameters"
