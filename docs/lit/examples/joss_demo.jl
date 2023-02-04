@@ -35,6 +35,7 @@ The following file, [ReconConfig\\_joss\\_demo.jl](@__REPO_ROOT_URL__/doc/lit/ex
 includes general configuration for spiral reconstruction.
 It is necessary to execute this file to make sure all parameters are loaded.
 =#
+rootProjPath = "/home/kasperl/SPIDI" # Root path of the project needs to be defined
 include("ReconConfig_joss_demo.jl")
 
 
@@ -65,16 +66,16 @@ Choose which interleave to be reconstructed.
 For multi-interleave data, the range of this value is [1:nTotalNumIntlv] (total number of interleaves)
 For single-interleave data, it should always be set as 1; for multi-interleave data, the value set here will be used, indicating which interleaves to be merged and reconstructed.
 =#
-startIndexIntlv = selector[:seg]
-@info 2
+startIndexIntlv = 1
+
 #===================================================
 ## 3. Image Reconstruction
 
 The steps of image reconstruction starts here.
 
-### 3.1 Calculation of B\_0 and Coil Sensitivity Maps
+### 3.1 Calculation of B\\_0 and Coil Sensitivity Maps
 
-The first step in reconstruction pipeline is to calculate the off-resonance (B\_0) maps `b0Maps` 
+The first step in reconstruction pipeline is to calculate the off-resonance (B\\_0) maps `b0Maps` 
 and coil sensitivity maps `senseCartesian` through the Cartesian reconstruction script 
 [CartesianRecon.jl](@__REPO_ROOT_URL__/recon/CartesianRecon.jl). 
 Ideally this script is execute once and the calculated maps are 
@@ -100,7 +101,7 @@ end
 #=
 ### 3.2 Preparation of Spiral Reconstruction
 
-With off-resonance (B\_0) maps and coil sensitivity maps calculated, 
+With off-resonance (B\\_0) maps and coil sensitivity maps calculated, 
 before the reconstruction of spiral images, there are necessary steps to prepare for 
 the related data. 
 
@@ -242,9 +243,9 @@ if paramsGeneral[:doCoilCompression]
 end
 
 #=
-#### 3.2.6 Processing Off-Resonance (B\_0) Maps
+#### 3.2.6 Processing Off-Resonance (B\\_0) Maps
 
-We need to resize the B\_0 maps to the size of output encoding matrix size.
+We need to resize the B\\_0 maps to the size of output encoding matrix size.
 =#
 resizedB0 = mapslices(x->imresize(x,paramsSpiral[:reconSize][1],paramsSpiral[:reconSize][2]), b0Maps, dims=[1,2])
 
@@ -254,10 +255,10 @@ resizedB0 = mapslices(x->imresize(x,paramsSpiral[:reconSize][1],paramsSpiral[:re
 Here we start the spiral image reconstruction.
 
 First we need to set necessary parameters for reconstruction, 
-including iterative solver's setting, coil maps, B\_0 maps, etc. 
+including iterative solver's setting, coil maps, B\\_0 maps, etc. 
 These parameters are held under the dictionary `paramsRecon`.
 
-Note that it is safer to cast B\_0 maps to ComplexF32 if the current version of MRIReco.jl is used.
+Note that it is safer to cast B\\_0 maps to ComplexF32 if the current version of MRIReco.jl is used.
 =#
 
 @info "Setting Reconstruction Parameters"

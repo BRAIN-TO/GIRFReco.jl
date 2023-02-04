@@ -1,39 +1,41 @@
-## This ReconConfig.jl file describes all reconstruction parameters, as well as data locations and selections for an iterative non-Cartesian reconstruction that relies 
-#  on an external reference scan (Cartesian) to estimate calibration maps (coil sensitivities, B0 maps)
+#-----------------------------------------------------------------------------------
+# # [GIRFReco.jl Example Configuration File](@id example_config)
+#-----------------------------------------------------------------------------------
 
-using Dates
+#= This ReconConfig.jl file describes all general reconstruction parameters, 
+as well as data locations and selections for an iterative non-Cartesian reconstruction that relies 
+on an external reference scan (Cartesian) to estimate calibration maps (coil sensitivities, B0 maps).
 
+All parameters are stored in a dictionary named `paramsGeneral`.
+
+=#
 paramsGeneral = Dict{Symbol,Any}()
 
 # Gyromagnetic ratio, in unit of Hz
 paramsGeneral[:gamma] = 42577478
 
-## General options for recon script
-paramsGeneral[:doLoadMaps] = false               # if true, reloads B0/SENSE maps instead of recalculating
+# General options for reconstruction script
+paramsGeneral[:doLoadMaps] = false              # if true, reloads B0/SENSE maps instead of recalculating
 paramsGeneral[:doSaveRecon] = true              # if true, saves reconstruction and all auxiliary image data (maps) as NIfTI files
-paramsGeneral[:doPlotRecon] = true             # if true, plots intermediate debugging and output recon figures (needs graphics, not recommended in multi-thread mode due to PyPlot)
+paramsGeneral[:doPlotRecon] = true              # if true, plots intermediate debugging and output recon figures (needs graphics, not recommended in multi-thread mode due to PyPlot)
 paramsGeneral[:doProcessMapScan] = true         # if true, compute sensitivity and B0 maps from reconstructed Cartesian scan   
-paramsGeneral[:doSaveProcessedMapScan] = false; # save ISMRMD file of preprocessed Cartesian data (before recon)
-
-paramsGeneral[:reconId] = "vDemo";
-paramsGeneral[:doCorrectWithB0map] = true
-paramsGeneral[:doCorrectWithGIRFkxyz] = true
-paramsGeneral[:doCorrectWithGIRFk0] = true
-
-paramsGeneral[:doCoilCompression] = false;
-paramsGeneral[:nVirtualCoils] = 8;
-paramsGeneral[:fovShift] = [0, -20]; # Unit: number of voxels in [x,y] direction
-
-## Scan parameters, Additional acquisition information, e.g., slice distance etc.
-paramsGeneral[:sliceDistanceFactor_percent] = 400 # 000
+paramsGeneral[:doSaveProcessedMapScan] = false  # save ISMRMD file of preprocessed Cartesian data (before recon)
+paramsGeneral[:reconId] = "vDemo"               # unique identifier for the saved result files
+paramsGeneral[:doCorrectWithB0map] = true       # whether perform off-resonance correction
+paramsGeneral[:doCorrectWithGIRFkxyz] = true    # whether perform 1st order GIRF correction
+paramsGeneral[:doCorrectWithGIRFk0] = true      # whether perform 1st order GIRF correction
+paramsGeneral[:doCoilCompression] = false       # whether perform coil compression
+paramsGeneral[:nVirtualCoils] = 8;              # if perform coil compression, the number of coils to be compressed to
+paramsGeneral[:fovShift] = [0, -20];            # amount of FOV shift; in unit of number of voxels in [x,y] direction
+paramsGeneral[:sliceDistanceFactor_percent] = 400 # Scan parameters, Additional acquisition information, e.g., slice distance etc.
 
 #Total number of ADC points BEFORE the rewinder at the end of the spiral readout. For gradient 508, use 15655 (out of 16084); for gradient 511, use 15445 (out of 15624).
 paramsGeneral[:numADCSamples] = 15655 # 15504
 # Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
 paramsGeneral[:reconSize] = [200, 200,1] #(112, 112) #(200, 200)
-paramsGeneral[:nReconIterations] = 20; # number of recon iterations (for both Cartesian and Spiral recon)
-paramsGeneral[:b0mapSmoothBeta] = 0.1 # for estimateB0Maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
-paramsGeneral[:doNormalizeRecon] = false # set max abs to 1
+paramsGeneral[:nReconIterations] = 20;          # number of recon iterations (for both Cartesian and Spiral recon)
+paramsGeneral[:b0mapSmoothBeta] = 0.1           # for estimateB0Maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
+paramsGeneral[:doNormalizeRecon] = false        # set max abs to 1
 paramsGeneral[:scalingFactorSaveRecon] = 1.0e9 # 1 # typical range of recon intensities is 1e-7, rescale when saving, e.g., to 0...1000 roughly for fMRI analysis
 
 # Data selector
@@ -50,24 +52,29 @@ end
 
 # Set recon file paths (tell GIRFReco where to find things)
 
-# paramsGeneral[:pathData] = "e:\\SPIDI\\data\\SPIDI_0007\\Phantom\\rawdata"
-# paramsGeneral[:pathProject] = "/home/kasperl/SPIDI"
-paramsGeneral[:pathProject] = "/srv/data/ajaffray/TORONTO_COLLAB"
+# Set paths for input and output files
+paramsGeneral[:pathProject] = rootProjPath # Root path for the project
 
-## Paths (user-dependent)
-# paramsGeneral[:pathData] = joinpath(paramsGeneral[:pathProject], "data", "joss_demo", "Human", "dat")
-# paramsGeneral[:pathGradients] = joinpath(paramsGeneral[:pathProject], "data", "joss_demo", "gradients")
-# paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "joss_demo", "Human")
-# paramsGeneral[:pathGIRF] = joinpath(paramsGeneral[:pathProject], "code", "GIRFReco", "data", "GIRF", "GIRF_ISMRM2022")
-# paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])
+#src # Paths (user-dependent)
+#src # paramsGeneral[:pathData] = joinpath(paramsGeneral[:pathProject], "data", "joss_demo", "Human", "dat")
+#src # paramsGeneral[:pathGradients] = joinpath(paramsGeneral[:pathProject], "data", "joss_demo", "gradients")
+#src # paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "joss_demo", "Human")
+#src # paramsGeneral[:pathGIRF] = joinpath(paramsGeneral[:pathProject], "code", "GIRFReco", "data", "GIRF", "GIRF_ISMRM2022")
+#src # paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])
 
+#Path to ISMRMRD files (raw k-space data)
 paramsGeneral[:pathData] = joinpath(paramsGeneral[:pathProject], "data", "SPIDI_0007", "Human", "dat")
+#Path to spiral readout gradient files
 paramsGeneral[:pathGradients] = joinpath(paramsGeneral[:pathProject], "data", "SPIDI_0007", "gradients")
-paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "SPIDI_0007", "Human")
+#Path to GIRF files
 paramsGeneral[:pathGIRF] = joinpath(paramsGeneral[:pathProject], "code", "GIRFReco", "data", "GIRF", "GIRF_ISMRM2022")
+
+#Path to middle results (coil and B0 maps) files
+paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "SPIDI_0007", "Human")
+#Path to final reconstructed spiral images
 paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])
 
-## Files (user-dependent)
+
 # Map scan file (Cartesian multi-echo file)
 paramsGeneral[:fileNameMapScan] = "field_map_132_2.h5"
 paramsGeneral[:mapTEs_ms] = [4.92,  7.38]
