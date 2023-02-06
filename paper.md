@@ -35,7 +35,7 @@ authors:
 affiliations:
  - name: MRI Research Centre, University of British Columbia, Vancouver, Canada
    index: 1
- - name: Techna Institute, University Health Network, Ontario, Canada
+ - name: Krembil Research Institute, University Health Network, Ontario, Canada
    index: 2
  - name: Department of Physics, Norwegian University of Science and Technology, Trondheim, Norway
    index: 3
