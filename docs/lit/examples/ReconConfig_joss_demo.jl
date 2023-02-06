@@ -12,12 +12,12 @@ on an external reference scan (Cartesian) to estimate calibration maps (coil sen
 All parameters are stored in a dictionary named `paramsGeneral`.
 
 =#
-paramsGeneral = Dict{Symbol,Any}()
+paramsGeneral = Dict{Symbol,Any}();
 
 # Gyromagnetic ratio, in unit of Hz
-paramsGeneral[:gamma] = 42577478
+paramsGeneral[:gamma] = 42577478;
 
-# General options for reconstruction script
+# General options for reconstruction script:
 paramsGeneral[:doLoadMaps] = false              # if true, reloads B0/SENSE maps instead of recalculating
 paramsGeneral[:doSaveRecon] = true              # if true, saves reconstruction and all auxiliary image data (maps) as NIfTI files
 paramsGeneral[:doPlotRecon] = true              # if true, plots intermediate debugging and output recon figures (needs graphics, not recommended in multi-thread mode due to PyPlot)
@@ -28,9 +28,9 @@ paramsGeneral[:doCorrectWithB0map] = true       # whether perform off-resonance 
 paramsGeneral[:doCorrectWithGIRFkxyz] = true    # whether perform 1st order GIRF correction
 paramsGeneral[:doCorrectWithGIRFk0] = true      # whether perform 1st order GIRF correction
 paramsGeneral[:doCoilCompression] = false       # whether perform coil compression
-paramsGeneral[:doNormalizeRecon] = false        # if true, set the range of magnitude image as [0 1]
+paramsGeneral[:doNormalizeRecon] = false;       # if true, set the range of magnitude image as [0 1]
 
-# General parameters for reconstruction
+# General parameters for reconstruction:
 paramsGeneral[:numADCSamples] = 15655             # total number of ADC points BEFORE the rewinder at the end of the spiral readout. Need to check with data. # 15504
 paramsGeneral[:reconSize] = [200, 200, 1]         # the matrix size of the reconstructed images. Needs to specify 1 on Z dimension for 2D images
 paramsGeneral[:nReconIterations] = 20;            # number of recon iterations (for both Cartesian and Spiral recon)
@@ -39,7 +39,7 @@ paramsGeneral[:scalingFactorSaveRecon] = 1.0e9    # typical range of recon inten
 paramsGeneral[:nVirtualCoils] = 8;                # if perform coil compression, the number of coils to be compressed to
 paramsGeneral[:fovShift] = [0, -20];              # amount of FOV shift; in unit of number of voxels in [x,y] direction
 paramsGeneral[:sliceDistanceFactor_percent] = 400 # Scan parameters, Additional acquisition information, e.g., slice distance etc.
-paramsGeneral[:nDiffusionDirections] = 6          # Need to specify total diffusion directions included in the raw data
+paramsGeneral[:nDiffusionDirections] = 6;         # Need to specify total diffusion directions included in the raw data
 #=
 ## Data selector
 
@@ -56,7 +56,7 @@ if !(@isdefined isCalledFromReconLoopGlobal) || !isCalledFromReconLoopGlobal
     global selector = Dict{Symbol,Any}()
     selector[:avg] = 1
     selector[:seg] = 1
-    selector[:dif] = 0
+    selector[:dif] = 0;
 end
 
 
@@ -86,7 +86,7 @@ paramsGeneral[:pathGIRF] = joinpath(paramsGeneral[:pathProject], "code", "GIRFRe
 #Path to middle results (coil and B0 maps) files [Output]
 paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "SPIDI_0007", "Human")
 #Path to final reconstructed spiral images [Output]
-paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])
+paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId]);
 
 #=
 ### Specifying File Names
@@ -100,7 +100,7 @@ paramsGeneral[:fileNameScan]=["508_124_2.h5"] # ISMRMRD Raw k-space data for spi
 paramsGeneral[:fileNameProcessedMapScan] = "processed_cartesian_data.h5" # file name for preprocessed data (remove oversampling, permute dimensions wrt MRIReco) [Output]
 paramsGeneral[:fileNameSaveMapRecon] = splitext(paramsGeneral[:fileNameMapScan])[1] * "_reconmap.nii" # File name for reconstructed dual-echo Cartesian images [Output]
 paramsGeneral[:fileNameSaveSense] = splitext(paramsGeneral[:fileNameMapScan])[1] * "_sensemap.nii" # File name for calculated coil sensitivity maps [Output]
-paramsGeneral[:fileNameSaveB0] = splitext(paramsGeneral[:fileNameMapScan])[1] * "_b0map.nii" # File name for calculated off-resonance (B0) maps [Output]
+paramsGeneral[:fileNameSaveB0] = splitext(paramsGeneral[:fileNameMapScan])[1] * "_b0map.nii"; # File name for calculated off-resonance (B0) maps [Output]
 
 #=
 File name for the final reconstructed spiral image.
@@ -109,9 +109,9 @@ the file name for the final reconstructed image is concatenated from multiple sc
 Otherwise, just append `_recon.nii` as suffix to file name.
 =#
 if isa(paramsGeneral[:fileNameScan], AbstractVector)
-    paramsGeneral[:fileNameSaveRecon] = join([(x[1] * "_") for x in splitext.(paramsGeneral[:fileNameScan])]) * "dif$(selector[:dif])_" * "itl$(selector[:seg])_" * "avg$(selector[:avg])_" * "recon.nii"
+    paramsGeneral[:fileNameSaveRecon] = join([(x[1] * "_") for x in splitext.(paramsGeneral[:fileNameScan])]) * "dif$(selector[:dif])_" * "itl$(selector[:seg])_" * "avg$(selector[:avg])_" * "recon.nii";
 else
-    paramsGeneral[:fileNameSaveRecon] = splitext(paramsGeneral[:fileNameScan])[1] * "_recon.nii"
+    paramsGeneral[:fileNameSaveRecon] = splitext(paramsGeneral[:fileNameScan])[1] * "_recon.nii";
 end
 
 #=
@@ -131,7 +131,7 @@ joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameProcessedMapScan]
 paramsGeneral[:fullPathSaveRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveRecon] ) # Full paths of the reconstructed spiral image [Output]
 paramsGeneral[:fullPathSaveMapRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveMapRecon] ) # Full paths of reconstructed dual-echo Cartesian images [Output]
 paramsGeneral[:fullPathSaveSense] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveSense] ) # Full paths of calculated coil sensitivity maps [Output]
-paramsGeneral[:fullPathSaveB0] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveB0] ) # Full paths of calculated off-resonance (B0) maps [Output]
+paramsGeneral[:fullPathSaveB0] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveB0] ); # Full paths of calculated off-resonance (B0) maps [Output]
 
 #=
 ## Final Steps
