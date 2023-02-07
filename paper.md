@@ -11,12 +11,12 @@ authors:
     orcid: 0000-0002-9571-1838
     equal-contrib: True
     corresponding: True
-    affiliation: 1
+    affiliation: "1,2"
   - name: Zhe Wu
     orcid: 0000-0002-2079-5977
     equal-contrib: True # (This is how you can denote equal contributions between multiple authors)
     corresponding: True # (This is how to denote the corresponding author)
-    affiliation: 2
+    affiliation: 1
   - name: S. Johanna Vannesjo
     orcid: 0000-0000-0000-0000
     equal-contrib: False # (This is how you can denote equal contributions between multiple authors)
@@ -26,16 +26,16 @@ authors:
     orcid: 0000-0000-0000-0000
     equal-contrib: False # (This is how you can denote equal contributions between multiple authors)
     corresponding: False # (This is how to denote the corresponding author)
-    affiliation: "2, 4" # (Multiple affiliations must be quoted)
+    affiliation: "1, 4" # (Multiple affiliations must be quoted)
   - name: Lars Kasper
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0001-7667-603X
     equal-contrib: False # (This is how you can denote equal contributions between multiple authors)
     corresponding: False # (This is how to denote the corresponding author)
-    affiliation: "2, 4" # (Multiple affiliations must be quoted)
+    affiliation: 1 # (Multiple affiliations must be quoted)
 affiliations:
- - name: MRI Research Centre, University of British Columbia, Vancouver, Canada
-   index: 1
  - name: Krembil Research Institute, University Health Network, Ontario, Canada
+   index: 1
+ - name: MRI Research Centre, University of British Columbia, Vancouver, Canada
    index: 2
  - name: Department of Physics, Norwegian University of Science and Technology, Trondheim, Norway
    index: 3
@@ -60,7 +60,7 @@ To combat this, accurate characterization of the system hardware for k-space tra
 
 The encoding of the object into the frequency domain is susceptible to static off-resonance (or field inhomogeneity, B<sub>0</sub>), the impact of which is magnified at longer readout durations such as those arising in non-Cartesian acquisitions. However, the resulting artifacts can be accounted for by incorporating off-resonance maps into the image reconstruction [@sutton_fast_2003].
 
-This software package, `GIRFReco.jl`, provides an open-source, single ecosystem implementation (in Julia [@bezanson_julia_2017]) of state-of-the-art spiral image reconstruction [@wilm_higher_2011;@wilm_diffusion_2015]. The core reconstruction routines rely upon `MRIReco.jl`, a comprehensive open-source image reconstruction toolbox also written in Julia. The reconstruction procedure uses an expanded signal model with additional terms which represent system imperfections and off-resonance, in combination with parallel imaging acceleration and iterative image reconstruction algorithms compatible with arbitrary sampling patterns (e.g., CG-SENSE [@pruessmann_advances_2001]). To enable robust, accessible and fast MRI with spiral gradient waveforms, `GIRFReco.jl` is designed as an end-to-end signal processing pipeline, from open-standard raw MR data ([ISMR]MRD [@inati_ismrm_2017]) to final reconstructed images (NIfTI format commonly used in processing packages for neuroimaging). It integrates system characterization information via GIRF correction for accurate representation of the encoding fields, relevant calibration data (coil sensitivity and static off-resonance maps) and non-Cartesian iterative parallel imaging reconstruction [@vannesjo_image_2016].
+This software package, `GIRFReco.jl`, provides an open-source, single ecosystem implementation (in the Julia programming language[@bezanson_julia_2017]) of state-of-the-art spiral image reconstruction [@wilm_higher_2011;@wilm_diffusion_2015]. The core reconstruction routines rely upon `MRIReco.jl`, a comprehensive open-source image reconstruction toolbox also written in Julia. The reconstruction procedure uses an expanded signal model with additional terms which represent system imperfections and off-resonance, in combination with parallel imaging acceleration and iterative image reconstruction algorithms compatible with arbitrary sampling patterns (e.g., CG-SENSE [@pruessmann_advances_2001]). To enable robust, accessible and fast MRI with spiral gradient waveforms, `GIRFReco.jl` is designed as an end-to-end signal processing pipeline, from open-standard raw MR data ([ISMR]MRD [@inati_ismrm_2017]) to final reconstructed images (NIfTI format commonly used in processing packages for neuroimaging). It integrates system characterization information via GIRF correction for accurate representation of the encoding fields, relevant calibration data (coil sensitivity and static off-resonance maps) and non-Cartesian iterative parallel imaging reconstruction [@vannesjo_image_2016].
 
 # Statement of Need
 
