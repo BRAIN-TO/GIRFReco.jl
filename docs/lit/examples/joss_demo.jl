@@ -304,7 +304,6 @@ end
 
 if paramsGeneral[:doPlotRecon]
     @info "Plotting Reconstruction"
-    plotlyjs()
     Plots.gui()
     plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice], figHandles=["Original Magnitude", "Original Phase", "B0"], isSliceInterleaved=true, rotateAngle=270)
 end
