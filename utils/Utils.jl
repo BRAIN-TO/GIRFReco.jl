@@ -1,16 +1,15 @@
-using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, Printf, ROMEO, NIfTI, Unitful, AxisArrays, ImageUtils, Plots
+export plotReconstruction, plotSenseMaps, calculateB0Maps, getSliceOrder, syncTrajAndData!, do_k0_correction!, adjustHeader!, checkAcquisitionNodes!, validateSiemensMRD!, validateAcqData!, preprocessCartesianData, removeOversampling!, mergeRawInterleaves, applyGIRF!, applyK0!, saveMap, loadMap, shiftksp!
 
 ## Choose plotting backend to be PlotlyJS!
-plotlyjs()
+# plotlyjs()
 
 ## General Plotting function for the reconstruction
 
-"Mosaic-plots reconstruction for selected slices and corresponding B0 map"
-
+# "Mosaic-plots reconstruction for selected slices and corresponding B0 map"
 """
-plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInterleaved = false)
-
+    plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInterleaved = false)
 Plots the magnitude and phase of the reconstructed images for a given slice or slices, along with a B₀ map if applicable
+
 # Arguments
 * `images` - Complex-valued images reconstructed using MRIReco.jl
 * `slicesIndex::Vector{Int}` - slices to plot
@@ -56,20 +55,9 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     absMosaic = mosaicview(absData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    heatmap(absMosaic,show=true, plot_title="|Images|",plot_titlevspan=0.1)
+    heatmap(absMosaic,show=true, plot_title="|Images|",plot_titlevspan=0.1,color=:grays)
+    display(plot!())
 
-    #gcf().suptitle("|Images|")
-
-    # Plot phase images
-    # if length(figHandles) < 2
-    #     figure("Phase Images")
-    # else
-    #     figure(figHandles[2])
-    # end
-
-    #clf()
-    # plot()
-    # phaseData = mapslices(x -> ROMEO.unwrap(x), angle.(images[:, :, reorderSliceIndex, 1, 1]), dims = [1,2])
     phaseData = angle.(images[:, :, reorderSliceIndex, 1, 1])
     if rotateAngle == 90
         phaseData = mapslices(x -> rotr90(x), phaseData, dims = [1,2])
@@ -80,8 +68,9 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     phaseMosaic = mosaicview(phaseData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    heatmap(phaseMosaic,show=true,plot_title="∠ Images",plot_titlevspan=0.1)
+    heatmap(phaseMosaic,show=true,plot_title="∠ Images",plot_titlevspan=0.1,color=:plasma)
     #colorbar()
+    display(plot!())
 
     #gcf().suptitle("∠Images")
 
@@ -104,8 +93,9 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     b0Mosaic = mosaicview(b0Data[:, :, reorderSliceIndex], nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    heatmap(b0Mosaic,show=true, plot_title="B₀ Map Images",plot_titlevspan=0.1)
+    heatmap(b0Mosaic,show=true, plot_title="B₀ Map Images",plot_titlevspan=0.1,color=:plasma)
     # colorbar()
+    display(plot!())
 
     # gcf().suptitle("B₀ Maps [rad/s]")
     
@@ -126,8 +116,9 @@ function checkProfiles(rawData)
 end
 
 """
-plotSenseMaps!(sense, n_channels)
+    plotSenseMaps!(sense, n_channels)
 Plots coil sensitivity maps from the channels, for a total of n_channels plots
+
 # Arguments
 * `sense` - sensitivity maps
 * `n_channels::Int` - number of coils (usually last dimension of sense)
@@ -146,7 +137,7 @@ function plotSenseMaps(sense,n_channels; sliceIndex = 1)
     # gcf()
 
     magMosaic = mosaicview((abs.(sense[:,:,sliceIndex,:])), nrow = Int(floor(sqrt(n_channels))), npad = 5, rowmajor = true, fillvalue = 0)
-    heatmap(magMosaic, show=true, plot_title="|Sensitivity|",plot_titlevspan=0.1)
+    heatmap(magMosaic, show=true, plot_title="|Sensitivity|",plot_titlevspan=0.1,color=:gnuplot2)
 
     # # Phase maps
     # figure(@sprintf("Sensitivity Map Phase of Slice %d / %d", sliceIndex, sliceNum)); clf(); for ch in 1:n_channels; subplot(8,4,ch); imshow(angle.(sense[:,:,sliceIndex,ch]), cmap = "gray"); end;
@@ -154,13 +145,13 @@ function plotSenseMaps(sense,n_channels; sliceIndex = 1)
     # gcf()
 
     phaseMosaic = mosaicview((angle.(sense[:,:,sliceIndex,:])), nrow = Int(floor(sqrt(n_channels))), npad = 5, rowmajor = true, fillvalue = 0)
-    heatmap(phaseMosaic,show=true, plot_title="∠ Sensitivity",plot_titlevspan=0.1)
+    heatmap(phaseMosaic,show=true, plot_title="∠ Sensitivity",plot_titlevspan=0.1,color=:plasma)
 
     1
 
 end
 
-"WIP: Plots trajectory and Data, doesn't work currently"
+# "WIP: Plots trajectory and Data, doesn't work currently"
 function plotTrajAndData(acq)
 
     for l in 1:length(acq.traj)
@@ -179,7 +170,6 @@ end
     calculateB0Maps(imData,slices,echoTime1,echoTime2)
 
 Calculate  B0 map from the two images with different echo times via their phase difference (obtained from imTE2.*conj(imTE1))
-
 TODO have the b0 map calculation be capable of handling variable echo times
 TODO2: Do we need this basic B0 map calculation or is it superseded by estimateB0Maps?
 
@@ -198,8 +188,10 @@ end
 
 """
     getSliceOrder(nSlices, isSliceInterleaved)
+
 Returns array mapping from acquisition number to slice number (geometric position) (indexArray[slice = 1:9] = [acquisitionNumbers])
 TODO: Add ascending/descending options
+
 # Arguments
 * `nSlices::Int`                    - number of slices in total acquired stack (FOV)
 * `isSliceInterleaved::Bool=true`   - if true, interleaved slice order is created, otherwise ascending slice order is returned
@@ -220,8 +212,9 @@ function getSliceOrder(nSlices; isSliceInterleaved::Bool=true)
 end
 
 """
-syncTrajAndData!(a::AcquisitionData)
+    syncTrajAndData!(a::AcquisitionData)
 Synchronizes k-space trajectory and sampled data as they do not usually have a common sampling rate
+
 # Arguments
 * `rawData::RawAcquisitionData` - RawAcquisitionData object
 * `traj::Trajectory` - Trajectory object to be synchronized with data contained in rawData
@@ -276,8 +269,9 @@ end
 
 
 """
-do_k0_correction!(rawData, k0_phase_modulation, interleave)
+    do_k0_correction!(rawData, k0_phase_modulation, interleave)
 Applies phase modulation due to 0th-order field fluctuations during the acquisition
+
 # Arguments
 * `rawData::RawAcquisitionData` - RawAcquisitionData object
 * `k0_phase_modulation::Matrix{Complex{T}}` - Vector containing phase modulation measurements
@@ -331,8 +325,9 @@ end
 
 
 """
-adjustHeader!(raw::RawAcquisitionData, reconSize, numSamples, interleaveNumber, singleSlice)
+    adjustHeader!(raw::RawAcquisitionData, reconSize, numSamples, interleaveNumber, singleSlice)
 Adjusts the header data for each interleave and slice of spiral diffusion RawAcquisitionData
+
 # Arguments
 * `raw::RawAcquisitionData` - RawAcquisitionData object
 * `reconSize::Vector` - Reconstruction matrix size
@@ -384,8 +379,9 @@ function adjustHeader!(raw, reconSize, numSamples, interleaveNumber, singleSlice
 end
 
 """
-checkAcquisitionNodes!(a::AcquisitionData)
-Validates processed AcquisitionData object to make sure that |kᵢ| < 0.5 ∀ i ∈ [1, Nₛ] 
+    checkAcquisitionNodes!(a::AcquisitionData)
+Validates processed AcquisitionData object to make sure that |kᵢ| < 0.5 ∀ i ∈ [1, Nₛ]
+
 # Arguments
 * `a::AcquisitionData` - AcquisitionData object
 """
@@ -397,8 +393,9 @@ end
 
 
 """
-validateSiemensMRD!(r::RawAcquisitionData)
-Validates RawAcquisitionData object created from ISMRMRD format object 
+    validateSiemensMRD!(r::RawAcquisitionData)
+Validates RawAcquisitionData object created from ISMRMRD format object
+
 # Arguments
 * `r::RawAcquisitionData` - RawAcquisitionData object
 """
@@ -418,8 +415,9 @@ function validateSiemensMRD!(r::RawAcquisitionData)
 end
 
 """
-validateAcqData!(a::AcquisitionData)
+    validateAcqData!(a::AcquisitionData)
 Validates processed AcquisitionData object after manipulation, etc...
+
 # Arguments
 * `a::AcquisitionData` - AcquisitionData object
 """
@@ -437,8 +435,9 @@ function validateAcqData!(a::AcquisitionData)
 end
 
 """
-preprocessCartesianData!(raw::RawAcquisitionData; dims = 1)
-prepares Cartesian for reconstruction
+    preprocessCartesianData!(raw::RawAcquisitionData; dims = 1)
+Prepares Cartesian for reconstruction
+
 # Arguments
 * `r::RawAcquisitionData{T}`          - RawAcquisitionData object
 * `fname`                             - filename to save the preprocessed data to
@@ -475,8 +474,9 @@ function preprocessCartesianData(r::RawAcquisitionData, doSave; fname = "data/te
 end
 
 """
-removeOversampling!(raw::RawAcquisitionData; dims = 1)
-removes 2x readout oversampling in specified raw data dimensions by iFFT, cropping FOV and FFT
+    removeOversampling!(raw::RawAcquisitionData; dims = 1)
+Removes 2x readout oversampling in specified raw data dimensions by iFFT, cropping FOV and FFT
+
 # Arguments
 * `raw::RawAcquisitionData{T}`          - RawAcquisitionData object
 * `dims`                                - dimension alongside which oversampling is removed (default: 1)
@@ -501,12 +501,11 @@ end
 
 
 """
-mergeRawInterleaves(params)
+    mergeRawInterleaves(params)
 Merges multiple interleave data together from individually acquired interleave scans
 
 # Arguments
 * `params`          - Dictionary
-
 """
 function mergeRawInterleaves(params)
 
@@ -614,8 +613,9 @@ function mergeRawInterleaves(params)
 end
 
 """
-applyGIRF!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
+    applyGIRF!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
 Applies the GIRF to the trajectories inside of a::AcquisitionData
+
 # Arguments
 * `a::AcquisitionData{T}`          - AcquisitionData object
 * `freq::AbstractVector`           - Vector containing frequencies of GIRF data
@@ -671,8 +671,9 @@ function applyGIRF!(a::AcquisitionData{T}, g::GirfApplier) where T
 end
 
 """
-applyK0!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
+    applyK0!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
 Applies the K0 modulation due to imaging gradients to the data inside of a::AcquisitionData
+
 # Arguments
 * `a::AcquisitionData{T}`          - AcquisitionData object
 * `freq::AbstractVector`           - Vector containing frequencies of GIRF data
@@ -769,10 +770,9 @@ end
 
 """
     saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
-
 Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
-For complex-valued data, magnitude and phase can be split into separate files
 
+For complex-valued data, magnitude and phase can be split into separate files
 # Arguments
 * `filename::String`            - string filename with extension .nii, example "sensemap.nii"
 * `calib_map`                   - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
@@ -820,18 +820,15 @@ end
 
 """
     loadMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
-
 Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
-For complex-valued data, magnitude and phase can be split into separate files
 
+For complex-valued data, magnitude and phase can be split into separate files
 # Arguments
 * `filename::String`            - string filename with extension .nii, example "sensemap.nii"
 * `doSplitPhase::Bool=false`    - if true, data is saved in two nifti files with suffix "_magn" and "_phase", respectively
                                   to enable display in typical NIfTI viewers
-
 # Output
 * `calib_map`                    - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
-
 """
 function loadMap(filename; doSplitPhase::Bool=false)
     

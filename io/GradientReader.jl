@@ -1,5 +1,3 @@
-using DelimitedFiles, MRIReco, Dierckx, MAT, DSP
-
 export read_gradient_txt_file
 
 "Reads in text file containing gradient waveform information"

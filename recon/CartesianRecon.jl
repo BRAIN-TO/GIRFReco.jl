@@ -1,6 +1,5 @@
-using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients, MRIFiles
+using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients, MRIFiles, MRIFieldmaps
 
-include("../utils/Utils.jl")
 include("../utils/fieldMapEstimator.jl")
 
 ## Dictionary of frequently changed parameters
@@ -106,12 +105,28 @@ if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., 
 end
 
 ## Calculate B0 maps from the acquired images (if two TEs)
-
-slices = 1:length(sliceIndexArray)
-
 @info "Calculating B0 Maps"
-# b0Maps = calculateB0Maps(cartesianReco.data,slices, TE1, TE2)
-b0Maps = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,true; β = paramsGeneral[:b0mapSmoothBeta], reltol = 1e-4)
+slices = 1:length(sliceIndexArray)
+b0Maps = zeros(200,200,15)
+b0Method = "2D_2008" # Can be "Simple","2D_2008" or "3D_2020" (How do we incorporate this into the recon demo?)
+
+if b0Method == "2D_2008"
+
+    b0Maps = estimateB0Maps(cartesianReco.data,slices,TE1,TE2,true; β = paramsGeneral[:b0mapSmoothBeta], reltol = 1e-4)
+
+elseif b0Method == "3D_2020" 
+
+    niter = 100 # usually good enough
+
+    for i = 1:15
+        
+        (b0Maps[:,:,i],times,out) = b0map(reshape(cartesianReco.data[:,:,i,:,1,1],(200,200,1,2))./maximum(abs.(cartesianReco.data)), [TE1/1000,TE2/1000]; order=2, l2b=-6, gamma_type=:PR, niter=niter, precon=:diag, track=false)
+
+    end
+
+    b0Maps = 2*pi*b0Maps
+
+end
 
 # save B0 map
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
