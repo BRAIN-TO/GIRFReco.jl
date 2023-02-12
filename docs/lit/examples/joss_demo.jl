@@ -34,8 +34,12 @@ using MRIReco, FileIO, MRIFiles, MRICoilSensitivities
 The following file, [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl),
 includes general configuration for spiral reconstruction.
 It is necessary to execute this file to make sure all parameters are loaded.
+Sample Data that works with this script can be found at: https://doi.org/10.5281/zenodo.6510021
+Please download, extract and set the rootProjPath as the top level folder (should be something like /your/path/here/data-2, I've renamed mine to SPIDI)
+
 =#
-rootProjPath = "/home/kasperl/SPIDI" # Root path of the project needs to be defined
+# rootProjPath = "/home/kasperl/SPIDI" # Root path of the project needs to be defined
+rootProjPath = "/Users/ajaffray/Documents/PhD/Data/SPIDI"
 include("ReconConfig_joss_demo.jl")
 
 
@@ -234,7 +238,7 @@ sensitivity = mapslices(x ->imresize(x, paramsSpiral[:reconSize][1],paramsSpiral
 
 #Optional: Plot the sensitivity maps of each coil
 if paramsGeneral[:doPlotRecon]
-    plotSenseMaps(sensitivity,size(sensitivity, 4),sliceIndex = 10)
+    plotSenseMaps(sensitivity,size(sensitivity, 4),sliceIndex = 6)
 end
 
 #Do coil compression to make recon faster
@@ -248,6 +252,15 @@ end
 We need to resize the B0 maps to the size of output encoding matrix size.
 =#
 resizedB0 = mapslices(x->imresize(x,paramsSpiral[:reconSize][1],paramsSpiral[:reconSize][2]), b0Maps, dims=[1,2])
+
+#=
+#### 3.2.7 Alignment of Off-Resonance, Sensitivity, and Spiral Data
+
+We need to make sure that the axes line up so we rotate the sensitivities and the off-resonance maps  
+Depending on your geometry, this might not be necessary but it is here
+=#
+resizedB0 = mapslices(x->rotl90(x),resizedB0,dims=[1,2])
+sensitivity = mapslices(x->rotl90(x),sensitivity,dims=[1,2])
 
 #=
 ### 3.3 Spiral Image Reconstruction

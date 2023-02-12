@@ -31,16 +31,17 @@ paramsGeneral[:doCoilCompression] = false       # whether perform coil compressi
 paramsGeneral[:doNormalizeRecon] = false;       # if true, set the range of magnitude image as [0 1]
 
 # General parameters for reconstruction:
-paramsGeneral[:numADCSamples] = 15655             # total number of ADC points BEFORE the rewinder at the end of the spiral readout. Need to check with data. # 15504
-paramsGeneral[:reconSize] = [200, 200, 1]         # the matrix size of the reconstructed images. Needs to specify 1 on Z dimension for 2D images
+paramsGeneral[:numADCSamples] = 15504             # total number of ADC points BEFORE the rewinder at the end of the spiral readout. Need to check with data. # 15504
+paramsGeneral[:reconSize] = [200,200, 1]         # the matrix size of the reconstructed images. Needs to specify 1 on Z dimension for 2D images
 paramsGeneral[:nReconIterations] = 20;            # number of recon iterations (for both Cartesian and Spiral recon)
 paramsGeneral[:b0mapSmoothBeta] = 0.1             # for estimateB0Maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
 paramsGeneral[:scalingFactorSaveRecon] = 1.0e9    # typical range of recon intensities is 1e-7, rescale when saving, e.g., to 0...1000 roughly for fMRI analysis
 paramsGeneral[:nVirtualCoils] = 8;                # if perform coil compression, the number of coils to be compressed to
-paramsGeneral[:fovShift] = [0, -20];              # amount of FOV shift; in unit of number of voxels in [x,y] direction
+paramsGeneral[:fovShift] = [0, 0];              # amount of FOV shift; in unit of number of voxels in [x,y] direction
 paramsGeneral[:sliceDistanceFactor_percent] = 400 # Scan parameters, Additional acquisition information, e.g., slice distance etc.
 paramsGeneral[:nDiffusionDirections] = 6;         # Need to specify total diffusion directions included in the raw data
 #=
+
 ## Data selector
 
 See details in the page Advanced Usage.
@@ -78,29 +79,30 @@ paramsGeneral[:pathProject] = rootProjPath # Root path for the project
 #src # paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId])
 
 #Path to ISMRMRD files (raw k-space data) [Input]
-paramsGeneral[:pathData] = joinpath(paramsGeneral[:pathProject], "data", "SPIDI_0007", "Human", "dat")
+paramsGeneral[:pathData] = paramsGeneral[:pathProject]
 #Path to spiral readout gradient files [Input]
-paramsGeneral[:pathGradients] = joinpath(paramsGeneral[:pathProject], "data", "SPIDI_0007", "gradients")
+paramsGeneral[:pathGradients] = joinpath(paramsGeneral[:pathProject],"Gradients")
 #Path to GIRF files [Input]
-paramsGeneral[:pathGIRF] = joinpath(paramsGeneral[:pathProject], "code", "GIRFReco", "data", "GIRF", "GIRF_ISMRM2022")
+paramsGeneral[:pathGIRF] = joinpath(paramsGeneral[:pathProject], "GIRF", "GIRF_ISMRM2022")
 #Path to middle results (coil and B0 maps) files [Output]
-paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results", "SPIDI_0007", "Human")
+paramsGeneral[:pathResults] = joinpath(paramsGeneral[:pathProject], "results","phantom")
 #Path to final reconstructed spiral images [Output]
 paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", paramsGeneral[:reconId]);
 
 #=
 ### Specifying File Names
 =#
-paramsGeneral[:fileNameMapScan] = "field_map_132_2.h5" # Cartesian dual-echo file, for coil and B0 maps calculation [Input]
+paramsGeneral[:fileNameMapScan] = "Fieldmaps/fieldMap_105_gre_2.h5" # Cartesian dual-echo file, for coil and B0 maps calculation [Input]
+paramsGeneral[:fileNameMapStem] = "fieldMap_105_gre_2.h5"
 paramsGeneral[:mapTEs_ms] = [4.92,  7.38] # Two echo times, in ms
-paramsGeneral[:fileNameGIRF] = 
-["2021Nov_PosNeg_Gx.mat", "2021Nov_PosNeg_Gy.mat", "2021Nov_PosNeg_Gz.mat"] # Calculated GIRF for each gradient axis [Input]
-paramsGeneral[:fileNameGradient] = joinpath("508", "gradients.txt") # File name for the spiral gradient [Input]
-paramsGeneral[:fileNameScan]=["508_124_2.h5"] # ISMRMRD Raw k-space data for spiral acquisition [Input]
+paramsGeneral[:fileNameGIRF] = ["2021Nov_PosNeg_Gx.mat", "2021Nov_PosNeg_Gy.mat", "2021Nov_PosNeg_Gz.mat"] # Calculated GIRF for each gradient axis [Input]
+paramsGeneral[:fileNameGradient] = joinpath("gradients523.txt") # File name for the spiral gradient [Input]
+paramsGeneral[:fileNameScan]=["Spirals/523_96_2.h5", "Spirals/523_98_2.h5","Spirals/523_100_2.h5","Spirals/523_102_2.h5"] # ISMRMRD Raw k-space data for spiral acquisition [Input]
+paramsGeneral[:fileNameScanStem] = "523_96_2.h5"
 paramsGeneral[:fileNameProcessedMapScan] = "processed_cartesian_data.h5" # file name for preprocessed data (remove oversampling, permute dimensions wrt MRIReco) [Output]
-paramsGeneral[:fileNameSaveMapRecon] = splitext(paramsGeneral[:fileNameMapScan])[1] * "_reconmap.nii" # File name for reconstructed dual-echo Cartesian images [Output]
-paramsGeneral[:fileNameSaveSense] = splitext(paramsGeneral[:fileNameMapScan])[1] * "_sensemap.nii" # File name for calculated coil sensitivity maps [Output]
-paramsGeneral[:fileNameSaveB0] = splitext(paramsGeneral[:fileNameMapScan])[1] * "_b0map.nii"; # File name for calculated off-resonance (B0) maps [Output]
+paramsGeneral[:fileNameSaveMapRecon] = splitext(paramsGeneral[:fileNameMapStem])[1] * "_reconmap.nii" # File name for reconstructed dual-echo Cartesian images [Output]
+paramsGeneral[:fileNameSaveSense] = splitext(paramsGeneral[:fileNameMapStem])[1] * "_sensemap.nii" # File name for calculated coil sensitivity maps [Output]
+paramsGeneral[:fileNameSaveB0] = splitext(paramsGeneral[:fileNameMapStem])[1] * "_b0map.nii"; # File name for calculated off-resonance (B0) maps [Output]
 
 #=
 File name for the final reconstructed spiral image.
@@ -109,9 +111,9 @@ the file name for the final reconstructed image is concatenated from multiple sc
 Otherwise, just append `_recon.nii` as suffix to file name.
 =#
 if isa(paramsGeneral[:fileNameScan], AbstractVector)
-    paramsGeneral[:fileNameSaveRecon] = join([(x[1] * "_") for x in splitext.(paramsGeneral[:fileNameScan])]) * "dif$(selector[:dif])_" * "itl$(selector[:seg])_" * "avg$(selector[:avg])_" * "recon.nii";
+    paramsGeneral[:fileNameSaveRecon] = join([(x[1] * "_") for x in splitext.(paramsGeneral[:fileNameScanStem])]) * "dif$(selector[:dif])_" * "itl$(selector[:seg])_" * "avg$(selector[:avg])_" * "recon.nii";
 else
-    paramsGeneral[:fileNameSaveRecon] = splitext(paramsGeneral[:fileNameScan])[1] * "_recon.nii";
+    paramsGeneral[:fileNameSaveRecon] = splitext(paramsGeneral[:fileNameScanStem])[1] * "_recon.nii";
 end
 
 #=
@@ -126,8 +128,7 @@ paramsGeneral[:fullPathGradient] = joinpath(paramsGeneral[:pathGradients], param
 paramsGeneral[:fullPathGIRF] = joinpath.(paramsGeneral[:pathGIRF], paramsGeneral[:fileNameGIRF]) # Full paths of GIRF files
 paramsGeneral[:fullPathMapScan] = joinpath(paramsGeneral[:pathData], paramsGeneral[:fileNameMapScan]) # Full path of dual-echo Cartesian data
 paramsGeneral[:fullPathScan] = joinpath.(paramsGeneral[:pathData], paramsGeneral[:fileNameScan]) # Full paths of raw k-space data files of spiral acquisition
-paramsGeneral[:fullPathProcessedMapScan] = 
-joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameProcessedMapScan]) # Full paths of pre-processed Cartesian dual-echo data [Output]
+paramsGeneral[:fullPathProcessedMapScan] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameProcessedMapScan]) # Full paths of pre-processed Cartesian dual-echo data [Output]
 paramsGeneral[:fullPathSaveRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveRecon] ) # Full paths of the reconstructed spiral image [Output]
 paramsGeneral[:fullPathSaveMapRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveMapRecon] ) # Full paths of reconstructed dual-echo Cartesian images [Output]
 paramsGeneral[:fullPathSaveSense] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveSense] ) # Full paths of calculated coil sensitivity maps [Output]
