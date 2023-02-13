@@ -5,9 +5,9 @@
 #=
 This page demonstrates an example script for using GIRFReco.jl
 
-This page was generated from the following Julia file: [`joss_demo.jl`](@__REPO_ROOT_URL__/doc/lit/examples/joss_demo.jl)
+This page was generated from the following Julia file: [`joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/examples/joss_demo.jl)
 
-The configuration file is [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl)
+The configuration file is [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/examples/ReconConfig_joss_demo.jl)
 =#
 
 #=
@@ -31,7 +31,7 @@ using MRIReco, FileIO, MRIFiles, MRICoilSensitivities
 #=
 ## 2. Configurations for reconstruction
 
-The following file, [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl),
+The following file, [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/examples/ReconConfig_joss_demo.jl),
 includes general configuration for spiral reconstruction.
 It is necessary to execute this file to make sure all parameters are loaded.
 =#
