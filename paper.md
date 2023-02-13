@@ -23,7 +23,7 @@ authors:
     corresponding: False # (This is how to denote the corresponding author)
     affiliation: 3
   - name: Kamil Uludag
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0002-2813-5930
     equal-contrib: False # (This is how you can denote equal contributions between multiple authors)
     corresponding: False # (This is how to denote the corresponding author)
     affiliation: "1, 4" # (Multiple affiliations must be quoted)
