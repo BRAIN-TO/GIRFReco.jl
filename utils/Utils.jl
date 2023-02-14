@@ -56,7 +56,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     absMosaic = mosaicview(absData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
     heatmap(absMosaic,show=true, plot_title="|Images|",plot_titlevspan=0.1,color=:grays)
-    display(plot!())
+    # display(plot!())
 
     phaseData = angle.(images[:, :, reorderSliceIndex, 1, 1])
     if rotateAngle == 90
@@ -70,7 +70,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
 
     heatmap(phaseMosaic,show=true,plot_title="∠ Images",plot_titlevspan=0.1,color=:plasma)
     #colorbar()
-    display(plot!())
+    # display(plot!())
 
     #gcf().suptitle("∠Images")
 
@@ -95,7 +95,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
 
     heatmap(b0Mosaic,show=true, plot_title="B₀ Map Images",plot_titlevspan=0.1,color=:plasma)
     # colorbar()
-    display(plot!())
+    # display(plot!())
 
     # gcf().suptitle("B₀ Maps [rad/s]")
     
@@ -146,8 +146,6 @@ function plotSenseMaps(sense,n_channels; sliceIndex = 1)
 
     phaseMosaic = mosaicview((angle.(sense[:,:,sliceIndex,:])), nrow = Int(floor(sqrt(n_channels))), npad = 5, rowmajor = true, fillvalue = 0)
     heatmap(phaseMosaic,show=true, plot_title="∠ Sensitivity",plot_titlevspan=0.1,color=:plasma)
-
-    1
 
 end
 
@@ -279,13 +277,8 @@ Applies phase modulation due to 0th-order field fluctuations during the acquisit
 """
 function do_k0_correction!(rawData,k0_phase_modulation, interleave)
 
-
-
     # Get number of samples for the k0 phase modulation (should be same size as the trajectory BEFORE resampling)
     numk0_samples = size(k0_phase_modulation,1)
-
-    # @info size(rawData.profiles) # DEBUG
-
 
     # define dwell times for phase modulation (dt_k) and signal sampling (dt_s)
     dt_s = 2*10^(-6) # [s]
@@ -318,7 +311,6 @@ function do_k0_correction!(rawData,k0_phase_modulation, interleave)
 
         plot(t_s, angle.(exp.(1im .* k0_interpolated)),show=true,title="B₀ Eddy Current Fluctuation During Readout ")
 
-
     end
 
 end
@@ -349,6 +341,7 @@ function adjustHeader!(raw, reconSize, numSamples, interleaveNumber, singleSlice
         # Set the contrast to 0 or raw.profiles[l].head.idx.repetition for diffusion directions
         # raw.profiles[l].head.idx.contrast = raw.profiles[l].head.idx.repetition
         raw.profiles[l].head.idx.contrast = 0
+
         # Set the repetition to 0
         raw.profiles[l].head.idx.repetition = 0
 
@@ -364,12 +357,8 @@ function adjustHeader!(raw, reconSize, numSamples, interleaveNumber, singleSlice
             raw.profiles[l].head.idx.slice = 0
         end
 
-        # @info raw.profiles[l].head.idx.slice
-
         # Set center sample to 0 (only for spiral scans)
         raw.profiles[l].head.center_sample = 0
-
-        # print("\n",raw.profiles[l].head.idx)
 
     end
 
@@ -425,7 +414,7 @@ function validateAcqData!(a::AcquisitionData)
 
     ## Dimensions CHECK:
 
-    #/ TODO add dimension check that the k-space encoding counters are set properly:
+    # TODO add dimension check that the k-space encoding counters are set properly:
     # kdata dimensions: dim1:=contrast/echo | dim2:=slices | dim3:=repetitions 
     # kdata element dimensions: dim1:=kspace nodes | dim2:=channels/coils
 
@@ -445,7 +434,6 @@ Prepares Cartesian for reconstruction
 function preprocessCartesianData(r::RawAcquisitionData, doSave; fname = "data/testFile.h5")
 
     removeOversampling!(r)
-    # headerCopy = deepcopy(r.params)
 
     # Convert rawAcquisitionData object to an AcquisitionData object (these can be reconstructed)
     acqDataCartesian = AcquisitionData(r,estimateProfileCenter=true)
@@ -482,11 +470,14 @@ Removes 2x readout oversampling in specified raw data dimensions by iFFT, croppi
 * `dims`                                - dimension alongside which oversampling is removed (default: 1)
 """
 function removeOversampling!(raw::RawAcquisitionData; dims = [1])
+
     idxDim = dims[1]
     Ns = raw.params["encodedSize"][idxDim]
     idxCropFov = convert(Vector{Int32}, [1:floor(Ns/4); ceil(3/4*Ns+1):Ns])
+    
     # For every profile in the acquisition
     for iProfile = 1:length(raw.profiles)
+    
         # IFFT to image space, crop, FFT back to k-space
         ifft!(raw.profiles[iProfile].data, idxDim)
         raw.profiles[iProfile].data = fft!(raw.profiles[iProfile].data[idxCropFov,:], idxDim)
@@ -512,12 +503,12 @@ function mergeRawInterleaves(params)
     # Get the other interleave indexes other than the one asked for
     otherInterleaveIndices = [x for x ∈ 1:params[:numInterleaves] if x ∉ params[:interleave]]
 
-    # @info "indices = $otherInterleaveIndices"
+    # @info "indices = $otherInterleaveIndices" #DEBUG
 
     # read in the data file from the ISMRMRD format
     dataFile = ISMRMRDFile(params[:interleaveDataFileNames][params[:interleave]])
 
-    # Read in the gradient file and perform GIRF correction to calculate trajectory and calculate k0 phase modulation
+    # Read in the gradient file
     trajAll = read_gradient_txt_file(params[:trajFilename],params[:reconSize],params[:delay])
 
     # Read in raw data from the dataFile
@@ -553,9 +544,6 @@ function mergeRawInterleaves(params)
             rawDataTemp = RawAcquisitionData(dataFileTemp)
             deleteat!(rawDataTemp.profiles,ic) # delete profiles which aren't needed
 
-            # read in the gradient file and perform the GIRF correction
-            # trajTemp = read_gradient_txt_file(params[:trajFilename],params[:reconSize],params[:delay])
-
             # synchronize the trajectory from the gradient file and the data from the raw data file for the interleave
             timesTemp = syncTrajAndData!(rawDataTemp, trajAll, params[:numSamples], l)
 
@@ -574,8 +562,6 @@ function mergeRawInterleaves(params)
         dataFileTemp = ISMRMRDFile(params[:interleaveDataFileNames][3])
         rawDataTemp = RawAcquisitionData(dataFileTemp)
         deleteat!(rawDataTemp.profiles,ic)
-
-        # trajTemp = read_gradient_txt_file(params[:trajFilename],params[:reconSize],params[:delay])
 
         timesTemp = syncTrajAndData!(rawDataTemp, trajAll, params[:numSamples], 3)
 
@@ -606,7 +592,6 @@ function mergeRawInterleaves(params)
 
     end
 
-
     # return the acquisition data object with everything corrected
     return acqData
 
@@ -627,13 +612,16 @@ function applyGIRF!(a::AcquisitionData{T}, g::GirfApplier) where T
     S = a.encodingSize
     F = a.fov
 
+    # Check dimensions of the acquisition data and ensure encoding size and FOV are consistent
     if length(S) == 2
         S = (S[1], S[2], 1)
     end
+
     if length(F) == 2
         F = Float32.(F[1], F[2], 1.0)
     end
 
+    # loop over all contained trajectories
     for l = 1:length(a.traj)
         
         nProfiles = a.traj[l].numProfiles
@@ -642,6 +630,7 @@ function applyGIRF!(a::AcquisitionData{T}, g::GirfApplier) where T
         times = a.traj[l].times
         oldNodes = a.traj[l].nodes
 
+        # loop over all profiles in a trajectory
         for profile = 1:nProfiles
             
             ilExtractor = nSamples*(profile-1) .+ (1:nSamples)
@@ -652,6 +641,7 @@ function applyGIRF!(a::AcquisitionData{T}, g::GirfApplier) where T
 
             ilGrads = nodes_to_gradients(ilNodes; dwellTime=DT, reconSize=S, FOV = F)
 
+            # loop over trajectory dimensions
             for dim = 1:size(ilGrads,1)
 
                 correctedGrads = apply_girf(g,ilGrads[dim,:], ilTimes ,ilTimes, dim) # THESE ARE ALL VECTORS SO INPUT orientation (column/row major ordering) doesn't matter
@@ -692,6 +682,7 @@ function applyK0!(a::AcquisitionData{T},g::GirfApplier) where T
         F = (F[1], F[2], 1.0)
     end
 
+    # loop over all contained trajectories
     for l = 1:length(a.traj)
         
         nProfiles = a.traj[l].numProfiles
@@ -700,6 +691,7 @@ function applyK0!(a::AcquisitionData{T},g::GirfApplier) where T
         times = a.traj[l].times
         oldNodes = a.traj[l].nodes
 
+        # loop over all profiles in a trajectory
         for profile = 1:nProfiles
             
             ilExtractor = nSamples*(profile-1) .+ (1:nSamples)
@@ -712,6 +704,7 @@ function applyK0!(a::AcquisitionData{T},g::GirfApplier) where T
 
             k0_correction = ones(size(ilGrads))
             
+            # loop over all trajectory dims
             for dim = 1:size(ilGrads,1)
 
                 k0_correction[dim,:] = apply_girf(g,ilGrads[dim,:], ilTimes, ilTimes, dim) # THESE ARE ALL VECTORS SO INPUT orientation (column/row major ordering) doesn't matter
@@ -729,7 +722,7 @@ function applyK0!(a::AcquisitionData{T},g::GirfApplier) where T
             # ylabel("k₀ [rad]")
             # title("B₀ Eddy Current Fluctuation During Readout ")
 
-            plot(ilTimes, angle.(exp.(1im .* finalCorrection')),show=true,title="B₀ Eddy Current Fluctuation During Readout ")
+            # plot(ilTimes, angle.(exp.(1im .* finalCorrection')),show=true,title="B₀ Eddy Current Fluctuation During Readout ") #DEBUG
             
         end
     
@@ -782,6 +775,7 @@ For complex-valued data, magnitude and phase can be split into separate files
                                   to enable display in typical NIfTI viewers
 """
 function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0], doSplitPhase::Bool=false, doNormalize::Bool=true)
+    
     # multiplication with 1000 should no longer be necessary after MRIReco 0.7.1
     spacing = 1000.0 .*resolution_mm .*Unitful.mm
     offset = 1000.0 .*offset_mm .*Unitful.mm
@@ -797,6 +791,7 @@ function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0]
         I /= maximum(abs.(I))
     end
 
+    # AxisArray Constructor
     im = AxisArray(I,
     Axis{:x}(range(offset[1], step=spacing[1], length=size(I, 1))),
     Axis{:y}(range(offset[2], step=spacing[2], length=size(I, 2))),
@@ -805,18 +800,22 @@ function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0]
     Axis{:echos}(1:size(I, 5)),
     Axis{:repetitions}(1:size(I, 6)))
 
+    # if separate mag and phase are desired, save them separately
     if doSplitPhase
+
         filename_magn = splitext(filename)[1] * "_magn.nii"
         saveImage(filename_magn, map(abs,im)) # map is needed, because abs.(im) would convert AxisArray back into basic array
 
         filename_phase = splitext(filename)[1] * "_phase.nii"
         saveImage(filename_phase, map(angle,im))
+
     else
+
         saveImage(filename, im)
+
     end
 
 end
-
 
 """
     loadMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
@@ -832,7 +831,9 @@ For complex-valued data, magnitude and phase can be split into separate files
 """
 function loadMap(filename; doSplitPhase::Bool=false)
     
+    # if separate mag and phase are saved, load and combine them
     if doSplitPhase
+
         filename_magn = splitext(filename)[1] * "_magn.nii"
         I_magn = loadImage(filename_magn) # map is needed, because abs.(im) would convert AxisArray back into basic array
 
@@ -840,16 +841,18 @@ function loadMap(filename; doSplitPhase::Bool=false)
         I_phase = loadImage(filename_phase)
 
         calib_map = (I_magn.data).*exp.(1im.*(I_phase.data))
+
     else
+
         I = loadImage(filename)
         calib_map = I.data
+
     end
     
     # squeeze singleton dimensions of 6-dim array
     calib_map = dropdims(calib_map, dims = tuple(findall(size(calib_map) .== 1)...))
 
     return calib_map
-
 
 end
 
