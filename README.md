@@ -43,6 +43,8 @@ For a full introduction, please refer to our [manuscript](./paper.md) for a full
 
 The final reconstructed spiral images are similar to the following ones:
 
+![Phantom Image](./docs/figs/Phantom-demo.png)
+
 2. **In-vivo Brain Image.** Below is a set of T2-weighted in-vivo spiral images reconstructed with both B0 and GIRF corrections using the scripts in this repo. We demonstrated the step-by-step improvement of GIRF and B0 corrections, respectively. Please note that the raw in-vivo data is not publically available due to REB restrictions.
 
 ![In-vivo Brain Image](./docs/figs/In-vivo-demo.png)
