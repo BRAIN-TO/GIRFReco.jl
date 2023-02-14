@@ -236,8 +236,9 @@ compress the channels according to user's setting to achieve a faster reconstruc
 =#
 sensitivity = mapslices(x ->imresize(x, paramsSpiral[:reconSize][1],paramsSpiral[:reconSize][2]), senseCartesian, dims=[1,2])
 
-#Optional: Plot the sensitivity maps of each coil
+#Optional: Plot the sensitivity maps of each coil on a given slice.
 if paramsGeneral[:doPlotRecon]
+    plotlyjs()
     plotSenseMaps(sensitivity,size(sensitivity, 4),sliceIndex = 6)
 end
 
