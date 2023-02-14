@@ -55,7 +55,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     absMosaic = mosaicview(absData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    heatmap(absMosaic,show=true, plot_title="|Images|",plot_titlevspan=0.1,color=:grays)
+    heatmap(absMosaic,show=true, plot_title="|Images|",plot_titlevspan=0.1,color=:grays,aspectratio=:equal)
     # display(plot!())
 
     phaseData = angle.(images[:, :, reorderSliceIndex, 1, 1])
@@ -68,7 +68,7 @@ function plotReconstruction(images, slicesIndex, b0; figHandles = [], isSliceInt
     end
     phaseMosaic = mosaicview(phaseData, nrow = Int(floor(sqrt(sliceNum))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    heatmap(phaseMosaic,show=true,plot_title="∠ Images",plot_titlevspan=0.1,color=:plasma)
+    heatmap(phaseMosaic,show=true,plot_title="∠ Images",plot_titlevspan=0.1,color=:plasma,aspectratio=:equal)
     #colorbar()
     # display(plot!())
 
