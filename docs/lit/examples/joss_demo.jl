@@ -39,7 +39,7 @@ Please download, extract and set the rootProjPath as the top level folder (shoul
 
 =#
 # rootProjPath = "/home/kasperl/SPIDI" # Root path of the project needs to be defined
-rootProjPath = "/Users/ajaffray/Documents/PhD/Data/SPIDI"
+rootProjPath = "/home/wuz/spiralDiffusion/data/demo_data"
 include("ReconConfig_joss_demo.jl")
 
 
@@ -317,7 +317,8 @@ end
 
 if paramsGeneral[:doPlotRecon]
     @info "Plotting Reconstruction"
-    plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice], figHandles=["Original Magnitude", "Original Phase", "B0"], isSliceInterleaved=true, rotateAngle=270)
+    plotlyjs()
+    plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice], figHandles=["Original Magnitude", "Original Phase", "B0"], isSliceInterleaved=false, rotateAngle=90)
 end
 
 @info "Successfully Completed SpiralRecon"

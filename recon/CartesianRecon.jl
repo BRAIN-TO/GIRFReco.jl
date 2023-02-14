@@ -136,8 +136,9 @@ end
 
 if paramsGeneral[:doPlotRecon]
     @info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps)"
-    plotSenseMaps(sensitivity,nCoils)
-    plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps, isSliceInterleaved = true, rotateAngle = 270)
+    # plotSenseMaps(sensitivity,nCoils)
+    plotlyjs()
+    plotReconstruction(cartesianReco[:,:,:,1], 1:size(cartesianReco,3), b0Maps, isSliceInterleaved = true, rotateAngle = 180)
 end
 
 # cleanup unused file
