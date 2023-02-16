@@ -70,7 +70,7 @@ However, the aforementioned complexity of the image reconstruction task for spir
 
 The programming language Julia [@bezanson_julia_2017] provides a solution to this multiple-language problem by using a high-level interface to low-level compiled code, i.e., enabling fast prototyping with limited resources in an academic setting, while delivering performant execution times without code rewriting, all within a single developing environment.
 
-In this work, we introduce `GIRFReco.jl` (initial version presented at the annual meeting of ISMRM 2022 [@jaffray_open-source_2022]), which implements an end-to-end, self-contained processing and image reconstruction pipeline for spiral MR data completely in Julia. Based on the established `MRIReco.jl` package, `GIRFReco.jl` incorporates model-based corrections [@sutton_fast_2003;@wilm_higher_2011;@wilm_diffusion_2015;@vannesjo_image_2016] to achieve high-quality spiral MRI reconstructions. Specifically, this reconstruction pipeline combines several major steps: (1) ESPIRiT coil sensitivity map estimation [@uecker_espirit-eigenvalue_2014]; (2) Robust off-resonance (B<sub>0</sub>) map estimation [@funai_regularized_2008;@lin_fessler_fieldmapestimation3d_2020]; (3) GIRF Correction to the theoretical non-Cartesian k-space trajectory [@vannesjo_gradient_2013;@vannesjo_image_2016]; (4) Iterative non-Cartesian MRI reconstruction with off-resonance correction [@pruessmann_advances_2001;@knopp_iterative_2009]. Considering software reusabulity and sustainability, (1) and (4) of the abovementioned steps are handled by `MRIReco.jl`, a comprehensive modular open-source image reconstruction toolbox in Julia. Step (2), the (B<sub>0</sub>) map estimation, was developed as a Julia package `MRIFieldmaps.jl` by the original authors [@lin_fessler_fieldmapestimation3d_2020] with our contributions to an alternative algorithm [@funai_regularized_2008]. Finally, we implemented step (3), the GIRF correction, in an original Julia package `MRIGradients.jl` (https://github.com/MRI-gradient) [@jaffray_open-source_2022], porting and refactoring the MATLAB code of the original authors [@vannesjo_girfmatlab_2020].
+In this work, we introduce `GIRFReco.jl` (initial version presented at the annual meeting of ISMRM 2022 [@jaffray_open-source_2022]), which implements an end-to-end, self-contained processing and image reconstruction pipeline for spiral MR data completely in Julia. Based on the established `MRIReco.jl` package, `GIRFReco.jl` incorporates model-based corrections [@sutton_fast_2003;@wilm_higher_2011;@wilm_diffusion_2015;@vannesjo_image_2016] to achieve high-quality spiral MRI reconstructions. Specifically, this reconstruction pipeline combines several major steps: (1) ESPIRiT coil sensitivity map estimation [@uecker_espirit-eigenvalue_2014]; (2) Robust off-resonance (B<sub>0</sub>) map estimation [@funai_regularized_2008;@lin_fessler_fieldmapestimation3d_2020]; (3) GIRF Correction to the theoretical non-Cartesian k-space trajectory [@vannesjo_gradient_2013;@vannesjo_image_2016]; (4) Iterative non-Cartesian MRI reconstruction with off-resonance correction [@pruessmann_advances_2001;@knopp_iterative_2009]. Considering software reusabulity and sustainability, (1) and (4) of the abovementioned steps are handled by `MRIReco.jl`, a comprehensive modular open-source image reconstruction toolbox in Julia. Step (2), the B<sub>0</sub> map estimation, was developed as a Julia package `MRIFieldmaps.jl` by the original authors [@lin_fessler_fieldmapestimation3d_2020] with our contributions to an alternative algorithm [@funai_regularized_2008]. Finally, we implemented step (3), the GIRF correction, in an original Julia package `MRIGradients.jl` (https://github.com/MRI-gradient) [@jaffray_open-source_2022], porting and refactoring the MATLAB code of the original authors [@vannesjo_girfmatlab_2020].
 
 # Functionality
 
@@ -79,7 +79,7 @@ In this work, we introduce `GIRFReco.jl` (initial version presented at the annua
 `GIRFReco.jl` requires raw MR (k-space) data (in [ISMR]MRD format [@inati_ismrm_2017]) of the following scans as input:
 
 1. Multi-echo Gradient-echo spin-warp (Cartesian) scan
-    - at least two echo times (e.g. 4.92 ms and 7.38 ms at 3T)
+    - needs to include at least two echo times (e.g. 4.92 ms and 7.38 ms at 3T)
 2. Spiral scan
     - single or multi-interleave
 
@@ -90,15 +90,15 @@ At the moment, the slice geometry (thickness, field-of-view, and direction) of t
 The following components are utilized within the spiral reconstruction pipeline of `GIRFReco.jl` (Fig. 1), and called from their respective packages.
 
 1. Core iterative image reconstruction, using Julia package `MRIReco.jl`
-    - CG-SENSE [@pruessmann_advances_2001] algorithm
-    - ESPIRiT [@uecker_espirit-eigenvalue_2014] for sensitivity maps
+    a. CG-SENSE [@pruessmann_advances_2001] algorithm
+    b. ESPIRiT [@uecker_espirit-eigenvalue_2014] for sensitivity maps
 2. Model-based correction components
-    - Smoothed B<sub>0</sub> map estimation, custom implementation of [@funai_regularized_2008;@lin_fessler_fieldmapestimation3d_2020] in `MRIFieldMaps.jl`
-    - Static B<sub>0</sub> map correction, accelerated by time-segmented implementation in `MRIReco.jl` [@knopp_mrirecojl_2021]
-    - Gradient impulse response function (GIRF) [@vannesjo_gradient_2013]
-        - Measured on a phantom [@graedel_comparison_2017]
-        - Open-source computation [@wu_mr_2022]
-        - Prediction implemented in our customized package `MRIGradients.jl` [@jaffray_open-source_2022]
+    a. Smoothed B<sub>0</sub> map estimation, custom implementation of [@funai_regularized_2008;@lin_fessler_fieldmapestimation3d_2020] in `MRIFieldMaps.jl`
+    b. Static B<sub>0</sub> map correction, accelerated by time-segmented implementation [@knopp_iterative_2009] in `MRIReco.jl` [@knopp_mrirecojl_2021]
+    c. Gradient impulse response function (GIRF) [@vannesjo_gradient_2013]
+        - Measurememt with a phantom-based technique [@graedel_comparison_2017]
+        - Estimation using our open-source code [@wu_mr_2022]
+        - Prediction via our original package `MRIGradients.jl` [@jaffray_open-source_2022]
 
 ![Figure 1](paper/GIRFReco_Components.png?raw=true "GIRFReco.jl Components")
 
