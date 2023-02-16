@@ -106,18 +106,18 @@ The following components are utilized within the spiral reconstruction pipeline 
 
 `GIRFReco.jl` executes the steps required for spiral diffusion reconstruction (shown in Figure 2) in the following order:
 
-1. Conversion of proprietary format, vendor-specific raw image data to an open-source raw data format ([ISMR]MRD, [@inati_ismrm_2017])
+1. Conversion of proprietary, vendor-specific raw image data to an open-source raw data format ([ISMR]MRD, [@inati_ismrm_2017])
 2. Synchronization of the data and the k-space trajectory onto a common timebase
-3. Model-based correction of the k-space sampling points and data using the gradient impulse response function (GIRF [@vannesjo_gradient_2013], `MRIGradients.jl`)
+3. Model-based correction of the k-space sampling points (linear gradient self-terms) and data (k<sub>0</sub> eddy currents) using the gradient impulse response function (GIRF [@vannesjo_gradient_2013], `MRIGradients.jl`)
 4. Coil sensitivity map estimation (ESPIRiT, [@uecker_espirit-eigenvalue_2014])
-5. Off-resonance (B<sub>0</sub>) map estimation (`MRIFieldmaps.jl`, [@funai_regularized_2008;@lin_fessler_fieldmapestimation3d_2020])
-6. Non-Cartesian, iterative parallel image reconstruction with off-resonance correction (`MRIReco.jl`, [@knopp_mrirecojl_2021])
+5. Off-resonance (B<sub>0</sub>) map estimation and processing (`MRIFieldmaps.jl`, [@funai_regularized_2008;@lin_fessler_fieldmapestimation3d_2020])
+6. Non-Cartesian, iterative parallel image reconstruction with off-resonance correction (`MRIReco.jl`, [@knopp_mrirecojl_2021;@knopp_iterative_2009;@pruessmann_advances_2001])
 
 ![Figure 2](paper/GIRFReco_Pipeline.png?raw=true "Template Reconstruction Pipeline")
 
 ## Quality of Life Features
 
-In addition to providing an end-to-end reconstruction workflow, `GIRFReco.jl` provides intermediate methods for plotting images and calibration data using PlotlyJS, as well as the capability to export intermediate reconstruction results such as calculated coil sensitivity maps and B<sub>0</sub> maps to NIfTI format.
+In addition to providing an end-to-end reconstruction workflow, `GIRFReco.jl` provides intermediate methods for plotting images and calibration data using PlotlyJS, as well as the capability to export intermediate reconstruction results such as calculated coil sensitivity maps and B<sub>0</sub> maps to NIfTI, a common neuroimaging data format, supported by various analysis and visualization packages [@NIfTI].
 
 # Getting Started
 
@@ -125,8 +125,6 @@ Up-to-date information about how to install `GIRFReco.jl`, run example reconstru
 
 # Conclusion and Outlook
 
-The presented package, `GIRFReco.jl`, is an open-source end-to-end toolbox for spiral MRI reconstruction. It is developed in Julia, and allows users to obtain final images directly from raw MR data acquired by spiral k-space trajectories. Following best practices of software sustainability and accessibility, we rely on the established MR image reconstruction package `MRIReco.jl` in our package, while extending its capability to handle the more complex use case of multiple model-based corrections, necessary for high-quality spiral MRI. Without loss of generality, `GIRFReco.jl` can be easily extended to allow model-based MRI reconstruction with GIRF and off-resonance corrections for data acquired under arbitrary non-Cartesian k-space trajectories besides spirals.
-
-`GIRFReco.jl` can be extended to handle arbitrary k-space trajectories, and can act as a self-contained template for generalized image reconstruction from raw scan and calibration data to interpretable images. 
+The presented pipeline, `GIRFReco.jl`, is an open-source end-to-end solution for spiral MRI reconstruction. It is developed in Julia, and allows users to obtain final images directly from raw MR data acquired by spiral k-space trajectories. Following best practices of software sustainability and accessibility, we rely on the established MR image reconstruction package `MRIReco.jl` in our package, while extending its capability to handle the more complex use case of multiple model-based corrections, necessary for high-quality spiral MRI. Without loss of generality, `GIRFReco.jl` can be easily extended to allow model-based MRI reconstruction with GIRF and off-resonance corrections for data acquired under arbitrary non-Cartesian k-space trajectories besides spirals. Furthermore, `GIRFReco.jl` can be extended to handle additional model-based corrections (e.g., concomitant or higher-order encoding fields, [bernstein_concomitant_1998;@wilm_higher_2011;@wilm_diffusion_2015;@vannesjo_image_2016]), and can act as a self-contained template for generalized image reconstruction from raw scan and calibration data to interpretable images. 
 
 # References
