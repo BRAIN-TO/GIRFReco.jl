@@ -65,6 +65,8 @@ pc1 = heatmap(abs.((b0Corr - noCorr)./maximum(b0Corr)),color=:viridis,aspectrati
 pc2 = heatmap(abs.((b0GirfCorr - b0Corr)./maximum(b0GirfCorr)),color=:viridis,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,title = "Δ: +GIRF",titlefontsize=10,top_margin=0mm)
 pc3 = heatmap(abs.((b0GirfK0Corr - b0GirfCorr)./maximum(b0GirfK0Corr)),color=:viridis,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,title = "Δ: +k₀",titlefontsize=10,top_margin=0mm)
 
-plot(p1,p2,p3,p4,heatmap(zeros(200,200);aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,color=:grays),pc1,pc2,pc3;layout=(2,4),aspectratio=1,top_margin=0mm,bottom_margin=0mm)
+p_tot = plot(p1,p2,p3,p4,heatmap(zeros(200,200);xgrid=false,ygrid=false,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,color=:grays),pc1,pc2,pc3;layout=(2,4),aspectratio=1,top_margin=0mm,bottom_margin=0mm)
+
+savefig(p_tot,"./paper/figure3.pdf")
 
 # TODO keep working on the plots to generate something useable for the figure 3
