@@ -52,7 +52,7 @@ reloadGIRFData = true; # Set true if we need to reload GIRF data compulsively.
 Choose Slice ([single number] OR [1,2,31,...]）
 Leave empty ([]) or remove this line to later select all slices
 =#
-sliceChoice = [];
+sliceChoice = [3];
 
 #=
 Choose which diffusion directions and averages to be processed. 
