@@ -104,7 +104,7 @@ The following components are utilized within the spiral reconstruction pipeline 
 
 ## Detailed Processing Pipeline
 
-`GIRFReco.jl` executes the steps required for spiral diffusion reconstruction (shown in Figure 2) in the following order:
+`GIRFReco.jl` executes the steps required for spiral diffusion reconstruction in the following order:
 
 1. Conversion of proprietary, vendor-specific raw image data to an open-source raw data format ([ISMR]MRD, [@inati_ismrm_2017]
 2. Synchronization of the data and the k-space trajectory onto a common timebase
@@ -112,8 +112,6 @@ The following components are utilized within the spiral reconstruction pipeline 
 4. Coil sensitivity map estimation (ESPIRiT, [@uecker_espirit-eigenvalue_2014])
 5. Off-resonance (B<sub>0</sub>) map estimation and processing (`MRIFieldmaps.jl`, [@funai_regularized_2008;@lin_fessler_fieldmapestimation3d_2020])
 6. Non-Cartesian, iterative parallel image reconstruction with off-resonance correction (`MRIReco.jl`, [@knopp_mrirecojl_2021;@knopp_iterative_2009;@pruessmann_advances_2001])
-
-![Figure 2](paper/GIRFReco_Pipeline.png?raw=true "Template Reconstruction Pipeline")
 
 Via dedicated configuration files, individual steps can be selectively applied or skipped during reconstruction, enabling assessment of the impact of different model-based corrections on final image quality. We demonstrate this use case by example `GIRFReco.jl` pipeline results for reconstruction of a T2-weighted multi-interleave spiral acquisition of a phantom (Figure 3) and single-interleave in-vivo brain acquisitions (Figure 4). In both cases, improved image quality was obtained by successively increasing the complexity of the applied model-based corrections (nominal trajectory, added B0 correction, GIRF-correction of gradients, GIRF correction of k<sub>0</sub> eddy currents).
 
