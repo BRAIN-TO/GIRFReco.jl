@@ -12,7 +12,8 @@ This page was generated from the following Julia file: [`generate_fig_3.jl`](@__
 The necessary Julia packages for reading NIfTI data
 =#
 
-#Base packages for computation
+#Base packages for file loading and plotting
+using Measures
 using NIfTI
 
 #=
