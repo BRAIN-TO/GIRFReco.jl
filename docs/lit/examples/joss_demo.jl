@@ -40,7 +40,7 @@ Please download, extract and set the rootProjPath as the top level folder (shoul
 =#
 # rootProjPath = "/home/kasperl/SPIDI" # Root path of the project needs to be defined
 rootProjPath = "/home/wuz/spiralDiffusion/data/demo_data"
-rootProjPath = "/Users/ajaffray/Documents/PhD/Data/SPIDI/"
+# rootProjPath = "/Users/ajaffray/Documents/PhD/Data/SPIDI/"
 include("ReconConfig_joss_demo.jl")
 
 
@@ -52,7 +52,7 @@ reloadGIRFData = true; # Set true if we need to reload GIRF data compulsively.
 Choose Slice ([single number] OR [1,2,31,...]）
 Leave empty ([]) or remove this line to later select all slices
 =#
-sliceChoice = [3];
+sliceChoice = [];
 
 #=
 Choose which diffusion directions and averages to be processed. 

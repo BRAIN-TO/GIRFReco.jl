@@ -23,8 +23,8 @@ We need to provide a location for the NIfTI files with each successive correctio
 
 =#
 # rootProjPath = "/home/kasperl/SPIDI" # Root path of the project needs to be defined
-# rootProjPath = "/home/wuz/spiralDiffusion/data/demo_data"
-rootProjPath = "/Users/ajaffray/Documents/PhD/Data/SPIDI/"
+rootProjPath = "/home/wuz/spiralDiffusion/data/demo_data"
+# rootProjPath = "/Users/ajaffray/Documents/PhD/Data/SPIDI/"
 include("ReconConfig_joss_demo.jl")
 
 #=
@@ -44,10 +44,10 @@ files = joinpath.(paths,filename_magn)
 
 =#
 
-noCorr = niread(files[1]).raw[:,:,1,1,1,1]
-b0Corr = niread(files[2]).raw[:,:,1,1,1,1]
-b0GirfCorr = niread(files[3]).raw[:,:,1,1,1,1]
-b0GirfK0Corr = niread(files[4]).raw[:,:,1,1,1,1]
+noCorr = niread(files[1]).raw[:,:,5,1,1,1]
+b0Corr = niread(files[2]).raw[:,:,5,1,1,1]
+b0GirfCorr = niread(files[3]).raw[:,:,5,1,1,1]
+b0GirfK0Corr = niread(files[4]).raw[:,:,5,1,1,1]
 #=
 
 ## 5. Plot!
@@ -65,7 +65,7 @@ pc1 = heatmap(abs.((b0Corr - noCorr)./maximum(b0Corr)),color=:viridis,aspectrati
 pc2 = heatmap(abs.((b0GirfCorr - b0Corr)./maximum(b0GirfCorr)),color=:viridis,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,title = "Δ: +GIRF",titlefontsize=10,top_margin=0mm)
 pc3 = heatmap(abs.((b0GirfK0Corr - b0GirfCorr)./maximum(b0GirfK0Corr)),color=:viridis,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,title = "Δ: +k₀",titlefontsize=10,top_margin=0mm)
 
-p_tot = plot(p1,p2,p3,p4,heatmap(zeros(200,200);xgrid=false,ygrid=false,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,color=:grays),pc1,pc2,pc3;layout=(2,4),aspectratio=1,top_margin=0mm,bottom_margin=0mm)
+p_tot = plot(p1,p2,p3,p4,heatmap(ones(200,200);xgrid=false,ygrid=false,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,color=:grays),pc1,pc2,pc3;layout=(2,4),aspectratio=1,top_margin=0mm,bottom_margin=0mm)
 
 savefig(p_tot,"./paper/figure3.pdf")
 

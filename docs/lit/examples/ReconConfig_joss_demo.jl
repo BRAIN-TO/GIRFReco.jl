@@ -18,7 +18,7 @@ paramsGeneral = Dict{Symbol,Any}();
 paramsGeneral[:gamma] = 42577478;
 
 # General options for reconstruction script:
-paramsGeneral[:doLoadMaps] = false              # if true, reloads B0/SENSE maps instead of recalculating
+paramsGeneral[:doLoadMaps] = true              # if true, reloads B0/SENSE maps instead of recalculating
 paramsGeneral[:doSaveRecon] = true              # if true, saves reconstruction and all auxiliary image data (maps) as NIfTI files
 paramsGeneral[:doPlotRecon] = true              # if true, plots intermediate debugging and output recon figures (needs graphics, not recommended in multi-thread mode due to PyPlot)
 paramsGeneral[:doProcessMapScan] = true         # if true, compute sensitivity and B0 maps from reconstructed Cartesian scan   
