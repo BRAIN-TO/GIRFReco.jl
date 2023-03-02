@@ -5,9 +5,9 @@
 #=
 This page demonstrates an example script for using GIRFReco.jl
 
-This page was generated from the following Julia file: [`joss_demo.jl`](@__REPO_ROOT_URL__/doc/lit/examples/joss_demo.jl)
+This page was generated from the following Julia file: [`joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/examples/joss_demo.jl)
 
-The configuration file is [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl)
+The configuration file is [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/examples/ReconConfig_joss_demo.jl)
 =#
 
 #=
@@ -31,11 +31,16 @@ using MRIReco, FileIO, MRIFiles, MRICoilSensitivities
 #=
 ## 2. Configurations for reconstruction
 
-The following file, [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/doc/lit/examples/ReconConfig_joss_demo.jl),
+The following file, [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/examples/ReconConfig_joss_demo.jl),
 includes general configuration for spiral reconstruction.
 It is necessary to execute this file to make sure all parameters are loaded.
+Sample Data that works with this script can be found at: https://doi.org/10.5281/zenodo.6510021
+Please download, extract and set the rootProjPath as the top level folder (should be something like /your/path/here/data-2, I've renamed mine to SPIDI)
+
 =#
-rootProjPath = "/home/kasperl/SPIDI" # Root path of the project needs to be defined
+# rootProjPath = "/home/kasperl/SPIDI" # Root path of the project needs to be defined
+rootProjPath = "/home/wuz/spiralDiffusion/data/demo_data"
+# rootProjPath = "/Users/ajaffray/Documents/PhD/Data/SPIDI/"
 include("ReconConfig_joss_demo.jl")
 
 
@@ -232,9 +237,10 @@ compress the channels according to user's setting to achieve a faster reconstruc
 =#
 sensitivity = mapslices(x ->imresize(x, paramsSpiral[:reconSize][1],paramsSpiral[:reconSize][2]), senseCartesian, dims=[1,2])
 
-#Optional: Plot the sensitivity maps of each coil
+#Optional: Plot the sensitivity maps of each coil on a given slice.
 if paramsGeneral[:doPlotRecon]
-    plotSenseMaps(sensitivity,size(sensitivity, 4),sliceIndex = 10)
+    plotlyjs()
+    plotSenseMaps(sensitivity,size(sensitivity, 4),sliceIndex = 6)
 end
 
 #Do coil compression to make recon faster
@@ -248,6 +254,15 @@ end
 We need to resize the B0 maps to the size of output encoding matrix size.
 =#
 resizedB0 = mapslices(x->imresize(x,paramsSpiral[:reconSize][1],paramsSpiral[:reconSize][2]), b0Maps, dims=[1,2])
+
+#=
+#### 3.2.7 Alignment of Off-Resonance, Sensitivity, and Spiral Data
+
+We need to make sure that the axes line up so we rotate the sensitivities and the off-resonance maps  
+Depending on your geometry, this might not be necessary but it is here
+=#
+resizedB0 = mapslices(x->rotl90(x),resizedB0,dims=[1,2])
+sensitivity = mapslices(x->rotl90(x),sensitivity,dims=[1,2])
 
 #=
 ### 3.3 Spiral Image Reconstruction
@@ -304,7 +319,8 @@ end
 
 if paramsGeneral[:doPlotRecon]
     @info "Plotting Reconstruction"
-    plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice], figHandles=["Original Magnitude", "Original Phase", "B0"], isSliceInterleaved=true, rotateAngle=270)
+    plotlyjs()
+    plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice], figHandles=["Original Magnitude", "Original Phase", "B0"], isSliceInterleaved=false, rotateAngle=90)
 end
 
 @info "Successfully Completed SpiralRecon"
