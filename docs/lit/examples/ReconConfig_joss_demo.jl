@@ -18,28 +18,28 @@ paramsGeneral = Dict{Symbol,Any}();
 paramsGeneral[:gamma] = 42577478;
 
 # General options for reconstruction script:
-paramsGeneral[:doLoadMaps] = true              # if true, reloads B0/SENSE maps instead of recalculating
+paramsGeneral[:doLoadMaps] = false              # if true, reloads B0/SENSE maps instead of recalculating
 paramsGeneral[:doSaveRecon] = true              # if true, saves reconstruction and all auxiliary image data (maps) as NIfTI files
 paramsGeneral[:doPlotRecon] = true              # if true, plots intermediate debugging and output recon figures (needs graphics, not recommended in multi-thread mode due to PyPlot)
 paramsGeneral[:doProcessMapScan] = true         # if true, compute sensitivity and B0 maps from reconstructed Cartesian scan   
 paramsGeneral[:doSaveProcessedMapScan] = false  # save ISMRMD file of preprocessed Cartesian data (before recon)
-paramsGeneral[:reconId] = "vB0_GIRF_k0"               # unique identifier for the saved result files
+paramsGeneral[:reconId] = "vFinal_unshifted_2_k0"               # unique identifier for the saved result files
 paramsGeneral[:doCorrectWithB0map] = true       # whether perform off-resonance correction
 paramsGeneral[:doCorrectWithGIRFkxyz] = true    # whether perform 1st order GIRF correction
-paramsGeneral[:doCorrectWithGIRFk0] = true     # whether perform 1st order GIRF correction
+paramsGeneral[:doCorrectWithGIRFk0] = true    # whether perform 1st order GIRF correction
 paramsGeneral[:doCoilCompression] = false       # whether perform coil compression
-paramsGeneral[:doNormalizeRecon] = false;       # if true, set the range of magnitude image as [0 1]
+paramsGeneral[:doNormalizeRecon] = false       # if true, set the range of magnitude image as [0 1]
 
 # General parameters for reconstruction:
-paramsGeneral[:numADCSamples] = 15504             # total number of ADC points BEFORE the rewinder at the end of the spiral readout. Need to check with data. # 15504
-paramsGeneral[:reconSize] = [200,200, 1]         # the matrix size of the reconstructed images. Needs to specify 1 on Z dimension for 2D images
-paramsGeneral[:nReconIterations] = 20;            # number of recon iterations (for both Cartesian and Spiral recon)
+paramsGeneral[:numADCSamples] = 15650             # total number of ADC points BEFORE the rewinder at the end of the spiral readout. Need to check with data. # 15504 for 523, 15655 for gradient 508
+paramsGeneral[:reconSize] = [200,200, 1]          # the matrix size of the reconstructed images. Needs to specify 1 on Z dimension for 2D images
+paramsGeneral[:nReconIterations] = 40             # number of recon iterations (for both Cartesian and Spiral recon)
 paramsGeneral[:b0mapSmoothBeta] = 0.1             # for estimateB0Maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
 paramsGeneral[:scalingFactorSaveRecon] = 1.0e9    # typical range of recon intensities is 1e-7, rescale when saving, e.g., to 0...1000 roughly for fMRI analysis
-paramsGeneral[:nVirtualCoils] = 8;                # if perform coil compression, the number of coils to be compressed to
-paramsGeneral[:fovShift] = [0, 0];              # amount of FOV shift; in unit of number of voxels in [x,y] direction
+paramsGeneral[:nVirtualCoils] = 8                 # if perform coil compression, the number of coils to be compressed to
+paramsGeneral[:fovShift] = [-2, -5]              # amount of FOV shift; in unit of number of voxels in [x,y] direction
 paramsGeneral[:sliceDistanceFactor_percent] = 400 # Scan parameters, Additional acquisition information, e.g., slice distance etc.
-paramsGeneral[:nDiffusionDirections] = 6;         # Need to specify total diffusion directions included in the raw data
+paramsGeneral[:nDiffusionDirections] = 6          # Need to specify total diffusion directions included in the raw data
 #=
 
 ## Data selector
@@ -92,13 +92,13 @@ paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", p
 #=
 ### Specifying File Names
 =#
-paramsGeneral[:fileNameMapScan] = "Fieldmaps/fieldMap_105_gre_2.h5" # Cartesian dual-echo file, for coil and B0 maps calculation [Input]
-paramsGeneral[:fileNameMapStem] = "fieldMap_105_gre_2.h5"
+paramsGeneral[:fileNameMapScan] = "Fieldmaps/meas_MID00083_FID06181_GRE_FieldMap_DualEcho_2mm.mrd" # Cartesian dual-echo file, for coil and B0 maps calculation [Input]
+paramsGeneral[:fileNameMapStem] = "meas_MID00083_FID06181_GRE_FieldMap_DualEcho_2mm.mrd"
 paramsGeneral[:mapTEs_ms] = [4.92,  7.38] # Two echo times, in ms
 paramsGeneral[:fileNameGIRF] = ["2021Nov_PosNeg_Gx.mat", "2021Nov_PosNeg_Gy.mat", "2021Nov_PosNeg_Gz.mat"] # Calculated GIRF for each gradient axis [Input]
-paramsGeneral[:fileNameGradient] = joinpath("gradients523.txt") # File name for the spiral gradient [Input]
-paramsGeneral[:fileNameScan]=["Spirals/523_96_2.h5", "Spirals/523_98_2.h5","Spirals/523_100_2.h5","Spirals/523_102_2.h5"] # ISMRMRD Raw k-space data for spiral acquisition [Input]
-paramsGeneral[:fileNameScanStem] = "523_96_2.h5"
+paramsGeneral[:fileNameGradient] = joinpath("gradients508.txt") # File name for the spiral gradient [Input]
+paramsGeneral[:fileNameScan] = ["Spirals/meas_MID00072_FID06170_diffSpiral_508_Intl0_b2k_4Avg.mrd","Spirals/meas_MID00074_FID06172_diffSpiral_508_Intl1_b2k_4Avg.mrd","Spirals/meas_MID00076_FID06174_diffSpiral_508_Intl2_b2k_4Avg.mrd","Spirals/meas_MID00078_FID06176_diffSpiral_508_Intl3_b2k_4Avg.mrd"]# , "Spirals/508_74_2.h5","Spirals/508_76_2.h5","Spirals/508_78_2.h5"] # ISMRMRD Raw k-space data for spiral acquisition [Input]
+paramsGeneral[:fileNameScanStem] = "meas_MID00072_FID06170_diffSpiral_508_Intl0_b2k_4Avg.mrd"
 paramsGeneral[:fileNameProcessedMapScan] = "processed_cartesian_data.h5" # file name for preprocessed data (remove oversampling, permute dimensions wrt MRIReco) [Output]
 paramsGeneral[:fileNameSaveMapRecon] = splitext(paramsGeneral[:fileNameMapStem])[1] * "_reconmap.nii" # File name for reconstructed dual-echo Cartesian images [Output]
 paramsGeneral[:fileNameSaveSense] = splitext(paramsGeneral[:fileNameMapStem])[1] * "_sensemap.nii" # File name for calculated coil sensitivity maps [Output]

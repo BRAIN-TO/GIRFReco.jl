@@ -17,7 +17,7 @@ The necessary Julia packages needed for spiral reconstruction.
 =#
 
 #Base packages for computation
-using HDF5, LinearAlgebra, Dierckx, DSP, FourierTools, RegularizedLeastSquares, ImageUtils
+using HDF5, LinearAlgebra, Dierckx, DSP, FourierTools, RegularizedLeastSquares, ImageUtils, PolygonInbounds
 
 #Packages for figure displaying
 using MosaicViews, Plots, Images
@@ -40,6 +40,7 @@ Please download, extract and set the rootProjPath as the top level folder (shoul
 =#
 # rootProjPath = "/home/kasperl/SPIDI" # Root path of the project needs to be defined
 rootProjPath = "/home/wuz/spiralDiffusion/data/demo_data"
+rootProjPath = "/srv/data/ajaffray/TORONTO_COLLAB/data/SPIDI_0007/Phantom/"
 # rootProjPath = "/Users/ajaffray/Documents/PhD/Data/SPIDI/"
 include("ReconConfig_joss_demo.jl")
 
@@ -190,6 +191,12 @@ if reloadSpiralData || !(@isdefined acqDataImaging)
     acqDataImaging = mergeRawInterleaves(paramsSpiral)
 end
 
+# for i = 1:20
+
+#     acqDataImaging.kdata[1][:,i] .= vcat(acqDataImaging.kdata[1][4:end,i],zeros(ComplexF32,(3,1)))
+
+# end
+
 #=
 #### 3.2.3 Correction of k-space Trajectory Using Gradient Impulse Response Function
 
@@ -235,12 +242,14 @@ We need to preprocess the coil sensitivity maps before reconstruction.
 This includes resizing the coil maps to the size of output encoding matrix size; 
 compress the channels according to user's setting to achieve a faster reconstruction.
 =#
+low_freq_mask = hanning((30,30),padding=170,zerophase=true)
+
 sensitivity = mapslices(x ->imresize(x, paramsSpiral[:reconSize][1],paramsSpiral[:reconSize][2]), senseCartesian, dims=[1,2])
 
 #Optional: Plot the sensitivity maps of each coil on a given slice.
 if paramsGeneral[:doPlotRecon]
     plotlyjs()
-    plotSenseMaps(sensitivity,size(sensitivity, 4),sliceIndex = 6)
+    plotSenseMaps(sensitivity,size(sensitivity, 4),sliceIndex = 2)
 end
 
 #Do coil compression to make recon faster
@@ -261,8 +270,8 @@ resizedB0 = mapslices(x->imresize(x,paramsSpiral[:reconSize][1],paramsSpiral[:re
 We need to make sure that the axes line up so we rotate the sensitivities and the off-resonance maps  
 Depending on your geometry, this might not be necessary but it is here
 =#
-resizedB0 = mapslices(x->rotl90(x),resizedB0,dims=[1,2])
-sensitivity = mapslices(x->rotl90(x),sensitivity,dims=[1,2])
+# resizedB0 = mapslices(x->rotl90(x),resizedB0,dims=[1,2])
+# sensitivity = mapslices(x->rotl90(x),sensitivity,dims=[1,2])
 
 #=
 ### 3.3 Spiral Image Reconstruction
@@ -281,7 +290,7 @@ paramsRecon = Dict{Symbol,Any}()
 paramsRecon[:reco] = "multiCoil"
 paramsRecon[:reconSize] = paramsSpiral[:reconSize][1:2]
 paramsRecon[:regularization] = "L2"
-paramsRecon[:λ] = 1e-2
+paramsRecon[:λ] = 1e-3
 paramsRecon[:iterations] = paramsGeneral[:nReconIterations]
 paramsRecon[:solver] = "cgnr"
 paramsRecon[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
