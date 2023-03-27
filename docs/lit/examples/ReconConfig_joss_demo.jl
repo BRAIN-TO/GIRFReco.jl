@@ -23,10 +23,10 @@ paramsGeneral[:doSaveRecon] = true              # if true, saves reconstruction 
 paramsGeneral[:doPlotRecon] = true              # if true, plots intermediate debugging and output recon figures (needs graphics, not recommended in multi-thread mode due to PyPlot)
 paramsGeneral[:doProcessMapScan] = true         # if true, compute sensitivity and B0 maps from reconstructed Cartesian scan   
 paramsGeneral[:doSaveProcessedMapScan] = false  # save ISMRMD file of preprocessed Cartesian data (before recon)
-paramsGeneral[:reconId] = "vNoCorr_Sing"               # unique identifier for the saved result files
-paramsGeneral[:doCorrectWithB0map] = false       # whether perform off-resonance correction
-paramsGeneral[:doCorrectWithGIRFkxyz] = false    # whether perform 1st order GIRF correction
-paramsGeneral[:doCorrectWithGIRFk0] = false    # whether perform 1st order GIRF correction
+paramsGeneral[:reconId] = "v7"               # unique identifier for the saved result files
+paramsGeneral[:doCorrectWithB0map] = true       # whether perform off-resonance correction
+paramsGeneral[:doCorrectWithGIRFkxyz] = true    # whether perform 1st order GIRF correction
+paramsGeneral[:doCorrectWithGIRFk0] = true    # whether perform 1st order GIRF correction
 paramsGeneral[:doCoilCompression] = false       # whether perform coil compression
 paramsGeneral[:doNormalizeRecon] = false       # if true, set the range of magnitude image as [0 1]
 
