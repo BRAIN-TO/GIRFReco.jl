@@ -41,7 +41,7 @@ Please download, extract and set the rootProjPath as the top level folder (shoul
 # rootProjPath = "/home/kasperl/SPIDI" # Root path of the project needs to be defined
 
 # rootProjPath = "/home/wuz/spiralDiffusion/data/demo_data"
-rootProjPath = "/srv/data/ajaffray/TORONTO_COLLAB/data/SPIDI_0007/Phantom/"
+rootProjPath = "/srv/data/ajaffray/TORONTO_COLLAB/data/joss_data_zenodo/"
 # rootProjPath = "/Users/ajaffray/Documents/PhD/Data/SPIDI/"
 
 include("ReconConfig_joss_demo.jl")
