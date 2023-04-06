@@ -38,11 +38,8 @@ Sample Data that works with this script can be found at: https://doi.org/10.5281
 Please download, extract and set the rootProjPath as the top level folder (should be something like /your/path/here/data-2, I've renamed mine to SPIDI)
 
 =#
-# rootProjPath = "/home/kasperl/SPIDI" # Root path of the project needs to be defined
 
-# rootProjPath = "/home/wuz/spiralDiffusion/data/demo_data"
-rootProjPath = "/srv/data/ajaffray/TORONTO_COLLAB/data/joss_data_zenodo/"
-# rootProjPath = "/Users/ajaffray/Documents/PhD/Data/SPIDI/"
+rootProjPath = "Your/Extracted/Data/Folder" # Root path of the data extracted from Zenodo
 
 include("ReconConfig_joss_demo.jl")
 

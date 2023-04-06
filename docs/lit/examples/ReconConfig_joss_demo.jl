@@ -97,7 +97,9 @@ paramsGeneral[:fileNameMapStem] = "meas_MID00083_FID06181_GRE_FieldMap_DualEcho_
 paramsGeneral[:mapTEs_ms] = [4.92,  7.38] # Two echo times, in ms
 paramsGeneral[:fileNameGIRF] = ["2021Nov_PosNeg_Gx.mat", "2021Nov_PosNeg_Gy.mat", "2021Nov_PosNeg_Gz.mat"] # Calculated GIRF for each gradient axis [Input]
 paramsGeneral[:fileNameGradient] = joinpath("gradients508.txt") # File name for the spiral gradient [Input]
-paramsGeneral[:fileNameScan] = ["Spirals/meas_MID00072_FID06170_diffSpiral_508_Intl0_b2k_4Avg.mrd"]#,"Spirals/meas_MID00074_FID06172_diffSpiral_508_Intl1_b2k_4Avg.mrd","Spirals/meas_MID00076_FID06174_diffSpiral_508_Intl2_b2k_4Avg.mrd","Spirals/meas_MID00078_FID06176_diffSpiral_508_Intl3_b2k_4Avg.mrd"]# , "Spirals/508_74_2.h5","Spirals/508_76_2.h5","Spirals/508_78_2.h5"] # ISMRMRD Raw k-space data for spiral acquisition [Input]
+paramsGeneral[:fileNameScan] = ["Spirals/meas_MID00072_FID06170_diffSpiral_508_Intl0_b2k_4Avg.mrd"]# ISMRMRD Raw k-space data for spiral acquisition [Input]
+#Remove the comment mark of the next line if you want a multi-interleave spiral reconstruction
+#paramsGeneral[:fileNameScan] = ["Spirals/meas_MID00072_FID06170_diffSpiral_508_Intl0_b2k_4Avg.mrd","Spirals/meas_MID00074_FID06172_diffSpiral_508_Intl1_b2k_4Avg.mrd","Spirals/meas_MID00076_FID06174_diffSpiral_508_Intl2_b2k_4Avg.mrd","Spirals/meas_MID00078_FID06176_diffSpiral_508_Intl3_b2k_4Avg.mrd"]
 paramsGeneral[:fileNameScanStem] = "meas_MID00072_FID06170_diffSpiral_508_Intl0_b2k_4Avg.mrd"
 paramsGeneral[:fileNameProcessedMapScan] = "processed_cartesian_data.h5" # file name for preprocessed data (remove oversampling, permute dimensions wrt MRIReco) [Output]
 paramsGeneral[:fileNameSaveMapRecon] = splitext(paramsGeneral[:fileNameMapStem])[1] * "_reconmap.nii" # File name for reconstructed dual-echo Cartesian images [Output]
