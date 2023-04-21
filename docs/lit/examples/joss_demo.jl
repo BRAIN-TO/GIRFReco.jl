@@ -40,6 +40,7 @@ Please download, extract and set the rootProjPath as the top level folder (shoul
 =#
 
 rootProjPath = "Your/Extracted/Data/Folder" # Root path of the data extracted from Zenodo
+# rootProjPath = "/srv/data/ajaffray/TORONTO_COLLAB/data/joss_data_zenodo/"
 
 include("ReconConfig_joss_demo.jl")
 
