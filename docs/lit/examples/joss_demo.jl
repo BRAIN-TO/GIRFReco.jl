@@ -34,13 +34,12 @@ using MRIReco, FileIO, MRIFiles, MRICoilSensitivities
 The following file, [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/examples/ReconConfig_joss_demo.jl),
 includes general configuration for spiral reconstruction.
 It is necessary to execute this file to make sure all parameters are loaded.
-Sample Data that works with this script can be found at: https://doi.org/10.5281/zenodo.6510021
+Sample Data that works with this script can be found at: https://doi.org/10.5281/zenodo.7779044
 Please download, extract and set the rootProjPath as the top level folder (should be something like /your/path/here/data-2, I've renamed mine to SPIDI)
 
 =#
 
 rootProjPath = "Your/Extracted/Data/Folder" # Root path of the data extracted from Zenodo
-# rootProjPath = "/srv/data/ajaffray/TORONTO_COLLAB/data/joss_data_zenodo/"
 
 include("ReconConfig_joss_demo.jl")
 
