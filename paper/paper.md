@@ -108,23 +108,23 @@ The following components are utilized within the spiral reconstruction pipeline 
 
 `GIRFReco.jl` executes the steps required (depicted in Figure 1.) for spiral diffusion reconstruction in the following order:
 
-1. Conversion of proprietary, vendor-specific raw image data to an open-source raw data format ([ISMR]MRD, [@inati_ismrm_2017])
-2. Reading of the trajectory or gradient sequence and synchronization of the k-space trajectory onto the time course of the sampled k-space data to resolve any sampling rate differences
-3. Model-based correction of the k-space sampling points (linear gradient self-terms) and data (k~0~ eddy currents) using the gradient impulse response function (GIRF [@vannesjo_gradient_2013], `MRIGradients.jl` [@jaffray_opensource_2022])
-4. Iterative reconstruction of Cartesian multi-echo gradient echo (GRE) scan
-5. Coil sensitivity map estimation (ESPIRiT [@uecker_espirit-eigenvalue_2014], `MRIReco.jl`)
-6. Off-resonance (B~0~) map estimation and processing (`MRIFieldmaps.jl`, [@funai_regularized_2008;@lin_fessler_fieldmapestimation3d_2020])
-7. Non-Cartesian, iterative parallel image reconstruction (cgSENSE) with off-resonance correction ([@knopp_iterative_2009;@pruessmann_advances_2001], `MRIReco.jl` [@knopp_mrirecojl_2021])
+1. Conversion of proprietary, vendor-specific raw image data to an open-source raw data format ([ISMR]MRD, [@inati_ismrm_2017]).
+2. Reading of the trajectory or gradient sequence and synchronization of the k-space trajectory onto the time course of the sampled k-space data to resolve any sampling rate differences.
+3. Model-based correction of the k-space sampling points (linear gradient self-terms) and data (k~0~ eddy currents) using the gradient impulse response function (GIRF [@vannesjo_gradient_2013], `MRIGradients.jl` [@jaffray_opensource_2022]).
+4. Iterative reconstruction of Cartesian multi-echo gradient echo (GRE) scan.
+5. Coil sensitivity map estimation (ESPIRiT [@uecker_espirit-eigenvalue_2014], `MRIReco.jl`) from the first echo of multi-echo Cartesian GRE data.
+6. Off-resonance (B~0~) map estimation and processing (`MRIFieldmaps.jl`, [@funai_regularized_2008;@lin_fessler_fieldmapestimation3d_2020]) based on multi-echo Cartesian GRE data.
+7. Non-Cartesian, iterative parallel image reconstruction (cgSENSE) with off-resonance correction ([@knopp_iterative_2009;@pruessmann_advances_2001], `MRIReco.jl` [@knopp_mrirecojl_2021]).
+
+Via dedicated configuration files, individual steps can be selectively applied or skipped during reconstruction, enabling assessment of the impact of different model-based corrections on final image quality. We demonstrate this use case by providing example reconstructions obtained from the `GIRFReco.jl` pipeline for a T~2~-weighted four-interleave spiral acquisition of a geometric structure phantom by the American College of Radiology (ACR). Reconstructions of both fully sampled and accelerated (using 1 of 4 interleaves, R = 4) datasets are depicted in Figure 2. *In vivo* brain images reconstructed from a T~2~-weighted single-interleave (R=4) spiral acquisition are presented in Figure 3 [@kasper_feasibilityspiraldiffusion_2023]. In all cases, improved image quality was obtained by successively increasing the complexity of the applied model-based corrections (nominal trajectory, added B~0~ correction, GIRF-correction of gradients, GIRF correction of k~0~ eddy currents). The improvements in quality are best seen when looking at high-contrast features of the images such as edges and corners, with subsequent corrections creating sharper edge contrast and reducing blurring of small features.
+
+Note that the reconstruction results from the phantom experiments (both R = 1 and R = 4 reconstructions in Figure 2) can be fully reproduced using `GIRFReco.jl` and the corresponding dataset made publicly available [@jaffray_phantomdata_2022]. For details, see the "Getting Started" section below.
 
 ![Figure 2](figs/Fig_2.png)
 *Figure 2. Reconstructed four-interleave (R=1) and single-interleave (R=4) spiral images of a selected slice of the ACR phantom. Top row, from left to right: Images reconstructed from the nominal spiral gradient waveforms ("No Correction"), with correction for static off-resonance ("B~0~ Correction"), B~0~ + GIRF correction of the k-space trajectory ("B~0~+GIRF Correction"), and additional correction for GIRF k~0~ eddy currents ("B~0~+GIRF+k~0~ Correction"). Bottom row: Stepwise difference images between subsequent corrections.*
 
-Via dedicated configuration files, individual steps can be selectively applied or skipped during reconstruction, enabling assessment of the impact of different model-based corrections on final image quality. We demonstrate this use case by providing example reconstructions obtained from the `GIRFReco.jl` pipeline for a T~2~-weighted four-interleave spiral acquisition of a geometric structure phantom by the American College of Radiology (ACR). Reconstructions of both fully sampled and accelerated (using 1 of 4 interleaves, R = 4) datasets are depicted in Figure 2. *In vivo* brain images reconstructed from a T2-weighted single-interleave (R=4) spiral acquisition are presented in Figure 3 [@kasper_feasibilityspiraldiffusion_2023]. In all cases, improved image quality was obtained by successively increasing the complexity of the applied model-based corrections (nominal trajectory, added B~0~ correction, GIRF-correction of gradients, GIRF correction of k~0~ eddy currents). The improvements in quality are best seen when looking at high-contrast features of the images such as edges and corners, with subsequent corrections creating sharper edge contrast and reducing blurring of small features.
-
 ![Figure 3](figs/Fig_3.png)
 *Figure 3. Reconstructed single-interleave spiral in-vivo human brain images (undersampling factor R=4). Top row: Images reconstructed from the nominal spiral gradient waveform ("No correction"), with correction for static off-resonance ("B~0~ map"), B~0~ + GIRF correction of the k-space trajectory ("GIRF k~xyz~"), and additional correction for GIRF k~0~ eddy currents ("Full Correction"). Bottom row: Consecutive absolute difference images of top-row reconstructions (5x scaled, i.e., +/- 20 % max image intensity). A Cartesian image (from the B~0~ map scan) is used as the reference; its edges are overlaid to assess geometric congruency of the spiral images.*
-
-Note that the reconstruction results from the phantom experiments (both R = 1 and R = 4 reconstructions in Figure 2) can be fully reproduced using `GIRFReco.jl` and the corresponding dataset made publicly available [@jaffray_phantomdata_2022]. For details, see the "Getting Started" section below.
 
 ## Quality of Life Features
 
