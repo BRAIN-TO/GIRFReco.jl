@@ -49,7 +49,8 @@ nSlices = numSlices(acqDataCartesian)
 sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
 # shift FOV to middle :) 
 #TODO: in MRIReco v0.7, try: correctOffset(acqDataCartesian, [0 -20 0])
-shiftksp!(acqDataCartesian, paramsGeneral[:fovShift])
+shiftksp!(acqDataCartesian, paramsGeneral[:fovShift]) # amount of FOV shift; in unit of number of voxels in [x,y] direction
+
 #changeFOV!(acqDataCartesian,[1.5,1.5])
 
 ## Don't have to recalculate sense maps for both scans but possibly it could make a
