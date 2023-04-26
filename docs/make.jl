@@ -27,7 +27,7 @@ deploydocs(
     repo="github.com/BRAIN-TO/GIRFReco.git",
     push_preview = true,
     # deploy_config = Documenter.GitHubActions(),
-    devbranch = "PaperPreparation",
+    devbranch = "main",
     devurl = "dev",
     versions = ["stable" => "v^", "dev" => "dev"],
     forcepush = true,
