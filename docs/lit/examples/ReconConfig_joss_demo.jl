@@ -37,7 +37,7 @@ paramsGeneral[:nReconIterations] = 40             # number of recon iterations (
 paramsGeneral[:b0mapSmoothBeta] = 0.1             # for estimateB0Maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
 paramsGeneral[:scalingFactorSaveRecon] = 1.0e9    # typical range of recon intensities is 1e-7, rescale when saving, e.g., to 0...1000 roughly for fMRI analysis
 paramsGeneral[:nVirtualCoils] = 8                 # if perform coil compression, the number of coils to be compressed to
-paramsGeneral[:fovShift] = [-2, -5]              # amount of FOV shift; in unit of number of voxels in [x,y] direction
+paramsGeneral[:fovShift] = [-2, -5]               # amount of FOV shift; in unit of number of voxels in [x,y] direction (for our in-vivo dataset this is [0, -15], change as necessary)
 paramsGeneral[:sliceDistanceFactor_percent] = 400 # Scan parameters, Additional acquisition information, e.g., slice distance etc.
 paramsGeneral[:nDiffusionDirections] = 6          # Need to specify total diffusion directions included in the raw data
 #=
