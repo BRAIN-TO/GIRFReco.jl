@@ -306,6 +306,7 @@ to perform final spiral image reconstruction.
 @info "Performing Spiral Reconstruction"
 @time reco = reconstruction(acqDataImaging, paramsRecon)
 
+GC.gc()
 
 #=
 ## 4. Save and Plot the Results (Optional)
