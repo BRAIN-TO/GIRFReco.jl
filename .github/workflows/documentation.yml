@@ -32,7 +32,7 @@ jobs:
       - name: Setup Julia Environment
         uses: julia-actions/setup-julia@latest
         with:
-          version: '1.7'
+          version: '1.9'
       - name: Install dependencies
         run: julia --project=docs -e 'using Pkg; Pkg.add("MRIGradients"); Pkg.develop(PackageSpec(path=pwd())); Pkg.add("Documenter"); Pkg.add("Literate"); Pkg.instantiate()'
       - name: Build Documents through Documenter.jl
