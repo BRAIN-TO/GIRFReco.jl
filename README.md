@@ -12,10 +12,20 @@ The data for the phantom reconstruction [`joss_demo.jl`](./docs/lit/examples/jos
 
 For a full introduction, please refer to our [manuscript](./paper.md) for a full description of this package, including background, purpose, implementation, and the information of dependent packages.
 
-## Quick Start
+## Quick Installation
+To install the package, use the following command:
+```
+julia>]add GIRFReco
+```
 
-1. To get started, make sure you have Julia installed (either version 1.6 or 1.7).
-2. Clone the GIRFReco.jl project from Github to a local directory by `git clone git@github:BRAIN-TO/GIRFReco.jl`.
+## Development Installation
+
+1. To get started, make sure you have Julia installed (>=1.6).
+2. Clone the GIRFReco.jl project from Github to a local directory by `git clone git@github:BRAIN-TO/GIRFReco.jl` or to copy it to the dev directory using the Quick Installation and the following command:
+```
+julia> ]dev GIRFReco
+```
+
 3. Download the demonstrating data from Zenodo (https://doi.org/10.5281/zenodo.6510020) and extract to your local folder. **Make sure you have both reading and writing privileges on the data folder.**
     * Note: The data downloading might take a few minutes. You can continue with step 5-10 in the meantime.
 4. Open a Julia REPL under the path of your local `GIRFReco.jl` folder. We recommend using Visual Studio Code with the Julia extension as development environment.
