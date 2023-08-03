@@ -20,7 +20,7 @@ julia>]add GIRFReco
 
 ## Development Installation
 
-1. To get started, make sure you have Julia installed (>=1.6).
+1. To get started, make sure you have Julia installed (>=1.9).
 2. Clone the GIRFReco.jl project from Github to a local directory by `git clone git@github:BRAIN-TO/GIRFReco.jl` or to copy it to the dev directory using the Quick Installation and the following command:
 ```
 julia> ]dev GIRFReco
