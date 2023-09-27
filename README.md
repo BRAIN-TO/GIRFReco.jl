@@ -27,7 +27,7 @@ julia> ]dev GIRFReco
 ```
 3. Download the demonstrating data from Zenodo (https://doi.org/10.5281/zenodo.6510020) and extract to your local folder. **Make sure you have both reading and writing privileges on the data folder.**
     * Note: The data downloading might take a few minutes. You can continue with step 5-10 in the meantime.
-4. Open a Julia REPL under the path of your local `GIRFReco.jl` folder. We recommend using Visual Studio Code with the Julia extension as development environment.
+4. Open a Julia REPL under the path of your local `GIRFReco.jl` folder. Our own development configuration is Visual Studio Code with the Julia extension. Other environments for Julia should work in a similar way with possible extra configurations.
 5. In the Julia REPL, type `]` to enter the package manager.
 6. In Julia package manager, Type `activate .` to activate a the Julia environment defined in `Project.toml` file in the `GIRFReco.jl` repo.
 7. Add the `MRIGradients.jl` package by `add MRIGradients`.
