@@ -10,7 +10,7 @@ This repository includes working [examples](./docs/lit/examples/) for spiral rec
 
 The data for the phantom reconstruction [`joss_demo.jl`](./docs/lit/examples/joss_demo.jl) is publicly available [here](https://www.doi.org/10.5281/zenodo.7779045). The path of the data, `paramsGeneral[:pathProject]`, needs to be modified accordingly in the [config file](./docs/lit/examples/ReconConfig_joss_demo.jl).
 
-For a full introduction, please refer to our [manuscript](./paper.md) for a full description of this package, including background, purpose, implementation, and the information of dependent packages.
+For a full introduction, please refer to our [manuscript](./paper/paper.md) for a full description of this package, including background, purpose, implementation, and the information of dependent packages.
 
 ## Quick Installation
 To install the package, use the following command:
