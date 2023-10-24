@@ -1,10 +1,10 @@
 #-----------------------------------------------------------------------------------
-# # [Figure 3 Generation](@id generate_fig_3)
+# # [Figure 2 Generation](@id generate_fig_2)
 #-----------------------------------------------------------------------------------
 
 #=
-This page provides the ability to generate figure 3 as a result of the reconstructions with successive corrections
-This page was generated from the following Julia file: [`generate_fig_3.jl`](@__REPO_ROOT_URL__/docs/lit/examples/generate_fig_3.jl)
+This page provides the ability to generate figure 2 as a result of the reconstructions with successive corrections
+This page was generated from the following Julia file: [`generate_fig_2.jl`](@__REPO_ROOT_URL__/docs/lit/examples/generate_fig_2.jl)
 =#
 
 #=
@@ -22,11 +22,8 @@ using NIfTI
 We need to provide a location for the NIfTI files with each successive correction. Start by making sure we have the same file structure as in recon
 
 =#
-# rootProjPath = "/home/kasperl/SPIDI" # Root path of the project needs to be defined
-rootProjPath = "/home/wuz/spiralDiffusion/data/demo_data"
-# rootProjPath = "/Users/ajaffray/Documents/PhD/Data/SPIDI/"
-rootProjPath = "/srv/data/ajaffray/TORONTO_COLLAB/data/SPIDI_0007/Phantom/"
-include("/srv/data/ajaffray/TORONTO_COLLAB/GIRFReco/docs/lit/examples/ReconConfig_joss_demo.jl")
+rootProjPath = "/Your/Project/Path/Here"
+include("Your/Project/Path/docs/lit/examples/ReconConfig_joss_demo.jl")
 
 #=
 
@@ -68,6 +65,4 @@ pc3 = heatmap(abs.((b0GirfK0Corr - b0GirfCorr)./maximum(b0GirfK0Corr)),color=:vi
 
 p_tot = plot(p1,p2,p3,p4,heatmap(ones(200,200);xgrid=false,ygrid=false,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,color=:grays),pc1,pc2,pc3;layout=(2,4),aspectratio=1,top_margin=0mm,bottom_margin=0mm)
 
-savefig(p_tot,"./paper/figure2_take2_Sing.pdf")
-
-# TODO keep working on the plots to generate something useable for the figure 3
+savefig(p_tot,"./paper/fig2.pdf")
