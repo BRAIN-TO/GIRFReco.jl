@@ -31,20 +31,20 @@ Pkg.add("GIRFReco")
 ```
 julia> ]dev GIRFReco
 ```
-3. Download the demonstrating data from Zenodo (https://doi.org/10.5281/zenodo.6510020) and extract to your local folder. **Make sure you have both reading and writing privileges on the data folder.**
-    * Note: The data downloading might take a few minutes. You can continue with step 5-10 in the meantime.
-4. Open a Julia REPL under the path of your local `GIRFReco.jl` folder. Our own development configuration is Visual Studio Code with the Julia extension. Other environments for Julia should work in a similar way with possible extra configurations.
-5. In the Julia REPL, type `]` to enter the package manager.
-6. In Julia package manager, Type `activate .` to activate a the Julia environment defined in `Project.toml` file in the `GIRFReco.jl` repo.
-7. Add the `MRIGradients.jl` package by `add MRIGradients`.
-8. Install all additional dependent packages:
+3. Open a Julia REPL under the path of your local `GIRFReco.jl` folder. Our own development configuration is Visual Studio Code with the Julia extension. Other environments for Julia should work in a similar way with possible extra configurations.
+4. In the Julia REPL, type `]` to enter the package manager.
+5. In Julia package manager, Type `activate .` to activate a the Julia environment defined in `Project.toml` file in the `GIRFReco.jl` repo.
+6. Add the `MRIGradients.jl` package by `add MRIGradients`.
+7. Install all additional dependent packages:
     * `add MRIReco`
     * `add MRIFiles`
     * `add MRIBase`
     * `add ImageUtils`
     * `add MRICoilSensitivities`
     * `add FileIO`
-9. Use command `instantiate` in Julia package manager to install all of the dependencies. This may be all you need to do (i.e you might be able to skip steps 7,8). 
+8. Use command `instantiate` in Julia package manager to install all of the dependencies. This may be all you need to do (i.e you might be able to skip steps 7,8). 
+9. Download the demonstrating data from Zenodo (https://doi.org/10.5281/zenodo.6510020) and extract to your local folder. **Make sure you have both reading and writing privileges on the data folder.**
+    * Note: The data downloading might take a few minutes.
 10. Open the demo script `joss_demo.jl` under the folder `docs/lit/examples/`, make sure to set `rootProjPath` as the folder that stores demo data, then run it in Julia REPL.
 
 ## Example Results
