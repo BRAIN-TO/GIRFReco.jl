@@ -450,6 +450,8 @@ function preprocessCartesianData(r::RawAcquisitionData, doSave; fname = "data/te
             e_sz = raw.params["encodedSize"]
             raw.params["encodedSize"] = [e_sz[1], e_sz[2], 1]
         end
+
+        raw.params["TE"] = r.params["TE"]
         
         # raw.params = headerCopy
         fout = ISMRMRDFile(fname)

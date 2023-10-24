@@ -7,10 +7,6 @@ include("../utils/fieldMapEstimator.jl")
 
 ## Load data files
 
-# Echo times for field map raw data, in ms
-TE1 = paramsGeneral[:mapTEs_ms][1]
-TE2 = paramsGeneral[:mapTEs_ms][2]
-
 @info "Loading Data Files"
 
 b0FileName = paramsGeneral[:fullPathMapScan];
@@ -45,6 +41,10 @@ acqDataCartesian= AcquisitionData(rawDataNew, estimateProfileCenter=true)
 nCoils = size(acqDataCartesian.kdata[1],2)
 nSlices = numSlices(acqDataCartesian)
 
+# Define TEs 
+# Echo times for field map raw data, in ms
+TE1 = rawDataNew.params["TE"][1]
+TE2 = rawDataNew.params["TE"][2]
 
 sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
 # shift FOV to middle :) 
