@@ -40,7 +40,6 @@ Please download, extract and set the rootProjPath as the top level folder (shoul
 =#
 
 rootProjPath = "Your/Extracted/Data/Folder" # Root path of the data extracted from Zenodo
-
 include("ReconConfig_joss_demo.jl")
 
 
@@ -91,16 +90,16 @@ This is controlled by `doLoadMaps` in general parameters.
 if paramsGeneral[:doLoadMaps] && isfile(paramsGeneral[:fullPathSaveB0])
     @info "Loading SENSE and B0 maps from $(paramsGeneral[:fullPathSaveSense]) and $(paramsGeneral[:fullPathSaveB0])"
     b0Maps = loadMap(paramsGeneral[:fullPathSaveB0])
-    
-    nSlices = size(b0Maps, 3);
+
+    nSlices = size(b0Maps, 3)
     sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
 
-    b0Maps = b0Maps[:,:,invperm(sliceIndexArray)]
-    senseCartesian = loadMap(paramsGeneral[:fullPathSaveSense]; doSplitPhase = true)[:,:,invperm(sliceIndexArray),:]
+    b0Maps = b0Maps[:, :, invperm(sliceIndexArray)]
+    senseCartesian = loadMap(paramsGeneral[:fullPathSaveSense]; doSplitPhase = true)[:, :, invperm(sliceIndexArray), :]
 else
     @info "Running CartesianRecon to retrieve maps (senseCartesian and b0Maps)"
     include("../../../recon/CartesianRecon.jl")
-    nSlices = size(b0Maps, 3);
+    nSlices = size(b0Maps, 3)
 end
 
 #=
@@ -145,7 +144,7 @@ Slice 1, Slice 2 ... Slice N   Slice 1, Slice 2 ... Slice N     Slice 1, Slice 2
 Here we chose the set corresponding to the b-value = 0 images under the first average as the example.
 There is a constant shift due to pre-scan data that we want to skip, which is why the data starts from `nSlices*2`.
 =#
-excitationList = collect(nSlices*2 + 2 : 2 : nSlices*4) .+ diffusionDirection * nSlices * 2 .+ (idxAverage - 1) * nSlices * (nTotalDiffDir + 1) * 2
+excitationList = collect(nSlices*2+2:2:nSlices*4) .+ diffusionDirection * nSlices * 2 .+ (idxAverage - 1) * nSlices * (nTotalDiffDir + 1) * 2
 sliceSelection = excitationList[selectedSlice]
 
 #=
@@ -212,7 +211,7 @@ gAk1 = GirfApplier(gK1, paramsGeneral[:gamma])
 gK0 = readGIRFFile(paramsGeneral[:fullPathGIRF][1], paramsGeneral[:fullPathGIRF][2], paramsGeneral[:fullPathGIRF][3], "b0ec_FT", true)
 gAk0 = GirfApplier(gK0, paramsGeneral[:gamma])
 
-if paramsGeneral[:doCorrectWithGIRFkxyz] 
+if paramsGeneral[:doCorrectWithGIRFkxyz]
     @info "Correcting For GIRF"
     applyGIRF!(acqDataImaging, gAk1)
 end
@@ -232,7 +231,7 @@ If the scanned object is not in the center of the FOV, we need to shift FOV
 to place the object in the center. This is achieved through adding linear phases 
 on all dimensions.
 =#
-shiftksp!(acqDataImaging,paramsGeneral[:fovShift])
+shiftksp!(acqDataImaging, paramsGeneral[:fovShift])
 
 #=
 #### 3.2.5 Processing Coil Sensitivity Maps
@@ -241,19 +240,19 @@ We need to preprocess the coil sensitivity maps before reconstruction.
 This includes resizing the coil maps to the size of output encoding matrix size; 
 compress the channels according to user's setting to achieve a faster reconstruction.
 =#
-low_freq_mask = hanning((30,30),padding=170,zerophase=true)
+low_freq_mask = hanning((30, 30), padding = 170, zerophase = true)
 
-sensitivity = mapslices(x ->imresize(x, paramsSpiral[:reconSize][1],paramsSpiral[:reconSize][2]), senseCartesian, dims=[1,2])
+sensitivity = mapslices(x -> imresize(x, paramsSpiral[:reconSize][1], paramsSpiral[:reconSize][2]), senseCartesian, dims = [1, 2])
 
 #Optional: Plot the sensitivity maps of each coil on a given slice.
 if paramsGeneral[:doPlotRecon]
     plotlyjs()
-    plotSenseMaps(sensitivity,size(sensitivity, 4),sliceIndex = 2)
+    plotSenseMaps(sensitivity, size(sensitivity, 4), sliceIndex = 2)
 end
 
 #Do coil compression to make recon faster
 if paramsGeneral[:doCoilCompression]
-    acqDataImaging, sensitivity = geometricCC_2d(acqDataImaging,sensitivity, paramsGeneral[:nVirtualCoils])
+    acqDataImaging, sensitivity = geometricCC_2d(acqDataImaging, sensitivity, paramsGeneral[:nVirtualCoils])
 end
 
 #=
@@ -261,7 +260,7 @@ end
 
 We need to resize the B0 maps to the size of output encoding matrix size.
 =#
-resizedB0 = mapslices(x->imresize(x,paramsSpiral[:reconSize][1],paramsSpiral[:reconSize][2]), b0Maps, dims=[1,2])
+resizedB0 = mapslices(x -> imresize(x, paramsSpiral[:reconSize][1], paramsSpiral[:reconSize][2]), b0Maps, dims = [1, 2])
 
 #=
 #### 3.2.7 Alignment of Off-Resonance, Sensitivity, and Spiral Data
@@ -292,11 +291,11 @@ paramsRecon[:regularization] = "L2"
 paramsRecon[:λ] = 1e-3
 paramsRecon[:iterations] = paramsGeneral[:nReconIterations]
 paramsRecon[:solver] = "cgnr"
-paramsRecon[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
-paramsRecon[:senseMaps] = ComplexF32.(sensitivity[:,:,selectedSlice,:])
+paramsRecon[:solverInfo] = SolverInfo(ComplexF32, store_solutions = false)
+paramsRecon[:senseMaps] = ComplexF32.(sensitivity[:, :, selectedSlice, :])
 
 if paramsGeneral[:doCorrectWithB0map]
-    paramsRecon[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
+    paramsRecon[:correctionMap] = ComplexF32.(-1im .* resizedB0[:, :, selectedSlice])
 end
 
 #= 
@@ -317,19 +316,32 @@ the file [Utils.jl](@__REPO_ROOT_URL__/utils/Utils.jl).
 
 =#
 if paramsGeneral[:doSaveRecon] #TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
-    resolution_tmp = fieldOfView(acqDataImaging)[1:2]./encodingSize(acqDataImaging)
-    resolution_mm = (resolution_tmp[1],resolution_tmp[2],fieldOfView(acqDataImaging)[3] *(1 + paramsGeneral[:sliceDistanceFactor_percent]/100.0)) #for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
+    resolution_tmp = fieldOfView(acqDataImaging)[1:2] ./ encodingSize(acqDataImaging)
+    resolution_mm = (resolution_tmp[1], resolution_tmp[2], fieldOfView(acqDataImaging)[3] * (1 + paramsGeneral[:sliceDistanceFactor_percent] / 100.0)) #for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
 
     #TODO: use slice ordering from cartesian scan directly!
     nSlices = numSlices(acqDataImaging)
     sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
-    saveMap(paramsGeneral[:fullPathSaveRecon], paramsGeneral[:scalingFactorSaveRecon]*reco.data[:,:,sliceIndexArray], resolution_mm; doSplitPhase=true, doNormalize = paramsGeneral[:doNormalizeRecon])
+    saveMap(
+        paramsGeneral[:fullPathSaveRecon],
+        paramsGeneral[:scalingFactorSaveRecon] * reco.data[:, :, sliceIndexArray],
+        resolution_mm;
+        doSplitPhase = true,
+        doNormalize = paramsGeneral[:doNormalizeRecon],
+    )
 end
 
 if paramsGeneral[:doPlotRecon]
     @info "Plotting Reconstruction"
     plotlyjs()
-    plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice], figHandles=["Original Magnitude", "Original Phase", "B0"], isSliceInterleaved=false, rotateAngle=90)
+    plotReconstruction(
+        reco,
+        1:length(selectedSlice),
+        resizedB0[:, :, selectedSlice],
+        figHandles = ["Original Magnitude", "Original Phase", "B0"],
+        isSliceInterleaved = false,
+        rotateAngle = 90,
+    )
 end
 
 @info "Successfully Completed SpiralRecon"

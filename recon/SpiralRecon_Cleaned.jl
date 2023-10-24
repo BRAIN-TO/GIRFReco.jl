@@ -14,7 +14,7 @@ include("../recon/CartesianRecon.jl")
 ## Set figures to be unlocked from the window (i.e use matplotlib backend with controls)
 
 ## Choose Slice (can be [single number] OR [1,2,3,4,5,6,7,8,9]
-sliceChoice = [1,2,3,4,5,6,7,8,9] # UNCOMMENT FOR MULTISLICE
+sliceChoice = [1, 2, 3, 4, 5, 6, 7, 8, 9] # UNCOMMENT FOR MULTISLICE
 # sliceChoice = [7] # UNCOMMENT FOR SINGLESLICE (SLICES 3, 7 and 8 are good examples)
 diffusionDirection = 0 # CAN BE FROM 0 (b=0) to 6 (1-6 are 6 directions of b=1000)
 
@@ -42,14 +42,14 @@ sliceSelection = excitationList[selectedSlice]
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] = (200,200)
+adjustmentDict[:reconSize] = (200, 200)
 adjustmentDict[:interleave] = 1
 adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 40
 adjustmentDict[:numSamples] = 15475
 adjustmentDict[:delay] = 0.00000 # naive delay correction
 
-adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_96_2.h5","data/Spirals/523_98_2.h5", "data/Spirals/523_100_2.h5", "data/Spirals/523_102_2.h5"]
+adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_96_2.h5", "data/Spirals/523_98_2.h5", "data/Spirals/523_100_2.h5", "data/Spirals/523_102_2.h5"]
 adjustmentDict[:trajFilename] = "data/Gradients/gradients523.txt"
 adjustmentDict[:excitations] = sliceSelection
 
@@ -69,14 +69,14 @@ acqDataImaging = mergeRawInterleaves(adjustmentDict)
 
 @info "Loading Gradient Impulse Response Functions \n"
 ## Load GIRFs!
-gK1 = loadGirf(1,1)
+gK1 = loadGirf(1, 1)
 gAk1 = GirfApplier(gK1, 42577478)
 
 @info "Correcting For GIRF \n"
 applyGIRF!(acqDataImaging, gAk1)
 
 # Load K₀ GIRF
-gK0 = loadGirf(0,1)
+gK0 = loadGirf(0, 1)
 gAk0 = GirfApplier(gK0, 42577478)
 
 @info "Correcting For k₀ \n"
@@ -87,26 +87,34 @@ checkAcquisitionNodes!(acqDataImaging)
 
 doCoilCompression = false
 
-nvcoils = size(sensitivity,4)
+nvcoils = size(sensitivity, 4)
 
 ## Do coil compression to make recon faster
 if doCoilCompression
     nvcoils = 8
-    acqDataImaging, senseCartesian = geometricCC_2d(acqDataImaging,senseCartesian,nvcoils)
+    acqDataImaging, senseCartesian = geometricCC_2d(acqDataImaging, senseCartesian, nvcoils)
 end
 
 ## Sense Map loading
 @info "Recalculating Sense Maps \n"
-senseCartesian = espirit(acqDataCartesian,(4,4),12,(acqDataImaging.encodingSize[1],acqDataImaging.encodingSize[2]),eigThresh_1=0.01, eigThresh_2=0.98, match_acq_size = false)
-sensitivity = mapslices(rotl90,senseCartesian,dims=[1,2])
+senseCartesian = espirit(
+    acqDataCartesian,
+    (4, 4),
+    12,
+    (acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2]),
+    eigThresh_1 = 0.01,
+    eigThresh_2 = 0.98,
+    match_acq_size = false,
+)
+sensitivity = mapslices(rotl90, senseCartesian, dims = [1, 2])
 
 # ## Plot the sensitivity maps of each coil
 @info "Plotting SENSE Maps \n"
-plotSenseMaps(sensitivity,nvcoils,sliceIndex=6)
+plotSenseMaps(sensitivity, nvcoils, sliceIndex = 6)
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Validating B0 Maps \n"
-resizedB0 = mapslices(x->imresize(x,(acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0Maps, dims=[1,2])
+resizedB0 = mapslices(x -> imresize(x, (acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0Maps, dims = [1, 2])
 
 ## Define Parameter Dictionary for use with reconstruction
 # CAST TO ComplexF32 if you're using current MRIReco.jl
@@ -119,17 +127,17 @@ params[:regularization] = "L2"
 params[:λ] = 1e-2 # CHANGE THIS TO GET BETTER OR WORSE RECONSTRUCTION RESULTS
 params[:iterations] = 20
 params[:solver] = "cgnr"
-params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
-params[:senseMaps] = ComplexF32.(sensitivity[:,:,selectedSlice,:])
-params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
+params[:solverInfo] = SolverInfo(ComplexF32, store_solutions = false)
+params[:senseMaps] = ComplexF32.(sensitivity[:, :, selectedSlice, :])
+params[:correctionMap] = ComplexF32.(-1im .* resizedB0[:, :, selectedSlice])
 
 ## Call to reconstruction
 @info "Performing Reconstruction \n"
-@time reco = reconstruction(acqDataImaging,params)
+@time reco = reconstruction(acqDataImaging, params)
 
 #totalRecon = sum(abs2,reco.data,dims=5)
 @info "Plotting Reconstruction \n"
-plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:,:,selectedSlice])
+plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice])
 
 ## Plot the image edges (feature comparison)
 

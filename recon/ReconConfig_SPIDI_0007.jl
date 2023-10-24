@@ -31,7 +31,7 @@ paramsGeneral[:sliceDistanceFactor_percent] = 400 # 000
 #Total number of ADC points BEFORE the rewinder at the end of the spiral readout. For gradient 508, use 15655 (out of 16084); for gradient 511, use 15445 (out of 15624).
 paramsGeneral[:numADCSamples] = 15655 # 15504
 # Matrix size of the reconstructed image. For gradient 508 with all 4 interleaves, use 200 for high resolution image; otherwise consider using 112 or 84 for a lower resolution. The FOV is 220 mm for both gradients 508 and 511.
-paramsGeneral[:reconSize] = [200, 200,1] #(112, 112) #(200, 200)
+paramsGeneral[:reconSize] = [200, 200, 1] #(112, 112) #(200, 200)
 paramsGeneral[:nReconIterations] = 20; # number of recon iterations (for both Cartesian and Spiral recon)
 paramsGeneral[:b0mapSmoothBeta] = 0.1 # for estimateB0Maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
 paramsGeneral[:doNormalizeRecon] = false # set max abs to 1
@@ -73,13 +73,13 @@ paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", p
 
 # Map scan file (Cartesian multi-echo file)
 paramsGeneral[:fileNameMapScan] = "field_map_132_2.h5"
-paramsGeneral[:mapTEs_ms] = [4.92,  7.38]
+paramsGeneral[:mapTEs_ms] = [4.92, 7.38]
 
 paramsGeneral[:fileNameGIRF] = ["2021Nov_PosNeg_Gx.mat", "2021Nov_PosNeg_Gy.mat", "2021Nov_PosNeg_Gz.mat"]
 
- # File name for the spiral gradient
- # multi-il (high-res 1.1mm) gradient file 508, single interleaf (low-res 2.6mm) gradient file 511
- paramsGeneral[:fileNameGradient] = joinpath("508", "gradients.txt")
+# File name for the spiral gradient
+# multi-il (high-res 1.1mm) gradient file 508, single interleaf (low-res 2.6mm) gradient file 511
+paramsGeneral[:fileNameGradient] = joinpath("508", "gradients.txt")
 
 # non-Cartesian (Spiral) scan file: MDDW 6
 # paramsGeneral[:fileNameScan]=["meas_MID00083_FID14976_diffSpiral_508_Intl0_b2k_4Avg.mrd"]
@@ -87,23 +87,23 @@ paramsGeneral[:fileNameGIRF] = ["2021Nov_PosNeg_Gx.mat", "2021Nov_PosNeg_Gy.mat"
 
 #  non-Cartesian (Spiral) scan file: MDDW30
 # For single interleave data, use this section
-    # startIndexIntlv = 1 # Should always be 1 for single-interleave data.
-    # fname_spiralIntlv = "511_134_2.h5" # Gradient 511, b = 300, 10 diff directions
-    # fname_spiralIntlv = "511_136_2.h5" # Gradient 511, b = 700, 30 diff directions
-    # fname_spiralIntlv = "511_138_2.h5" # Gradient 511, b = 2500, 64 diff directions
-    # fname_spiralIntlv = "508_140_2.h5" # Gradient 508, interleave 0, b = 300, 10 diff directions
-    # fname_spiralIntlv = "508_142_2.h5" # Gradient 508, interleave 0, b = 700, 30 diff directions
-    # fname_spiralIntlv = "508_144_2.h5" # Gradient 508, interleave 0, b = 2500, 64 diff directions
+# startIndexIntlv = 1 # Should always be 1 for single-interleave data.
+# fname_spiralIntlv = "511_134_2.h5" # Gradient 511, b = 300, 10 diff directions
+# fname_spiralIntlv = "511_136_2.h5" # Gradient 511, b = 700, 30 diff directions
+# fname_spiralIntlv = "511_138_2.h5" # Gradient 511, b = 2500, 64 diff directions
+# fname_spiralIntlv = "508_140_2.h5" # Gradient 508, interleave 0, b = 300, 10 diff directions
+# fname_spiralIntlv = "508_142_2.h5" # Gradient 508, interleave 0, b = 700, 30 diff directions
+# fname_spiralIntlv = "508_144_2.h5" # Gradient 508, interleave 0, b = 2500, 64 diff directions
 
 # Multi-interleave data, needs all 4 file names, but will only read the corresponding one.
-    #fname_spiralIntlv0 = "508_124_2.h5" # Gradient 508, interleave 0, b = 2000, 6 diff directions, 4 averages
-    #fname_spiralIntlv1 = "508_126_2.h5" # Gradient 508, interleave 1, b = 2000, 6 diff directions, 4 averages
-    #fname_spiralIntlv2 = "508_128_2.h5" # Gradient 508, interleave 2, b = 2000, 6 diff directions, 4 averages
-    #fname_spiralIntlv3 = "508_130_2.h5" # Gradient 508, interleave 3, b = 2000, 6 diff directions, 4 averages
+#fname_spiralIntlv0 = "508_124_2.h5" # Gradient 508, interleave 0, b = 2000, 6 diff directions, 4 averages
+#fname_spiralIntlv1 = "508_126_2.h5" # Gradient 508, interleave 1, b = 2000, 6 diff directions, 4 averages
+#fname_spiralIntlv2 = "508_128_2.h5" # Gradient 508, interleave 2, b = 2000, 6 diff directions, 4 averages
+#fname_spiralIntlv3 = "508_130_2.h5" # Gradient 508, interleave 3, b = 2000, 6 diff directions, 4 averages
 # paramsGeneral[:fileNameScan]=["508_124_2.h5", "508_126_2.h5", "508_128_2.h5", "508_130_2.h5"]
 # paramsGeneral[:nDiffusionDirections] = 6
 # SPIDI_0007 MDDW 6
-paramsGeneral[:fileNameScan]=["508_124_2.h5"]
+paramsGeneral[:fileNameScan] = ["508_124_2.h5"]
 paramsGeneral[:nDiffusionDirections] = 6
 
 # NODDI
@@ -142,16 +142,21 @@ paramsGeneral[:fileNameSaveB0] = splitext(paramsGeneral[:fileNameMapScan])[1] * 
 
 if isa(paramsGeneral[:fileNameScan], AbstractVector)
     # for multiple files, concatenate recon name from scan file names, e.g., 508_124_2_508_126_2_508_128_2_508_130_2_recon.nii
-    paramsGeneral[:fileNameSaveRecon] = join([(x[1] * "_") for x in splitext.(paramsGeneral[:fileNameScan])]) * "dif$(selector[:dif])_" * "itl$(selector[:seg])_" * "avg$(selector[:avg])_" * "recon.nii"
+    paramsGeneral[:fileNameSaveRecon] =
+        join([(x[1] * "_") for x in splitext.(paramsGeneral[:fileNameScan])]) *
+        "dif$(selector[:dif])_" *
+        "itl$(selector[:seg])_" *
+        "avg$(selector[:avg])_" *
+        "recon.nii"
 else
     # otherwise, just concat _recon.nii to file name
     paramsGeneral[:fileNameSaveRecon] = splitext(paramsGeneral[:fileNameScan])[1] * "_recon.nii"
 end
 
-paramsGeneral[:fullPathSaveRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveRecon] )
-paramsGeneral[:fullPathSaveMapRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveMapRecon] )
-paramsGeneral[:fullPathSaveSense] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveSense] )
-paramsGeneral[:fullPathSaveB0] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveB0] )
+paramsGeneral[:fullPathSaveRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveRecon])
+paramsGeneral[:fullPathSaveMapRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveMapRecon])
+paramsGeneral[:fullPathSaveSense] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveSense])
+paramsGeneral[:fullPathSaveB0] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveB0])
 
 if ~ispath(paramsGeneral[:pathSaveRecon])
     mkpath(paramsGeneral[:pathSaveRecon])

@@ -43,14 +43,14 @@ sliceSelection = excitationList[selectedSlice]
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] = (200,200)
+adjustmentDict[:reconSize] = (200, 200)
 adjustmentDict[:interleave] = 1
 adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 20
 adjustmentDict[:numSamples] = 15475
 adjustmentDict[:delay] = 0.00000 # naive delay correction
 
-adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_96_2.h5","data/Spirals/523_98_2.h5", "data/Spirals/523_100_2.h5", "data/Spirals/523_102_2.h5"]
+adjustmentDict[:interleaveDataFileNames] = ["data/Spirals/523_96_2.h5", "data/Spirals/523_98_2.h5", "data/Spirals/523_100_2.h5", "data/Spirals/523_102_2.h5"]
 adjustmentDict[:trajFilename] = "data/Gradients/gradients523.txt"
 adjustmentDict[:excitations] = sliceSelection
 
@@ -70,7 +70,7 @@ acqDataImaging = mergeRawInterleaves(adjustmentDict)
 
 @info "Loading Gradient Impulse Response Functions \n"
 ## Load GIRFs!
-gK1 = loadGirf(1,1)
+gK1 = loadGirf(1, 1)
 gAk1 = GirfApplier(gK1, 42577478)
 
 @info "Correcting For GIRF \n"
@@ -90,16 +90,16 @@ checkAcquisitionNodes!(acqDataImaging)
 @info "Validating Sense Maps \n"
 
 # Resize sense maps to match encoding size of data matrix
-sensitivity = mapslices(x ->imresize(x, (acqDataImaging.encodingSize[1],acqDataImaging.encodingSize[2])), senseCartesian, dims=[1,2])
-sensitivity = mapslices(rotl90,sensitivity,dims=[1,2])
+sensitivity = mapslices(x -> imresize(x, (acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), senseCartesian, dims = [1, 2])
+sensitivity = mapslices(rotl90, sensitivity, dims = [1, 2])
 
 # ## Plot the sensitivity maps of each coil
 @info "Plotting SENSE Maps \n"
-plotSenseMaps(sensitivity,adjustmentDict[:coils])
+plotSenseMaps(sensitivity, adjustmentDict[:coils])
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Validating B0 Maps \n"
-resizedB0 = mapslices(x->imresize(x,(acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0Maps, dims=[1,2])
+resizedB0 = mapslices(x -> imresize(x, (acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0Maps, dims = [1, 2])
 
 ## Define Parameter Dictionary for use with reconstruction
 # CAST TO ComplexF32 if you're using current MRIReco.jl
@@ -110,9 +110,9 @@ params[:reco] = "multiCoil"
 params[:reconSize] = adjustmentDict[:reconSize]
 params[:λ] = 0.01 # CHANGE THIS TO GET BETTER OR WORSE RECONSTRUCTION RESULTS
 params[:solver] = "fista"
-params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
-params[:senseMaps] = ComplexF32.(sensitivity[:,:,selectedSlice,:])
-params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
+params[:solverInfo] = SolverInfo(ComplexF32, store_solutions = false)
+params[:senseMaps] = ComplexF32.(sensitivity[:, :, selectedSlice, :])
+params[:correctionMap] = ComplexF32.(-1im .* resizedB0[:, :, selectedSlice])
 
 
 # CS reconstruction using Wavelets
@@ -135,10 +135,10 @@ params[:sparseTrafo] = "Wavelet"
 
 ## Call to reconstruction
 @info "Performing Reconstruction \n"
-@time reco = reconstruction(acqDataImaging,params)
+@time reco = reconstruction(acqDataImaging, params)
 
 #totalRecon = sum(abs2,reco.data,dims=5)
-plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:,:,selectedSlice])
+plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice])
 
 ## Plot the image edges (feature comparison)
 

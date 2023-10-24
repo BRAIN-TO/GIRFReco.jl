@@ -7,9 +7,9 @@ global selector = Dict{Symbol,Any}()
 global isCalledFromReconLoopGlobal::Bool = true
 for avg = 1:4 #1:4
     for dif = 0:30 #1:10 # 0:30 # 0:6 # 0 is b=0 image
-        selector[:avg] = avg;
-        selector[:seg] = 1;
-        selector[:dif] = dif;
+        selector[:avg] = avg
+        selector[:seg] = 1
+        selector[:dif] = dif
         @info "\n\n\n\tReconstructing avg=$(selector[:avg]), seg=$(selector[:seg]), dif=$(selector[:dif])\n\n"
         include("SpiralRecon_SingleIntlv.jl")
     end

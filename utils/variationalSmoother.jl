@@ -8,9 +8,9 @@ Calculates the cost between an estimated sensitivity map and the unsmoothed map
 * `y::Matrix{Complex{T}}` - unsmoothed map
 * `β` - Regularization parameter controlling roughness penalty
 """
-function cost_smooth(x::Matrix{T},y::Matrix{T}, β) where T
+function cost_smooth(x::Matrix{T}, y::Matrix{T}, β) where {T}
 
-    (0.5 .* sum(abs2, x - y, dims=[1,2]) .+ β*R(x))[1]
+    (0.5 .* sum(abs2, x - y, dims = [1, 2]).+β*R(x))[1]
 
 end
 
@@ -20,9 +20,9 @@ Regularization function which penalizes roughness
 # Arguments
 * `x::Matrix{Complex{T}}` - fieldmap estimate (in radians)
 """
-function R(x::Matrix{T}) where T
+function R(x::Matrix{T}) where {T}
 
-    0.5 * sum(abs2,diff(x,dims=1),dims=[1,2]) + 0.5 * sum(abs2,diff(x,dims=2),dims=[1,2])
+    0.5 * sum(abs2, diff(x, dims = 1), dims = [1, 2]) + 0.5 * sum(abs2, diff(x, dims = 2), dims = [1, 2])
 
 end
 
@@ -37,7 +37,7 @@ Estimates smooth sensitivity maps using gradient descent and a roughness penalty
 * `β` - Regularization parameter controlling roughness penalty
 * `reltol` - early stopping criteria (exit if subsequent cost function change < reltol)
 """
-function sens_smooth(x_c::AbstractMatrix{Complex{T}},y_c::AbstractMatrix{Complex{T}},β = 1e-1, reltol = 5e-5) where T
+function sens_smooth(x_c::AbstractMatrix{Complex{T}}, y_c::AbstractMatrix{Complex{T}}, β = 1e-1, reltol = 5e-5) where {T}
 
     c_r = 0
     c_i = 0
@@ -52,33 +52,33 @@ function sens_smooth(x_c::AbstractMatrix{Complex{T}},y_c::AbstractMatrix{Complex
     while Δ > reltol && itcount < 1000
 
         gs_r = gradient(Flux.params(x_r)) do
-            c_r = cost_smooth(x_r, y_r,β) 
+            c_r = cost_smooth(x_r, y_r, β)
         end
 
         gs_i = gradient(Flux.params(x_i)) do
-            c_i = cost_smooth(x_i, y_i,β)
+            c_i = cost_smooth(x_i, y_i, β)
         end
 
         x̄_r = gs_r[x_r]
-        x_r .-=  0.01 .* x̄_r 
+        x_r .-= 0.01 .* x̄_r
 
         x̄_i = gs_i[x_i]
-        x_i .-=  0.01 .* x̄_i 
+        x_i .-= 0.01 .* x̄_i
 
-        Δ_r = abs.(cost_smooth(x_r,y_r,β) - c_r)/(c_r + eps())
-        Δ_i = abs.(cost_smooth(x_i,y_i,β) - c_i)/(c_i + eps())
+        Δ_r = abs.(cost_smooth(x_r, y_r, β) - c_r) / (c_r + eps())
+        Δ_i = abs.(cost_smooth(x_i, y_i, β) - c_i) / (c_i + eps())
 
         Δ = sqrt.(abs2.(Δ_r) + abs2.(Δ_i))
 
         @info Δ
 
-        itcount +=1
+        itcount += 1
 
     end
 
     print("Required $itcount iterations to converge below tolerance $reltol ")
 
-    return complex.(x_r,x_i)
+    return complex.(x_r, x_i)
 
 end
 
@@ -94,15 +94,15 @@ Processes 3D volume data as output from MRIReco.reconstruction to estimate field
 """
 function smooth_sensitivity_maps(smaps; β = 5e-4, reltol = 0.001)
 
-    nx,ny,slices,coils = size(smaps)
+    nx, ny, slices, coils = size(smaps)
     smaps_ref = smaps
-    smaps_out = Complex.(zeros(nx,ny,slices,coils))
+    smaps_out = Complex.(zeros(nx, ny, slices, coils))
 
-    for coil in 1:coils
-        @sync for slice in 1:slices
+    for coil = 1:coils
+        @sync for slice = 1:slices
             Threads.@spawn begin
-                smaps_out[:,:,slice,coil] = sens_smooth(smaps[:,:,slice,coil],smaps_ref[:,:,slice,coil],β,reltol)
-                println("for slice $slice") 
+                smaps_out[:, :, slice, coil] = sens_smooth(smaps[:, :, slice, coil], smaps_ref[:, :, slice, coil], β, reltol)
+                println("for slice $slice")
             end
         end
         println("for coil $coil")
@@ -119,7 +119,7 @@ function process_sens_maps(smap)
     psize = 4
     thres = 0.005
 
-    mask = collect(padarray(abs.(smap) .> thres, Fill(0, (psize,psize))))
+    mask = collect(padarray(abs.(smap) .> thres, Fill(0, (psize, psize))))
 
     for i = 1:8
 
@@ -127,11 +127,11 @@ function process_sens_maps(smap)
 
     end
 
-    mask = mask[(psize+1):(psize+d[1]),(psize+1):(psize+d[2])]
+    mask = mask[(psize+1):(psize+d[1]), (psize+1):(psize+d[2])]
 
     mask = get_conv_hull_mask(mask)
 
-    return 1im .* (mask) .* abs.(smap) .* exp.(1im .* angle.(smap)).^mask
+    return 1im .* (mask) .* abs.(smap) .* exp.(1im .* angle.(smap)) .^ mask
 
 end
 
@@ -139,21 +139,21 @@ function get_conv_hull_mask(mask)
 
     cord = convexhull(mask)
     nedge = length(cord)
-    edges = hcat(1:nedge,2:(nedge+1))
+    edges = hcat(1:nedge, 2:(nedge+1))
     edges[end] = 1
     tol = 1e-1
 
-    stat = inpoly2(vec(CartesianIndices((1:size(mask,1),1:size(mask,2)))),cord,edges,atol=tol)
+    stat = inpoly2(vec(CartesianIndices((1:size(mask, 1), 1:size(mask, 2)))), cord, edges, atol = tol)
 
-    return reshape(stat[:,1],size(mask))
+    return reshape(stat[:, 1], size(mask))
 
 end
 
 function standardize_sens_phase(sens)
 
-    for i = 1:size(sens,4)
+    for i = 1:size(sens, 4)
 
-        sens[:,:,:,i] = sens[:,:,:,i] .* exp.(-1im .*mean(angle.(sensitivity[:,:,:,i])))
+        sens[:, :, :, i] = sens[:, :, :, i] .* exp.(-1im .* mean(angle.(sensitivity[:, :, :, i])))
 
     end
 

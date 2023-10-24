@@ -31,10 +31,10 @@ include("Your/Project/Path/docs/lit/examples/ReconConfig_joss_demo.jl")
 
 =#
 
-tags = ["vNoCorr_Sing","vB0Corr_Sing","vB0_GIRF_Sing","vB0_GIRF_k0_Sing"]
-paths = joinpath.(paramsGeneral[:pathResults], "recon",tags)
+tags = ["vNoCorr_Sing", "vB0Corr_Sing", "vB0_GIRF_Sing", "vB0_GIRF_k0_Sing"]
+paths = joinpath.(paramsGeneral[:pathResults], "recon", tags)
 filename_magn = splitext(paramsGeneral[:fileNameSaveRecon])[1] * "_magn.nii"
-files = joinpath.(paths,filename_magn)
+files = joinpath.(paths, filename_magn)
 
 #=
 
@@ -42,10 +42,10 @@ files = joinpath.(paths,filename_magn)
 
 =#
 
-noCorr = niread(files[1]).raw[:,:,8,1,1,1]
-b0Corr = niread(files[2]).raw[:,:,8,1,1,1]
-b0GirfCorr = niread(files[3]).raw[:,:,8,1,1,1]
-b0GirfK0Corr = niread(files[4]).raw[:,:,8,1,1,1]
+noCorr = niread(files[1]).raw[:, :, 8, 1, 1, 1]
+b0Corr = niread(files[2]).raw[:, :, 8, 1, 1, 1]
+b0GirfCorr = niread(files[3]).raw[:, :, 8, 1, 1, 1]
+b0GirfK0Corr = niread(files[4]).raw[:, :, 8, 1, 1, 1]
 #=
 
 ## 5. Plot!
@@ -54,15 +54,123 @@ b0GirfK0Corr = niread(files[4]).raw[:,:,8,1,1,1]
 
 gr()
 
-p1 = heatmap(noCorr,color=:grays,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,title="No Correction",titlefontsize=10,top_margin=0mm)
-p2 = heatmap(b0Corr,color=:grays,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,title="B₀ Correction",titlefontsize=10,top_margin=0mm)
-p3 = heatmap(b0GirfCorr,color=:grays,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,title="B₀ + GIRF",titlefontsize=10,top_margin=0mm)
-p4 = heatmap(b0GirfK0Corr,color=:grays,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,title = "B₀ + GIRF + k₀",titlefontsize=10,top_margin=0mm)
+p1 = heatmap(
+    noCorr,
+    color = :grays,
+    aspectratio = 1,
+    xlims = (0, 200),
+    ylims = (0, 200),
+    xshowaxis = false,
+    yshowaxis = false,
+    colorbar = :none,
+    title = "No Correction",
+    titlefontsize = 10,
+    top_margin = 0mm,
+)
+p2 = heatmap(
+    b0Corr,
+    color = :grays,
+    aspectratio = 1,
+    xlims = (0, 200),
+    ylims = (0, 200),
+    xshowaxis = false,
+    yshowaxis = false,
+    colorbar = :none,
+    title = "B₀ Correction",
+    titlefontsize = 10,
+    top_margin = 0mm,
+)
+p3 = heatmap(
+    b0GirfCorr,
+    color = :grays,
+    aspectratio = 1,
+    xlims = (0, 200),
+    ylims = (0, 200),
+    xshowaxis = false,
+    yshowaxis = false,
+    colorbar = :none,
+    title = "B₀ + GIRF",
+    titlefontsize = 10,
+    top_margin = 0mm,
+)
+p4 = heatmap(
+    b0GirfK0Corr,
+    color = :grays,
+    aspectratio = 1,
+    xlims = (0, 200),
+    ylims = (0, 200),
+    xshowaxis = false,
+    yshowaxis = false,
+    colorbar = :none,
+    title = "B₀ + GIRF + k₀",
+    titlefontsize = 10,
+    top_margin = 0mm,
+)
 
-pc1 = heatmap(abs.((b0Corr - noCorr)./maximum(b0Corr)),color=:viridis,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,title = "Δ: +B₀",titlefontsize=10,top_margin=0mm)
-pc2 = heatmap(abs.((b0GirfCorr - b0Corr)./maximum(b0GirfCorr)),color=:viridis,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,title = "Δ: +GIRF",titlefontsize=10,top_margin=0mm)
-pc3 = heatmap(abs.((b0GirfK0Corr - b0GirfCorr)./maximum(b0GirfK0Corr)),color=:viridis,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,title = "Δ: +k₀",titlefontsize=10,top_margin=0mm)
+pc1 = heatmap(
+    abs.((b0Corr - noCorr) ./ maximum(b0Corr)),
+    color = :viridis,
+    aspectratio = 1,
+    xlims = (0, 200),
+    ylims = (0, 200),
+    xshowaxis = false,
+    yshowaxis = false,
+    colorbar = :none,
+    title = "Δ: +B₀",
+    titlefontsize = 10,
+    top_margin = 0mm,
+)
+pc2 = heatmap(
+    abs.((b0GirfCorr - b0Corr) ./ maximum(b0GirfCorr)),
+    color = :viridis,
+    aspectratio = 1,
+    xlims = (0, 200),
+    ylims = (0, 200),
+    xshowaxis = false,
+    yshowaxis = false,
+    colorbar = :none,
+    title = "Δ: +GIRF",
+    titlefontsize = 10,
+    top_margin = 0mm,
+)
+pc3 = heatmap(
+    abs.((b0GirfK0Corr - b0GirfCorr) ./ maximum(b0GirfK0Corr)),
+    color = :viridis,
+    aspectratio = 1,
+    xlims = (0, 200),
+    ylims = (0, 200),
+    xshowaxis = false,
+    yshowaxis = false,
+    colorbar = :none,
+    title = "Δ: +k₀",
+    titlefontsize = 10,
+    top_margin = 0mm,
+)
 
-p_tot = plot(p1,p2,p3,p4,heatmap(ones(200,200);xgrid=false,ygrid=false,aspectratio = 1,xlims=(0,200),ylims=(0,200),xshowaxis=false,yshowaxis=false,colorbar=:none,color=:grays),pc1,pc2,pc3;layout=(2,4),aspectratio=1,top_margin=0mm,bottom_margin=0mm)
+p_tot = plot(
+    p1,
+    p2,
+    p3,
+    p4,
+    heatmap(
+        ones(200, 200);
+        xgrid = false,
+        ygrid = false,
+        aspectratio = 1,
+        xlims = (0, 200),
+        ylims = (0, 200),
+        xshowaxis = false,
+        yshowaxis = false,
+        colorbar = :none,
+        color = :grays,
+    ),
+    pc1,
+    pc2,
+    pc3;
+    layout = (2, 4),
+    aspectratio = 1,
+    top_margin = 0mm,
+    bottom_margin = 0mm,
+)
 
-savefig(p_tot,"./paper/fig2.pdf")
+savefig(p_tot, "./paper/fig2.pdf")

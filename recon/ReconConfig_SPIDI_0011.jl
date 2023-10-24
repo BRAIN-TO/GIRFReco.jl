@@ -72,20 +72,20 @@ paramsGeneral[:pathSaveRecon] = joinpath(paramsGeneral[:pathResults], "recon", p
 
 # Map scan file (Cartesian multi-echo file)
 paramsGeneral[:fileNameMapScan] = "meas_MID00075_FID14968_GRE_FieldMap_DualEcho_2mm.mrd"
-paramsGeneral[:mapTEs_ms] = [4.92,  7.38]
+paramsGeneral[:mapTEs_ms] = [4.92, 7.38]
 
 paramsGeneral[:fileNameGIRF] = ["2021Nov_PosNeg_Gx.mat", "2021Nov_PosNeg_Gy.mat", "2021Nov_PosNeg_Gz.mat"]
 
- # File name for the spiral gradient
- # multi-il (high-res 1.1mm) gradient file 508, single interleaf (low-res 2.6mm) gradient file 511
- paramsGeneral[:fileNameGradient] = joinpath("508", "gradients.txt")
+# File name for the spiral gradient
+# multi-il (high-res 1.1mm) gradient file 508, single interleaf (low-res 2.6mm) gradient file 511
+paramsGeneral[:fileNameGradient] = joinpath("508", "gradients.txt")
 
 # non-Cartesian (Spiral) scan file: MDDW 6
 # paramsGeneral[:fileNameScan]=["meas_MID00083_FID14976_diffSpiral_508_Intl0_b2k_4Avg.mrd"]
 # paramsGeneral[:nDiffusionDirections] = 6
 
 #  non-Cartesian (Spiral) scan file: MDDW30
-paramsGeneral[:fileNameScan]=["meas_MID00085_FID14978_diffSpiral_508_Intl0_b1000_30d.mrd"]
+paramsGeneral[:fileNameScan] = ["meas_MID00085_FID14978_diffSpiral_508_Intl0_b1000_30d.mrd"]
 paramsGeneral[:nDiffusionDirections] = 30
 
 
@@ -115,16 +115,21 @@ paramsGeneral[:fileNameSaveB0] = splitext(paramsGeneral[:fileNameMapScan])[1] * 
 
 if isa(paramsGeneral[:fileNameScan], AbstractVector)
     # for multiple files, concatenate recon name from scan file names, e.g., 508_124_2_508_126_2_508_128_2_508_130_2_recon.nii
-    paramsGeneral[:fileNameSaveRecon] = join([(x[1] * "_") for x in splitext.(paramsGeneral[:fileNameScan])]) * "dif$(selector[:dif])_" * "itl$(selector[:seg])_" * "avg$(selector[:avg])_" * "recon.nii"
+    paramsGeneral[:fileNameSaveRecon] =
+        join([(x[1] * "_") for x in splitext.(paramsGeneral[:fileNameScan])]) *
+        "dif$(selector[:dif])_" *
+        "itl$(selector[:seg])_" *
+        "avg$(selector[:avg])_" *
+        "recon.nii"
 else
     # otherwise, just concat _recon.nii to file name
     paramsGeneral[:fileNameSaveRecon] = splitext(paramsGeneral[:fileNameScan])[1] * "_recon.nii"
 end
 
-paramsGeneral[:fullPathSaveRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveRecon] )
-paramsGeneral[:fullPathSaveMapRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveMapRecon] )
-paramsGeneral[:fullPathSaveSense] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveSense] )
-paramsGeneral[:fullPathSaveB0] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveB0] )
+paramsGeneral[:fullPathSaveRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveRecon])
+paramsGeneral[:fullPathSaveMapRecon] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveMapRecon])
+paramsGeneral[:fullPathSaveSense] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveSense])
+paramsGeneral[:fullPathSaveB0] = joinpath(paramsGeneral[:pathSaveRecon], paramsGeneral[:fileNameSaveB0])
 
 if ~ispath(paramsGeneral[:pathSaveRecon])
     mkpath(paramsGeneral[:pathSaveRecon])

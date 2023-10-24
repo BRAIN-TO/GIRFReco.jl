@@ -10,9 +10,9 @@ Calculates the ML estimator cost between an estimated phase map and the underlyi
 * `m::Matrix{T}` - normalized weighting data (m ∈ [0,1]:= abs.(conj.(y).*z)./maximum(abs.(conj.(y).*z))), precomputed for speed
 * `β` - Regularization parameter controlling roughness penalty
 """
-function ml_cost(x::Matrix{T},y::Matrix{Complex{T}},z::Matrix{Complex{T}},m::Matrix{T}, β) where T
+function ml_cost(x::Matrix{T}, y::Matrix{Complex{T}}, z::Matrix{Complex{T}}, m::Matrix{T}, β) where {T}
 
-    Ψ = (sum(m.* (1 .- cos.(angle.(z) .- angle.(y) .- x)),dims=[1,2]) + β * R(x))[1]
+    Ψ = (sum(m .* (1 .- cos.(angle.(z) .- angle.(y) .- x)), dims = [1, 2])+β*R(x))[1]
 
 end
 
@@ -22,9 +22,9 @@ Regularization function which penalizes roughness
 # Arguments
 * `x::Matrix{T}` - fieldmap estimate (in radians)
 """
-function R(x::Matrix{T}) where T
+function R(x::Matrix{T}) where {T}
 
-    return T.(0.5) * sum(abs2,diff(x,dims=1),dims=[1,2]) + T.(0.5) * sum(abs2,diff(x,dims=2),dims=[1,2])
+    return T.(0.5) * sum(abs2, diff(x, dims = 1), dims = [1, 2]) + T.(0.5) * sum(abs2, diff(x, dims = 2), dims = [1, 2])
 
 end
 
@@ -39,7 +39,7 @@ Estimates the fieldmap using the method presented in https://doi.org/10.1109/tmi
 * `β` - Regularization parameter controlling roughness penalty
 * `reltol` - early stopping criteria (exit if subsequent cost function change < reltol)
 """
-function pcg_ml_est_fieldmap(y::AbstractMatrix{Complex{T}},z::AbstractMatrix{Complex{T}},β = 1e-3, reltol = 5e-3) where T
+function pcg_ml_est_fieldmap(y::AbstractMatrix{Complex{T}}, z::AbstractMatrix{Complex{T}}, β = 1e-3, reltol = 5e-3) where {T}
 
     d = 1
     κ = conj.(y) .* z
@@ -50,20 +50,20 @@ function pcg_ml_est_fieldmap(y::AbstractMatrix{Complex{T}},z::AbstractMatrix{Com
     Δ = 1
     itcount = 0
 
-    trust_step = 1.0 ./ (m .+ 4*β)
+    trust_step = 1.0 ./ (m .+ 4 * β)
 
     while Δ > reltol
 
         gs = gradient(Flux.params(x)) do
-            c = ml_cost(x, y,z,m,β) # need to interpolate the y z and β to have better performance 
+            c = ml_cost(x, y, z, m, β) # need to interpolate the y z and β to have better performance 
         end
 
         x̄ = gs[x]
-        x .-= (trust_step) .* x̄ 
+        x .-= (trust_step) .* x̄
 
-        Δ = abs.(ml_cost(x,y,z,m,β) - c)/c
+        Δ = abs.(ml_cost(x, y, z, m, β) - c) / c
 
-        itcount +=1
+        itcount += 1
 
     end
 
@@ -90,18 +90,18 @@ Processes 3D volume data as output from MRIReco.reconstruction to estimate field
 * `reltol` - early stopping criteria (exit if subsequent cost function change < reltol)
 
 """
-function estimateB0Maps(imData,slices, TE1,TE2,isrotated::Bool=false; β = 5e-4, reltol = 0.001)
+function estimateB0Maps(imData, slices, TE1, TE2, isrotated::Bool = false; β = 5e-4, reltol = 0.001)
 
     b0Maps = Complex.(zeros(size(imData)[1:3]))
 
     @sync for slice in slices
         Threads.@spawn begin
-            b0Maps[:,:,slice] = pcg_ml_est_fieldmap(imData[:,:,slice,1,1],imData[:,:,slice,2,1],β,reltol) ./ ((TE2 - TE1)/1000)
+            b0Maps[:, :, slice] = pcg_ml_est_fieldmap(imData[:, :, slice, 1, 1], imData[:, :, slice, 2, 1], β, reltol) ./ ((TE2 - TE1) / 1000)
             println("for slice $slice")
         end
     end
 
-    b0Maps = mapslices(isrotated ? x->x : x-> rotl90(x),b0Maps,dims=(1,2)) 
+    b0Maps = mapslices(isrotated ? x -> x : x -> rotl90(x), b0Maps, dims = (1, 2))
 
     return real.(b0Maps)
 

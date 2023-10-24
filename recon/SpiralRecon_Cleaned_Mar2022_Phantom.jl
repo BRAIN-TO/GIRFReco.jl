@@ -22,11 +22,11 @@ if reloadCartesianData || !((@isdefined senseCartesian) && (@isdefined b0Maps))
 end
 
 ## Choose Slice (can be [single number] OR [1,2,3,4,5,6,7,8,9]
-sliceChoice = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] # UNCOMMENT FOR MULTISLICE
+sliceChoice = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] # UNCOMMENT FOR MULTISLICE
 # sliceChoice = [6] # UNCOMMENT FOR SINGLESLICE (SLICES 3, 7 and 8 are good examples)
 diffusionDirection = 0 # CAN BE FROM 0 (b=0) to 6 (e.g. for 6 direction MDDW, 1-6 are 6 directions)
 
-reconSize = (112,112) #(200,200)
+reconSize = (112, 112) #(200,200)
 
 ## Spiral Reconstruction Recipe Starts Here
 @info "Starting Spiral Reconstruction Pipeline"
@@ -62,7 +62,7 @@ fname_girfGz = "data/GIRF/GIRF_ISMRM2022/2021Nov_PosNeg_Gz.mat"
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] =  reconSize
+adjustmentDict[:reconSize] = reconSize
 adjustmentDict[:interleave] = 1
 adjustmentDict[:slices] = 1
 adjustmentDict[:coils] = 20
@@ -118,16 +118,16 @@ end
 @info "Validating Sense Maps \n"
 
 # Resize sense maps to match encoding size of data matrix
-sensitivity = mapslices(x ->imresize(x, (acqDataImaging.encodingSize[1],acqDataImaging.encodingSize[2])), senseCartesian, dims=[1,2])
+sensitivity = mapslices(x -> imresize(x, (acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), senseCartesian, dims = [1, 2])
 # sensitivity = mapslices(rotl90,sensitivity,dims=[1,2])
 
 # ## Plot the sensitivity maps of each coil
 @info "Plotting SENSE Maps \n"
-plotSenseMaps(sensitivity,adjustmentDict[:coils])
+plotSenseMaps(sensitivity, adjustmentDict[:coils])
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Resizing B0 Maps \n"
-resizedB0 = mapslices(x->imresize(x,(acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0Maps, dims=[1,2])
+resizedB0 = mapslices(x -> imresize(x, (acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), b0Maps, dims = [1, 2])
 
 ## Define Parameter Dictionary for use with reconstruction
 # CAST TO ComplexF32 if you're using current MRIReco.jl
@@ -140,17 +140,17 @@ params[:regularization] = "L2"
 params[:λ] = 1e-2 # CHANGE THIS TO GET BETTER OR WORSE RECONSTRUCTION RESULTS
 params[:iterations] = 20
 params[:solver] = "cgnr"
-params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
-params[:senseMaps] = ComplexF32.(sensitivity[:,:,selectedSlice,:])
-params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
+params[:solverInfo] = SolverInfo(ComplexF32, store_solutions = false)
+params[:senseMaps] = ComplexF32.(sensitivity[:, :, selectedSlice, :])
+params[:correctionMap] = ComplexF32.(-1im .* resizedB0[:, :, selectedSlice])
 
 ## Call to reconstruction
 @info "Performing Reconstruction \n"
-@time reco = reconstruction(acqDataImaging,params)
+@time reco = reconstruction(acqDataImaging, params)
 
 @info "Plotting Reconstruction \n"
 ## Set figures to be unlocked from the win9ow (i.e use matplotlib backend with controls)
 pygui(true)
-plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:,:,selectedSlice])
+plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice])
 
 @info "Successfully Completed SpiralRecon \n"

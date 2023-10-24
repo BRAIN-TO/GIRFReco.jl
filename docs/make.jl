@@ -1,6 +1,6 @@
-push!(LOAD_PATH,"../src")
-push!(LOAD_PATH,"../recon/")
-push!(LOAD_PATH,"../utils/")
+push!(LOAD_PATH, "../src")
+push!(LOAD_PATH, "../recon/")
+push!(LOAD_PATH, "../utils/")
 
 using Documenter, Literate, GIRFReco
 
@@ -14,17 +14,18 @@ opath = gen
 Literate.markdown(ipath_script, opath; documenter = true)
 Literate.markdown(ipath_config, opath; documenter = true)
 
-makedocs(sitename="GIRFReco Documentation",
+makedocs(
+    sitename = "GIRFReco Documentation",
     modules = [GIRFReco],
     pages = [
         "Home" => "index.md",
         "Utilities" => "Utilities.md",
-        "Examples" => [joinpath("generated/", "joss_demo.md"), joinpath("generated/", "ReconConfig_joss_demo.md")]
+        "Examples" => [joinpath("generated/", "joss_demo.md"), joinpath("generated/", "ReconConfig_joss_demo.md")],
     ],
 )
 
 deploydocs(
-    repo="github.com/BRAIN-TO/GIRFReco.git",
+    repo = "github.com/BRAIN-TO/GIRFReco.git",
     push_preview = true,
     # deploy_config = Documenter.GitHubActions(),
     devbranch = "main",
