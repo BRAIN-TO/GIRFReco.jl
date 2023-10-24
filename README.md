@@ -13,9 +13,15 @@ The data for the phantom reconstruction [`joss_demo.jl`](./docs/lit/examples/jos
 For a full introduction, please refer to our [manuscript](./paper/paper.md) for a full description of this package, including background, purpose, implementation, and the information of dependent packages.
 
 ## Quick Installation
-To install the package, use the following command:
+To install the package, **type** the following command:
 ```
 julia>]add GIRFReco
+```
+
+It is also possible to install the package with the following code:
+```
+using Pkg
+Pkg.add("GIRFReco")
 ```
 
 ## Development Installation
