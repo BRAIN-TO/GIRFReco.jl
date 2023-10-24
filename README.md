@@ -49,7 +49,7 @@ julia> ]dev GIRFReco
 
 ## Example Results
 
-1. **Phantom Images.** (*Presented at [ISMRM 2022, p.2435](https://archive.ismrm.org/2022/2435.html)*): using a dataset with 4 spiral interleaves for images with 1.1mm in-plane resolution. The code and dataset are both described in the [previous section](#quick-start).
+1. **Phantom Images.** (*Presented at [ISMRM 2022, p.2435](https://archive.ismrm.org/2022/2435.html)*): using a dataset with 4 spiral interleaves for images with 1.1mm in-plane resolution. The code and dataset are both described in the [previous section](#quick-installation).
 
     ```bash
     cd docs/lit/examples
