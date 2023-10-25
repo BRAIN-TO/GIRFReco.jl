@@ -74,11 +74,11 @@ function pcg_ml_est_fieldmap(y::AbstractMatrix{Complex{T}}, z::AbstractMatrix{Co
 end
 
 """
-estimateB0Maps(imData,slices, TE1,TE2,β,isrotated)
+estimateB0Maps(im_data,slices, TE1,TE2,β,isrotated)
 Processes 3D volume data as output from MRIReco.reconstruction to estimate fieldmaps using the method presented by Funai and Fessler
 # Required Arguments
-* `imData` - 5-D array with complex image data -> first 
-* `slices` - vector of slices to process (must be within range of 3rd dimension of imData)
+* `im_data` - 5-D array with complex image data -> first 
+* `slices` - vector of slices to process (must be within range of 3rd dimension of im_data)
 * `TE1` - Echo time 1 [ms]
 * `TE2` - Echo time 2 [ms]
 
@@ -90,19 +90,19 @@ Processes 3D volume data as output from MRIReco.reconstruction to estimate field
 * `reltol` - early stopping criteria (exit if subsequent cost function change < reltol)
 
 """
-function estimateB0Maps(imData, slices, TE1, TE2, isrotated::Bool = false; β = 5e-4, reltol = 0.001)
+function estimate_b0_maps(im_data, slices, TE1, TE2, isrotated::Bool = false; β = 5e-4, reltol = 0.001)
 
-    b0Maps = Complex.(zeros(size(imData)[1:3]))
+    b0_maps = Complex.(zeros(size(im_data)[1:3]))
 
     @sync for slice in slices
         Threads.@spawn begin
-            b0Maps[:, :, slice] = pcg_ml_est_fieldmap(imData[:, :, slice, 1, 1], imData[:, :, slice, 2, 1], β, reltol) ./ ((TE2 - TE1) / 1000)
+            b0_maps[:, :, slice] = pcg_ml_est_fieldmap(im_data[:, :, slice, 1, 1], im_data[:, :, slice, 2, 1], β, reltol) ./ ((TE2 - TE1) / 1000)
             println("for slice $slice")
         end
     end
 
-    b0Maps = mapslices(isrotated ? x -> x : x -> rotl90(x), b0Maps, dims = (1, 2))
+    b0_maps = mapslices(isrotated ? x -> x : x -> rotl90(x), b0_maps, dims = (1, 2))
 
-    return real.(b0Maps)
+    return real.(b0_maps)
 
 end

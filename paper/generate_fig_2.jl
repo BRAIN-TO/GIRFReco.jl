@@ -22,7 +22,7 @@ using NIfTI
 We need to provide a location for the NIfTI files with each successive correction. Start by making sure we have the same file structure as in recon
 
 =#
-rootProjPath = "/Your/Project/Path/Here"
+root_project_path = "/Your/Project/Path/Here"
 include("Your/Project/Path/docs/lit/examples/ReconConfig_joss_demo.jl")
 
 #=
@@ -32,9 +32,9 @@ include("Your/Project/Path/docs/lit/examples/ReconConfig_joss_demo.jl")
 =#
 
 tags = ["vNoCorr_Sing", "vB0Corr_Sing", "vB0_GIRF_Sing", "vB0_GIRF_k0_Sing"]
-paths = joinpath.(paramsGeneral[:pathResults], "recon", tags)
-filename_magn = splitext(paramsGeneral[:fileNameSaveRecon])[1] * "_magn.nii"
-files = joinpath.(paths, filename_magn)
+paths = joinpath.(params_general[:results_path], "recon", tags)
+filename_magnitude = splitext(params_general[:recon_save_filename])[1] * "_magn.nii"
+files = joinpath.(paths, filename_magnitude)
 
 #=
 
@@ -42,10 +42,10 @@ files = joinpath.(paths, filename_magn)
 
 =#
 
-noCorr = niread(files[1]).raw[:, :, 8, 1, 1, 1]
-b0Corr = niread(files[2]).raw[:, :, 8, 1, 1, 1]
-b0GirfCorr = niread(files[3]).raw[:, :, 8, 1, 1, 1]
-b0GirfK0Corr = niread(files[4]).raw[:, :, 8, 1, 1, 1]
+uncorrected = niread(files[1]).raw[:, :, 8, 1, 1, 1]
+b0_corrected = niread(files[2]).raw[:, :, 8, 1, 1, 1]
+b0_girf_k1_corrected = niread(files[3]).raw[:, :, 8, 1, 1, 1]
+b0_girf_k0_corrected = niread(files[4]).raw[:, :, 8, 1, 1, 1]
 #=
 
 ## 5. Plot!
@@ -55,7 +55,7 @@ b0GirfK0Corr = niread(files[4]).raw[:, :, 8, 1, 1, 1]
 gr()
 
 p1 = heatmap(
-    noCorr,
+    uncorrected,
     color = :grays,
     aspectratio = 1,
     xlims = (0, 200),
@@ -68,7 +68,7 @@ p1 = heatmap(
     top_margin = 0mm,
 )
 p2 = heatmap(
-    b0Corr,
+    b0_corrected,
     color = :grays,
     aspectratio = 1,
     xlims = (0, 200),
@@ -81,7 +81,7 @@ p2 = heatmap(
     top_margin = 0mm,
 )
 p3 = heatmap(
-    b0GirfCorr,
+    b0_girf_k1_corrected,
     color = :grays,
     aspectratio = 1,
     xlims = (0, 200),
@@ -94,7 +94,7 @@ p3 = heatmap(
     top_margin = 0mm,
 )
 p4 = heatmap(
-    b0GirfK0Corr,
+    b0_girf_k0_corrected,
     color = :grays,
     aspectratio = 1,
     xlims = (0, 200),
@@ -108,7 +108,7 @@ p4 = heatmap(
 )
 
 pc1 = heatmap(
-    abs.((b0Corr - noCorr) ./ maximum(b0Corr)),
+    abs.((b0_corrected - uncorrected) ./ maximum(b0_corrected)),
     color = :viridis,
     aspectratio = 1,
     xlims = (0, 200),
@@ -121,7 +121,7 @@ pc1 = heatmap(
     top_margin = 0mm,
 )
 pc2 = heatmap(
-    abs.((b0GirfCorr - b0Corr) ./ maximum(b0GirfCorr)),
+    abs.((b0_girf_k1_corrected - b0_corrected) ./ maximum(b0_girf_corrected)),
     color = :viridis,
     aspectratio = 1,
     xlims = (0, 200),
@@ -134,7 +134,7 @@ pc2 = heatmap(
     top_margin = 0mm,
 )
 pc3 = heatmap(
-    abs.((b0GirfK0Corr - b0GirfCorr) ./ maximum(b0GirfK0Corr)),
+    abs.((b0GirfK0k1_Corr - b0_girf_corrected) ./ maximum(b0_girf_k0_corrected)),
     color = :viridis,
     aspectratio = 1,
     xlims = (0, 200),

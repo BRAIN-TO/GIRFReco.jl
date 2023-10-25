@@ -1,119 +1,119 @@
-export read_gradient_txt_file
+export readGradientTextFile
 
 "Reads in text file containing gradient waveform information"
-function read_gradient_txt_file(fileName, reconSize, delay)
+function readGradientTextFile(filename, reconsize, delay)
 
-    gradientData = readdlm(fileName, '\n')
+    gradient_data = readdlm(filename, '\n')
 
     ## Read in the header data of the gradient text file (lines 1 to 21)
-    dataDict = Dict{Symbol,Any}()
-    dataDict[:versionNr] = gradientData[1]
-    dataDict[:numSamples] = gradientData[2]
-    dataDict[:dwellTime] = gradientData[3] # [seconds]
-    dataDict[:samplesPerInterleave] = gradientData[4]
-    dataDict[:numInterleaves] = gradientData[5]
-    dataDict[:numDims] = gradientData[6]
-    dataDict[:timeToCenterKSpace] = gradientData[7] # [seconds]
-    dataDict[:acqDuration] = gradientData[8]
-    dataDict[:samplesPerAcq] = gradientData[9]
-    dataDict[:numAcquisitions] = gradientData[10]
-    dataDict[:acqTR] = gradientData[11]
-    dataDict[:gradientAcqStartDelay] = gradientData[12]
-    dataDict[:echoTimeShiftSamples] = gradientData[13]
-    dataDict[:FOV] = gradientData[14:16] # [m]
-    dataDict[:voxelDims] = gradientData[17:19] # [m]
-    dataDict[:gradientStrengthFactor] = gradientData[20] # [mT/m]
-    dataDict[:isBinary] = gradientData[21]
-    dataDict[:gamma] = 42577.478 # [Hz/mT] CAN CHANGE
-    dataDict[:fieldStrength] = 3 # [T] CAN CHANGE
+    gradient_dict = Dict{Symbol,Any}()
+    gradient_dict[:version_number] = gradient_data[1]
+    gradient_dict[:num_samples] = gradient_data[2]
+    gradient_dict[:dwell_time] = gradient_data[3] # [seconds]
+    gradient_dict[:samples_per_interleave] = gradient_data[4]
+    gradient_dict[:num_interleaves] = gradient_data[5]
+    gradient_dict[:num_dims] = gradient_data[6]
+    gradient_dict[:time_to_center_kspace] = gradient_data[7] # [seconds]
+    gradient_dict[:acq_duration] = gradient_data[8]
+    gradient_dict[:samples_per_acq] = gradient_data[9]
+    gradient_dict[:num_acq] = gradient_data[10]
+    gradient_dict[:acq_TR] = gradient_data[11]
+    gradient_dict[:gradient_acq_start_delay] = gradient_data[12]
+    gradient_dict[:echo_time_shift_samples] = gradient_data[13]
+    gradient_dict[:fov] = gradient_data[14:16] # [m]
+    gradient_dict[:voxel_dims] = gradient_data[17:19] # [m]
+    gradient_dict[:gradient_strength_factor] = gradient_data[20] # [mT/m]
+    gradient_dict[:is_binary] = gradient_data[21]
+    gradient_dict[:gamma] = 42577.478 # [Hz/mT] CAN CHANGE
+    gradient_dict[:field_strength] = 3 # [T] CAN CHANGE
 
-    #print(dataDict)
+    #print(gradient_dict)
 
     ## reading and data scaling of gradient data
-    dataDict[:gradData] = gradientData[22:end]
-    interleaveGradArray =
-        dataDict[:gradientStrengthFactor] * reshape(dataDict[:gradData], dataDict[:samplesPerInterleave], dataDict[:numInterleaves], dataDict[:numDims]) #[mT/m]
+    gradient_dict[:gradient_vector] = gradient_data[22:end]
+    interleave_gradient_array =
+        gradient_dict[:gradient_strength_factor] * reshape(gradient_dict[:gradient_vector], gradient_dict[:samples_per_interleave], gradient_dict[:num_interleaves], gradient_dict[:num_dims]) #[mT/m]
 
-    plannedTimes = dataDict[:dwellTime] .* (0:(dataDict[:samplesPerInterleave]-1))
-    delayedTimes = plannedTimes .- delay .- dataDict[:dwellTime] ./ 2 # seconds (dwellTime/2 compensates for integration)
+    planned_times = gradient_dict[:dwell_time] .* (0:(gradient_dict[:samples_per_interleave]-1))
+    delayed_times = planned_times .- delay .- gradient_dict[:dwell_time] ./ 2 # seconds (dwell_time/2 compensates for integration)
 
-    interleaveGradArrayFlexible = Array{Float64,3}(undef, size(interleaveGradArray))
+    interleave_gradient_array_new = Array{Float64,3}(undef, size(interleave_gradient_array))
 
-    #print(size(interleaveGradArrayFlexible))
+    #print(size(interleave_gradient_array_new))
 
     ## Loop over all of the unique excitation trajectories and create an interpolant of the gradient
-    for dim = 1:dataDict[:numDims]
+    for dim = 1:gradient_dict[:num_dims]
 
-        for l = 1:dataDict[:numInterleaves]
+        for l = 1:gradient_dict[:num_interleaves]
 
             #print((dim,l),"\n")
 
-            sp = Spline1D(plannedTimes, interleaveGradArray[:, l, dim], w = ones(length(plannedTimes)), k = 1, bc = "zero", s = 0.0)
+            sp = Spline1D(planned_times, interleave_gradient_array[:, l, dim], w = ones(length(planned_times)), k = 1, bc = "zero", s = 0.0)
 
             # evaluate the interpolant at the sampling times of the kspace data
-            interleaveGradArrayFlexible[:, l, dim] = sp(delayedTimes)
+            interleave_gradient_array_new[:, l, dim] = sp(delayed_times)
 
-            #print(interleaveGradArrayFlexible[:,l,dim][end],"\n")
+            #print(interleave_gradient_array_new[:,l,dim][end],"\n")
 
         end
 
     end
 
     ## cumulative summation and numerical integration of the gradient data, resulting in the kspace trajectory
-    kSpaceTrajArrayFlexible = dataDict[:gamma] * dataDict[:dwellTime] * cumsum(interleaveGradArrayFlexible, dims = 1) # [rad/m]
+    kspace_trajectory_array_new = gradient_dict[:gamma] * gradient_dict[:dwell_time] * cumsum(interleave_gradient_array_new, dims = 1) # [rad/m]
 
     ## Conversion to the trajectory scaling convention in MRIReco.jl
     #  Currently only 2d Trajectories
-    convertedKSpaceArrayFlexible = kSpaceTrajArrayFlexible
-    convertedKSpaceArrayFlexible[:, :, 1] *= dataDict[:FOV][1] ./ reconSize[1]
-    convertedKSpaceArrayFlexible[:, :, 2] *= dataDict[:FOV][2] ./ reconSize[2]
+    converted_kspace_trajectory_array_new = kspace_trajectory_array_new
+    converted_kspace_trajectory_array_new[:, :, 1] *= gradient_dict[:fov][1] ./ reconsize[1]
+    converted_kspace_trajectory_array_new[:, :, 2] *= gradient_dict[:fov][2] ./ reconsize[2]
 
     ## Construction of the trajectory object ##
 
     ## Reshaping of the array to the format expected by the Trajectory constructor in MRIReco.jl
     # - dim 1 = kspace dimension
     # - dim 2 = kspace position (with interleaves/profiles arranged consecutively)
-    permutedTrajectory =
-        permutedims(reshape(convertedKSpaceArrayFlexible, dataDict[:samplesPerInterleave] * dataDict[:numInterleaves], dataDict[:numDims]), [2, 1])
+    permuted_trajectory =
+        permutedims(reshape(converted_kspace_trajectory_array_new, gradient_dict[:samples_per_interleave] * gradient_dict[:num_interleaves], gradient_dict[:num_dims]), [2, 1])
 
     ## Construction of the trajectory
     # - Note: timing vectors are automatically generated - seems to be consistent with the dwell time
-    trajectoryObject = Trajectory(
-        permutedTrajectory,
-        dataDict[:numInterleaves],
-        dataDict[:samplesPerInterleave],
-        TE = dataDict[:echoTimeShiftSamples],
-        AQ = dataDict[:acqDuration],
+    trajectory_object = Trajectory(
+        permuted_trajectory,
+        gradient_dict[:num_interleaves],
+        gradient_dict[:samples_per_interleave],
+        TE = gradient_dict[:echo_time_shift_samples],
+        AQ = gradient_dict[:acq_duration],
         numSlices = 9,
         cartesian = false,
         circular = false,
     )
 
-    return trajectoryObject
+    return trajectory_object
 
 end
 
 function testGradReader()
 
-    ## Testing
-    gradFile = "data/Gradients/gradients523.txt"
+    # ## Testing
+    # gradFile = "data/Gradients/gradients523.txt"
 
-    ##
-    kSpaceTrajectory_2 = read_gradient_txt_file(gradFile, (200, 200), 0.00000)
+    # ##
+    # kSpaceTrajectory_2 = readGradientTextFile(gradFile, (200, 200), 0.00000)
 
-    ##
-    pulledTrajectory21 = kspaceNodes(kSpaceTrajectory_2)[1, :]
-    pulledTrajectory22 = kspaceNodes(kSpaceTrajectory_2)[2, :]
+    # ##
+    # pulledTrajectory21 = kspaceNodes(kSpaceTrajectory_2)[1, :]
+    # pulledTrajectory22 = kspaceNodes(kSpaceTrajectory_2)[2, :]
 
-    #
-    fig = figure(234, figsize = (10, 10))
-    ax = fig.gca()
-    ax.scatter(pulledTrajectory21, pulledTrajectory22, label = "Nominal")
-    xlabel("kx")
-    ylabel("ky")
-    title("K-space Center")
-    xlim((-0.05, 0.05))
-    ylim((-0.05, 0.05))
-    legend()
+    # #
+    # fig = figure(234, figsize = (10, 10))
+    # ax = fig.gca()
+    # ax.scatter(pulledTrajectory21, pulledTrajectory22, label = "Nominal")
+    # xlabel("kx")
+    # ylabel("ky")
+    # title("K-space Center")
+    # xlim((-0.05, 0.05))
+    # ylim((-0.05, 0.05))
+    # legend()
 
 end

@@ -48,18 +48,18 @@ if paramsGeneral[:doLoadMaps] && isfile(paramsGeneral[:fullPathSaveB0]) # # TODO
     @info "Loading SENSE and B0 maps from $(paramsGeneral[:fullPathSaveSense]) and $(paramsGeneral[:fullPathSaveB0])"
     # load maps, permute slice, sice files have geometric slice order
     b0Maps = loadMap(paramsGeneral[:fullPathSaveB0])
-    
-    nSlices = size(b0Maps, 3);
+
+    nSlices = size(b0Maps, 3)
     sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
 
-    b0Maps = b0Maps[:,:,invperm(sliceIndexArray)]
-    senseCartesian = loadMap(paramsGeneral[:fullPathSaveSense]; doSplitPhase = true)[:,:,invperm(sliceIndexArray),:]
+    b0Maps = b0Maps[:, :, invperm(sliceIndexArray)]
+    senseCartesian = loadMap(paramsGeneral[:fullPathSaveSense]; doSplitPhase = true)[:, :, invperm(sliceIndexArray), :]
 else
     ## Only calculate sensitivity and B0 maps when they have not been done yet, or it's specifically required.
     ## Executing Cartesian recon from which B0/sensitivity maps have been computed
     @info "Running CartesianRecon to retrieve maps (senseCartesian and b0Maps)"
     include("CartesianRecon_Mar2022_Human.jl")
-    nSlices = size(b0Maps, 3);
+    nSlices = size(b0Maps, 3)
 end
 
 ## Set figures to be unlocked from the win9ow (i.e use matplotlib backend with controls)
@@ -81,7 +81,7 @@ else
 end
 
 ## The ISMRMRD File contains more than one excitation, so we choose the set corresponding to the b-value 0 images
-excitationList = collect(nSlices*2 + 2 : 2 : nSlices*4) .+ diffusionDirection * nSlices * 2 .+ (idxAverage - 1) * nSlices * (nDiffusionDirections + 1) * 2 # DATASET SPECIFIC INDEXING: 15 slices, starting from profile 32
+excitationList = collect(nSlices*2+2:2:nSlices*4) .+ diffusionDirection * nSlices * 2 .+ (idxAverage - 1) * nSlices * (nDiffusionDirections + 1) * 2 # DATASET SPECIFIC INDEXING: 15 slices, starting from profile 32
 sliceSelection = excitationList[selectedSlice]
 
 @info "Slice Chosen = $selectedSlice: \n \nExcitations Chosen = $excitationList "
@@ -110,7 +110,7 @@ adjustmentDict[:singleSlice] = !isMultiSlice
 
 if reloadGIRFData || !(@isdefined gK1) || !(@isdefined gAK1) || !(@isdefined gK0) || !(@isdefined gAK0)
     @info "Loading Gradient Impulse Response Functions"
-    
+
     ## Load GIRFs (K1)
     gK1 = readGIRFFile(paramsGeneral[:fullPathGIRF][1], paramsGeneral[:fullPathGIRF][2], paramsGeneral[:fullPathGIRF][3], "GIRF_FT", false)
     gAk1 = GirfApplier(gK1, gamma)
@@ -127,13 +127,13 @@ if reloadSpiralData || !(@isdefined acqDataImaging)
     @info "Reading spiral data and merging interleaves"
     acqDataImaging = mergeRawInterleaves(adjustmentDict)
 
-    if paramsGeneral[:doCorrectWithGIRFkxyz] 
+    if paramsGeneral[:doCorrectWithGIRFkxyz]
         @info "Correcting For GIRF"
         applyGIRF!(acqDataImaging, gAk1)
     end
 
     if paramsGeneral[:doCorrectWithGIRFk0]
-            @info "Correcting For k₀"
+        @info "Correcting For k₀"
         applyK0!(acqDataImaging, gAk0)
     end
 
@@ -146,30 +146,30 @@ end
 @info "Resizing Sense Maps"
 
 # Resize sense maps to match encoding size of data matrix
-sensitivity = mapslices(x ->imresize(x, adjustmentDict[:reconSize]), senseCartesian, dims=[1,2])
+sensitivity = mapslices(x -> imresize(x, adjustmentDict[:reconSize]), senseCartesian, dims = [1, 2])
 
 # Plot the sensitivity maps of each coil
 @info "Plotting SENSE Maps"
 
 if paramsGeneral[:doPlotRecon]
-    plotSenseMaps(sensitivity,size(sensitivity, 4),sliceIndex = 10)
+    plotSenseMaps(sensitivity, size(sensitivity, 4), sliceIndex = 10)
 end
 
 
 # shift FOV to middle :) 
-shiftksp!(acqDataImaging,paramsGeneral[:fovShift])
+shiftksp!(acqDataImaging, paramsGeneral[:fovShift])
 #changeFOV!(acqDataImaging,[1.5,1.5])
 
 
 ## Do coil compression to make recon faster
 if paramsGeneral[:doCoilCompression]
-    acqDataImaging, sensitivity = geometricCC_2d(acqDataImaging,sensitivity, paramsGeneral[:nVirtualCoils])
+    acqDataImaging, sensitivity = geometricCC_2d(acqDataImaging, sensitivity, paramsGeneral[:nVirtualCoils])
 end
 
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Resizing B0 Maps"
-resizedB0 = mapslices(x->imresize(x,adjustmentDict[:reconSize]), b0Maps, dims=[1,2])
+resizedB0 = mapslices(x -> imresize(x, adjustmentDict[:reconSize]), b0Maps, dims = [1, 2])
 
 ## Define Parameter Dictionary for use with reconstruction
 # CAST TO ComplexF32 if you're using current MRIReco.jl
@@ -182,33 +182,46 @@ params[:regularization] = "L2"
 params[:λ] = 1e-2 # CHANGE THIS TO GET BETTER OR WORSE RECONSTRUCTION RESULTS
 params[:iterations] = paramsGeneral[:nReconIterations]
 params[:solver] = "cgnr"
-params[:solverInfo] = SolverInfo(ComplexF32,store_solutions=false)
-params[:senseMaps] = ComplexF32.(sensitivity[:,:,selectedSlice,:])
+params[:solverInfo] = SolverInfo(ComplexF32, store_solutions = false)
+params[:senseMaps] = ComplexF32.(sensitivity[:, :, selectedSlice, :])
 
 if paramsGeneral[:doCorrectWithB0map]
-    params[:correctionMap] = ComplexF32.(-1im.*resizedB0[:,:,selectedSlice])
+    params[:correctionMap] = ComplexF32.(-1im .* resizedB0[:, :, selectedSlice])
 end
 
 ## Call to reconstruction
 @info "Performing Reconstruction"
-@time reco = reconstruction(acqDataImaging,params)
+@time reco = reconstruction(acqDataImaging, params)
 #totalRecon = sum(abs2,reco.data,dims=5)
 
 # save Map recon (multi-echo etc.)
 if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
-    resolution_mm = fieldOfView(acqDataImaging)./encodingSize(acqDataImaging)
-    resolution_mm[3] = fieldOfView(acqDataImaging)[3] *(1 + paramsGeneral[:sliceDistanceFactor_percent]/100.0); # for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
+    resolution_mm = fieldOfView(acqDataImaging) ./ encodingSize(acqDataImaging)
+    resolution_mm[3] = fieldOfView(acqDataImaging)[3] * (1 + paramsGeneral[:sliceDistanceFactor_percent] / 100.0) # for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
 
     # TODO: use slice ordering from cartesian scan directly!
     nSlices = numSlices(acqDataImaging)
     sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
-    saveMap(paramsGeneral[:fullPathSaveRecon], paramsGeneral[:scalingFactorSaveRecon]*reco.data[:,:,sliceIndexArray], resolution_mm; doSplitPhase=true, doNormalize = paramsGeneral[:doNormalizeRecon])
+    saveMap(
+        paramsGeneral[:fullPathSaveRecon],
+        paramsGeneral[:scalingFactorSaveRecon] * reco.data[:, :, sliceIndexArray],
+        resolution_mm;
+        doSplitPhase = true,
+        doNormalize = paramsGeneral[:doNormalizeRecon],
+    )
 end
 
 if paramsGeneral[:doPlotRecon]
     @info "Plotting Reconstruction"
     pygui(true)
-    plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice], figHandles=["Original Magnitude", "Original Phase", "B0"], isSliceInterleaved=true, rotateAngle=270)
+    plotReconstruction(
+        reco,
+        1:length(selectedSlice),
+        resizedB0[:, :, selectedSlice],
+        figHandles = ["Original Magnitude", "Original Phase", "B0"],
+        isSliceInterleaved = true,
+        rotateAngle = 270,
+    )
 end
 
 @info "Successfully Completed SpiralRecon"

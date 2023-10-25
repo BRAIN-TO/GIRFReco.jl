@@ -4,7 +4,7 @@
 @info "Starting in $(pwd())"
 
 global selector = Dict{Symbol,Any}()
-global isCalledFromReconLoopGlobal::Bool = true
+global is_called_from_global_recon::Bool = true
 for avg = 1:4 #1:4
     for dif = 0:30 #1:10 # 0:30 # 0:6 # 0 is b=0 image
         selector[:avg] = avg
@@ -14,4 +14,4 @@ for avg = 1:4 #1:4
         include("SpiralRecon_SingleIntlv.jl")
     end
 end
-isCalledFromReconLoopGlobal = false;
+is_called_from_global_recon = false;
