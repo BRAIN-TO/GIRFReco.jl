@@ -106,7 +106,7 @@ end
 ## Calculate B0 maps from the acquired images (if two TEs)
 @info "Calculating B0 Maps"
 slices = 1:length(slice_idx_array)
-b0_maps = zeros(200, 200, 15)
+b0_maps = zeros(200, 200, num_slices)
 b0_method = "2D_2008" # Can be "Simple","2D_2008" or "3D_2020" (How do we incorporate this into the recon demo?)
 
 if b0_method == "2D_2008"
@@ -115,22 +115,13 @@ if b0_method == "2D_2008"
 
 elseif b0_method == "3D_2020"
 
-    niter = 100 # usually good enough
-
-    for i = 1:15
-
-        (b0_maps[:, :, i], times, out) = b0map(
-            reshape(cartesian_reco.data[:, :, i, :, 1, 1], (200, 200, 1, 2)) ./ maximum(abs.(cartesian_reco.data)),
-            [TE1 / 1000, TE2 / 1000];
-            order = 2,
-            l2b = -6,
-            gamma_type = :PR,
-            niter = niter,
-            precon = :diag,
-            track = false,
-        )
-
-    end
+    b0_maps, times, out = b0map(
+        reshape(cartesian_reco.data[:, :, :, :, 1, 1], (200, 200, num_slices,1, 2)),
+        (TE1 / 1000.0, TE2 / 1000.0);
+        track =true,
+        chat = true,
+        chat_iter = 2
+    )
 
     b0_maps = 2 * pi * b0_maps
 
