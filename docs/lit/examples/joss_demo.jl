@@ -90,13 +90,13 @@ This is controlled by `do_load_maps` in general parameters.
 
 if params_general[:do_load_maps] && isfile(params_general[:b0_map_save_fullpath])
     @info "Loading SENSE and B0 maps from $(params_general[:sensitivity_save_fullpath]) and $(params_general[:b0_map_save_fullpath])"
-    b0_maps = loadMap(params_general[:b0_map_save_fullpath])
+    b0_maps = load_map(params_general[:b0_map_save_fullpath])
 
     num_slices = size(b0_maps, 3)
-    slice_idx_array = getSliceOrder(num_slices, is_slice_interleaved = true)
+    slice_idx_array = get_slice_order(num_slices, is_slice_interleaved = true)
 
     b0_maps = b0_maps[:, :, invperm(slice_idx_array)]
-    cartesian_sensitivity = loadMap(params_general[:sensitivity_save_fullpath]; do_split_phase = true)[:, :, invperm(slice_idx_array), :]
+    cartesian_sensitivity = load_map(params_general[:sensitivity_save_fullpath]; do_split_phase = true)[:, :, invperm(slice_idx_array), :]
 else
     @info "Running CartesianRecon to retrieve maps (cartesian_sensitivity and b0_maps)"
     include("../../../recon/CartesianRecon.jl")
@@ -175,14 +175,14 @@ params_spiral[:single_slice] = !is_multislice
 Here we synchronize the spiral k-space data with trajectory by upsampling the trajectory. 
 Subsequently, data of all the selected spiral interleaves and the corresponding trajectories 
 are merged into `imaging_acq_data`. 
-This step is done through the function `mergeRawInterleaves`, which can be viewed in 
+This step is done through the function `merge_raw_interleaves`, which can be viewed in 
 [Utils.jl](@__REPO_ROOT_URL__/utils/Utils.jl).
 
 Note that we only do these steps when they have not been done yet or it's specifically required.
 =#
 if reload_spiral_data || !(@isdefined imaging_acq_data)
     @info "Reading spiral data and merging interleaves"
-    imaging_acq_data = mergeRawInterleaves(params_spiral)
+    imaging_acq_data = merge_raw_interleaves(params_spiral)
 end
 
 #=
@@ -203,16 +203,16 @@ girf_applier_k0 = GirfApplier(girf_k0, params_general[:gamma])
 
 if params_general[:do_correct_with_girf_k1]
     @info "Correcting For GIRF"
-    applyGIRF!(imaging_acq_data, girf_applier_k1)
+    apply_girf!(imaging_acq_data, girf_applier_k1)
 end
 
 if params_general[:do_correct_with_girf_k0]
     @info "Correcting For k₀"
-    applyK0!(imaging_acq_data, girf_applier_k0)
+    apply_k0!(imaging_acq_data, girf_applier_k0)
 end
 
 # Check the k-space nodes so they don't exceed frequency limits [-0.5, 0.5] (inclusive)
-checkAcquisitionNodes!(imaging_acq_data)
+check_acquisition_nodes!(imaging_acq_data)
 
 #=
 #### 3.2.4 Center the Object to the Field-of-View (FOV)
@@ -237,7 +237,7 @@ sensitivity = mapslices(x -> imresize(x, params_spiral[:recon_size][1], params_s
 # Optional: Plot the sensitivity maps of each coil on a given slice.
 if params_general[:do_plot_recon]
     plotlyjs()
-    plotSenseMaps(sensitivity, size(sensitivity, 4), slice_index = 2)
+    plot_sense_maps(sensitivity, size(sensitivity, 4), slice_index = 2)
 end
 
 # Do coil compression to make recon faster
@@ -300,8 +300,8 @@ GC.gc()
 #=
 ## 4. Save and Plot the Results (Optional)
 
-All results could be saved into NIfTI files using the `saveMap` function 
-and be plotted using the `plotReconstruction` function, both located in 
+All results could be saved into NIfTI files using the `save_map` function 
+and be plotted using the `plot_reconstruction` function, both located in 
 the file [Utils.jl](@__REPO_ROOT_URL__/utils/Utils.jl).
 
 =#
@@ -311,8 +311,8 @@ if params_general[:do_save_recon] # TODO: include elements to save as tuple, e.g
 
     # TODO: use slice ordering from cartesian scan directly!
     num_slices = numSlices(imaging_acq_data)
-    slice_idx_array = getSliceOrder(num_slices, is_slice_interleaved = true)
-    saveMap(
+    slice_idx_array = get_slice_order(num_slices, is_slice_interleaved = true)
+    save_map(
         params_general[:recon_save_fullpath],
         params_general[:saving_scalefactor] * reco.data[:, :, slice_idx_array],
         resolution_mm;
@@ -324,7 +324,7 @@ end
 if params_general[:do_plot_recon]
     @info "Plotting Reconstruction"
     plotlyjs()
-    plotReconstruction(
+    plot_reconstruction(
         reco,
         1:length(selected_slice),
         resized_b0_maps[:, :, selected_slice],

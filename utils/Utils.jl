@@ -1,20 +1,20 @@
-export plotReconstruction,
-    plotSenseMaps,
-    calculateB0Maps,
-    getSliceOrder,
-    syncTrajAndData!,
+export plot_reconstruction,
+    plot_sense_maps,
+    calculate_b0_maps,
+    get_slice_order,
+    sync_traj_and_data!,
     do_k0_correction!,
-    adjustHeader!,
-    checkAcquisitionNodes!,
-    validateSiemensMRD!,
-    validateAcqData!,
-    preprocessCartesianData,
-    removeOversampling!,
-    mergeRawInterleaves,
-    applyGIRF!,
-    applyK0!,
-    saveMap,
-    loadMap,
+    adjust_header!,
+    check_acquisition_nodes!,
+    validate_siemens_mrd!,
+    validate_acq_data!,
+    preprocess_cartesian_data,
+    remove_oversampling!,
+    merge_raw_interleaves,
+    apply_girf!,
+    apply_k0!,
+    save_map,
+    load_map,
     shift_kspace!
 
 ## Choose plotting backend to be PlotlyJS!
@@ -24,7 +24,7 @@ export plotReconstruction,
 
 # "Mosaic-plots reconstruction for selected slices and corresponding B0 map"
 """
-    plotReconstruction(images, slices_index, b0; fig_handles = [], is_slice_interleaved = false)
+    plot_reconstruction(images, slices_index, b0; fig_handles = [], is_slice_interleaved = false)
 Plots the magnitude and phase of the reconstructed images for a given slice or slices, along with a B₀ map if applicable
 
 # Arguments
@@ -35,7 +35,7 @@ Plots the magnitude and phase of the reconstructed images for a given slice or s
 * `is_slice_interleaved::Bool` - for 2D scanning, indicate this value as `true` to make sure the slice order on the displayed results is correct
 * `rotation::Int` - Counterclock-wise rotation angle for each slice, should be a value from 0, 90, 180, 270 degrees
 """
-function plotReconstruction(images, slices_index, b0; fig_handles = [], is_slice_interleaved = false, rotation = 0)
+function plot_reconstruction(images, slices_index, b0; fig_handles = [], is_slice_interleaved = false, rotation = 0)
     # plot()
     ## If we need to re-order all slices
     num_slices = length(slices_index)
@@ -121,7 +121,7 @@ function plotReconstruction(images, slices_index, b0; fig_handles = [], is_slice
 end
 
 "Function plots all profiles in the acquisition to check consistency with ISMRMRD file"
-function checkProfiles(raw_data)
+function check_profiles(raw_data)
 
     num_profiles = 128 # Set to the number of profiles that you would like to see
 
@@ -133,7 +133,7 @@ function checkProfiles(raw_data)
 end
 
 """
-    plotSenseMaps!(sensitivity, num_channels)
+    plot_sense_maps!(sensitivity, num_channels)
 Plots coil sensitivity maps from the channels, for a total of num_channels plots
 
 # Arguments
@@ -141,7 +141,7 @@ Plots coil sensitivity maps from the channels, for a total of num_channels plots
 * `num_channels::Int` - number of coils (usually last dimension of sensitivity)
 * `slice_index::Int` - The index of the slice to be displayed (if multislice)
 """
-function plotSenseMaps(sensitivity, num_channels; slice_index = 1)
+function plot_sense_maps(sensitivity, num_channels; slice_index = 1)
     num_slices = size(sensitivity, 3)
     if slice_index > num_slices
         err_msg = @sprintf("The index of slice to be displayed is %d, but total slice number is %d.", slice_index, num_slices)
@@ -167,7 +167,7 @@ function plotSenseMaps(sensitivity, num_channels; slice_index = 1)
 end
 
 # "WIP: Plots trajectory and Data, doesn't work currently"
-function plotTrajAndData(acq)
+function plot_traj_and_data(acq)
 
     for l = 1:length(acq.traj)
 
@@ -182,7 +182,7 @@ end
 ## PREPROCESSING
 
 """
-    calculateB0Maps(me_data,slices,echotime_1,echotime_2)
+    calculate_b0_maps(me_data,slices,echotime_1,echotime_2)
 
 Calculate  B0 map from the two images with different echo times via their phase difference (obtained from imTE2.*conj(imTE1))
 TODO have the b0 map calculation be capable of handling variable echo times
@@ -194,7 +194,7 @@ TODO2: Do we need this basic B0 map calculation or is it superseded by estimateB
 * `echotime_1::AbstractFloat`        - TE1 [ms]
 * `echotime_2::AbstractFloat`        - TE2 [ms]
 """
-function calculateB0Maps(me_data, slices, echotime_1, echotime_2)
+function calculate_b0_maps(me_data, slices, echotime_1, echotime_2)
 
     # b0Maps = mapslices(x -> rotl90(x),ROMEO.unwrap(angle.(me_data[:,:,slices,2,1].*conj(me_data[:,:,slices,1,1]))),dims=(1,2))./((7.38-4.92)/1000)
     b0Maps =
@@ -204,7 +204,7 @@ function calculateB0Maps(me_data, slices, echotime_1, echotime_2)
 end
 
 """
-    getSliceOrder(num_slices, is_slice_interleaved)
+    get_slice_order(num_slices, is_slice_interleaved)
 
 Returns array mapping from acquisition number to slice number (geometric position) (indexArray[slice = 1:9] = [acquisitionNumbers])
 TODO: Add ascending/descending options
@@ -213,7 +213,7 @@ TODO: Add ascending/descending options
 * `num_slices::Int`                    - number of slices in total acquired stack (FOV)
 * `is_slice_interleaved::Bool=true`   - if true, interleaved slice order is created, otherwise ascending slice order is returned
 """
-function getSliceOrder(num_slices; is_slice_interleaved::Bool = true)
+function get_slice_order(num_slices; is_slice_interleaved::Bool = true)
 
     slice_index_array = 1:num_slices
     reordered_slice_indices = zeros(Int16, size(slice_index_array))
@@ -229,7 +229,7 @@ function getSliceOrder(num_slices; is_slice_interleaved::Bool = true)
 end
 
 """
-    syncTrajAndData!(a::AcquisitionData)
+    sync_traj_and_data!(a::AcquisitionData)
 Synchronizes k-space trajectory and sampled data as they do not usually have a common sampling rate
 
 # Arguments
@@ -238,7 +238,7 @@ Synchronizes k-space trajectory and sampled data as they do not usually have a c
 * `idx_crop::Int` - Trajectory and Data may contain samples we don't want in the recon, usually at the end of acquisition. Ignore samples after idx_crop
 * `interleave::Int` - index of interleave
 """
-function syncTrajAndData!(raw_data, traj, idx_crop, interleave)
+function sync_traj_and_data!(raw_data, traj, idx_crop, interleave)
 
     # get number of gradient samples
     num_gradient_samples = traj.numSamplingPerProfile # cannot avoid camelcase as it is in MRIBase
@@ -336,7 +336,7 @@ end
 
 
 """
-    adjustHeader!(raw::RawAcquisitionData, recon_size, num_samples, interleave_number, single_slice)
+    adjust_header!(raw::RawAcquisitionData, recon_size, num_samples, interleave_number, single_slice)
 Adjusts the header data for each interleave and slice of spiral diffusion RawAcquisitionData
 
 # Arguments
@@ -346,7 +346,7 @@ Adjusts the header data for each interleave and slice of spiral diffusion RawAcq
 * `interleave_number::Int` - Index of interleave for multi-shot acquisitionNumbers
 * `single_slice::Bool` - flag for single-slice reconstruction/acquisition
 """
-function adjustHeader!(raw, recon_size, num_samples, interleave_number, single_slice)
+function adjust_header!(raw, recon_size, num_samples, interleave_number, single_slice)
 
     # For every profile in the acquisition
     for l = 1:length(raw.profiles)
@@ -387,13 +387,13 @@ function adjustHeader!(raw, recon_size, num_samples, interleave_number, single_s
 end
 
 """
-    checkAcquisitionNodes!(a::AcquisitionData)
+    check_acquisition_nodes!(a::AcquisitionData)
 Validates processed AcquisitionData object to make sure that |kᵢ| < 0.5 ∀ i ∈ [1, Nₛ]
 
 # Arguments
 * `a::AcquisitionData` - AcquisitionData object
 """
-function checkAcquisitionNodes!(a::AcquisitionData)
+function check_acquisition_nodes!(a::AcquisitionData)
 
     a.traj[1].nodes[abs.(a.traj[1].nodes[:]).>0.5] .= 0.5
 
@@ -401,13 +401,13 @@ end
 
 
 """
-    validateSiemensMRD!(r::RawAcquisitionData)
+    validate_siemens_mrd!(r::RawAcquisitionData)
 Validates RawAcquisitionData object created from ISMRMRD format object
 
 # Arguments
 * `r::RawAcquisitionData` - RawAcquisitionData object
 """
-function validateSiemensMRD!(r::RawAcquisitionData)
+function validate_siemens_mrd!(r::RawAcquisitionData)
 
     @info "Validating Siemens converted data"
 
@@ -423,13 +423,13 @@ function validateSiemensMRD!(r::RawAcquisitionData)
 end
 
 """
-    validateAcqData!(a::AcquisitionData)
+    validate_acq_data!(a::AcquisitionData)
 Validates processed AcquisitionData object after manipulation, etc...
 
 # Arguments
 * `a::AcquisitionData` - AcquisitionData object
 """
-function validateAcqData!(a::AcquisitionData)
+function validate_acq_data!(a::AcquisitionData)
 
     ## Dimensions CHECK:
 
@@ -438,27 +438,27 @@ function validateAcqData!(a::AcquisitionData)
     # kdata element dimensions: dim1:=kspace nodes | dim2:=channels/coils
 
     permutedims(a.kdata, [3, 2, 1])
-    checkAcquisitionNodes!(a)
+    check_acquisition_nodes!(a)
 
 end
 
 """
-    preprocessCartesianData!(raw::RawAcquisitionData; dims = 1)
+    preprocess_cartesian_data!(raw::RawAcquisitionData; dims = 1)
 Prepares Cartesian for reconstruction
 
 # Arguments
 * `r::RawAcquisitionData{T}`          - RawAcquisitionData object
 * `filename`                             - filename to save the preprocessed data to
 """
-function preprocessCartesianData(r::RawAcquisitionData, do_save; filename = "data/testFile.h5")
+function preprocess_cartesian_data(r::RawAcquisitionData, do_save; filename = "data/testFile.h5")
 
-    removeOversampling!(r)
+    remove_oversampling!(r)
 
     # Convert rawAcquisitionData object to an AcquisitionData object (these can be reconstructed)
     cartesian_acq_data = AcquisitionData(r, estimateProfileCenter = true) # cannot avoid camel case as defined by MRIBase
 
     ## Properly arrange data from the converted siemens file
-    validateAcqData!(cartesian_acq_data)
+    validate_acq_data!(cartesian_acq_data)
 
     if do_save
 
@@ -483,14 +483,14 @@ function preprocessCartesianData(r::RawAcquisitionData, do_save; filename = "dat
 end
 
 """
-    removeOversampling!(raw::RawAcquisitionData; dims = 1)
+    remove_oversampling!(raw::RawAcquisitionData; dims = 1)
 Removes 2x readout oversampling in specified raw data dimensions by iFFT, cropping FOV and FFT
 
 # Arguments
 * `raw::RawAcquisitionData{T}`          - RawAcquisitionData object
 * `dims`                                - dimension alongside which oversampling is removed (default: 1)
 """
-function removeOversampling!(raw::RawAcquisitionData; dims = [1])
+function remove_oversampling!(raw::RawAcquisitionData; dims = [1])
 
     dimension_index = dims[1]
     num_data_samples = raw.params["encodedSize"][dimension_index]
@@ -513,13 +513,13 @@ end
 
 
 """
-    mergeRawInterleaves(params)
+    merge_raw_interleaves(params)
 Merges multiple interleave data together from individually acquired interleave scans
 
 # Arguments
 * `params`          - Dictionary
 """
-function mergeRawInterleaves(params)
+function merge_raw_interleaves(params)
 
     # Get the other interleave indexes other than the one asked for
     interleave_complement = [x for x ∈ 1:params[:num_interleaves] if x ∉ params[:interleave]]
@@ -530,7 +530,7 @@ function mergeRawInterleaves(params)
     data_file = ISMRMRDFile(params[:interleave_data_filenames][params[:interleave]])
 
     # Read in the gradient file
-    input_trajectory = readGradientTextFile(params[:traj_filename], params[:recon_size], params[:delay])
+    input_trajectory = read_gradient_text_file(params[:traj_filename], params[:recon_size], params[:delay])
 
     # Read in raw data from the data_file
     raw_data = RawAcquisitionData(data_file)
@@ -546,11 +546,11 @@ function mergeRawInterleaves(params)
     time_track_vector = []
 
     # synchronize trajectory data and the kspace data
-    times = syncTrajAndData!(raw_data, input_trajectory, params[:num_samples], params[:interleave])
+    times = sync_traj_and_data!(raw_data, input_trajectory, params[:num_samples], params[:interleave])
 
     # adjust the header so that each diffusion direction is considered as a contrast instead of a repetition
-    # adjustHeader!(raw_data, params[:recon_size], params[:num_samples], params[:interleave],params[:single_slice])
-    adjustHeader!(raw_data, params[:recon_size], params[:num_samples], 1, params[:single_slice])
+    # adjust_header!(raw_data, params[:recon_size], params[:num_samples], params[:interleave],params[:single_slice])
+    adjust_header!(raw_data, params[:recon_size], params[:num_samples], 1, params[:single_slice])
 
     # add the times to the time tracking vector
     append!(time_track_vector, times)
@@ -566,10 +566,10 @@ function mergeRawInterleaves(params)
             deleteat!(raw_data_temp.profiles, ic) # delete profiles which aren't needed
 
             # synchronize the trajectory from the gradient file and the data from the raw data file for the interleave
-            times_temp = syncTrajAndData!(raw_data_temp, input_trajectory, params[:num_samples], l)
+            times_temp = sync_traj_and_data!(raw_data_temp, input_trajectory, params[:num_samples], l)
 
             # adjust the header to reflect the arrangement of data expected by MRIReco.jl's reconstruction function
-            adjustHeader!(raw_data_temp, params[:recon_size], params[:num_samples], l, params[:single_slice])
+            adjust_header!(raw_data_temp, params[:recon_size], params[:num_samples], l, params[:single_slice])
 
             # append the important data (the profile and the sampling times) to the raw Data file created out of this look
             append!(raw_data.profiles, deepcopy(raw_data_temp.profiles))
@@ -584,9 +584,9 @@ function mergeRawInterleaves(params)
         raw_data_temp = RawAcquisitionData(data_file_temp)
         deleteat!(raw_data_temp.profiles, ic)
 
-        times_temp = syncTrajAndData!(raw_data_temp, input_trajectory, params[:num_samples], 3)
+        times_temp = sync_traj_and_data!(raw_data_temp, input_trajectory, params[:num_samples], 3)
 
-        adjustHeader!(raw_data_temp, params[:recon_size], params[:num_samples], 2, params[:single_slice])
+        adjust_header!(raw_data_temp, params[:recon_size], params[:num_samples], 2, params[:single_slice])
 
         append!(raw_data.profiles, copy(raw_data_temp.profiles))
         append!(time_track_vector, times_temp)
@@ -619,7 +619,7 @@ function mergeRawInterleaves(params)
 end
 
 """
-    applyGIRF!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
+    apply_girf!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
 Applies the GIRF to the trajectories inside of a::AcquisitionData
 
 # Arguments
@@ -627,7 +627,7 @@ Applies the GIRF to the trajectories inside of a::AcquisitionData
 * `freq::AbstractVector`           - Vector containing frequencies of GIRF data
 * `g_data::AbstractMatrix`         - Matrix of size N x length(freq) containing complex GIRF data
 """
-function applyGIRF!(a::AcquisitionData{T}, g::GirfApplier) where {T}
+function apply_girf!(a::AcquisitionData{T}, g::GirfApplier) where {T}
 
     # Read parameters for gradient and node conversion
     S = a.encodingSize
@@ -682,7 +682,7 @@ function applyGIRF!(a::AcquisitionData{T}, g::GirfApplier) where {T}
 end
 
 """
-    applyK0!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
+    apply_k0!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
 Applies the K0 modulation due to imaging gradients to the data inside of a::AcquisitionData
 
 # Arguments
@@ -690,7 +690,7 @@ Applies the K0 modulation due to imaging gradients to the data inside of a::Acqu
 * `freq::AbstractVector`           - Vector containing frequencies of GIRF data
 * `k0_data::AbstractMatrix`         - Matrix of size N x length(freq) containing complex k0 function data
 """
-function applyK0!(a::AcquisitionData{T}, g::GirfApplier) where {T}
+function apply_k0!(a::AcquisitionData{T}, g::GirfApplier) where {T}
 
     # Read parameters for gradient and node conversion
     S = a.encodingSize
@@ -783,7 +783,7 @@ end
 ## Input/Output, File handling
 
 """
-    saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
+    save_map(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
 Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
 
 For complex-valued data, magnitude and phase can be split into separate files
@@ -795,7 +795,7 @@ For complex-valued data, magnitude and phase can be split into separate files
 * `do_split_phase::Bool=false`    - if true, data is saved in two nifti files with suffix "_magn" and "_phase", respectively
                                   to enable display in typical NIfTI viewers
 """
-function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0], do_split_phase::Bool = false, do_normalize::Bool = true)
+function save_map(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0], do_split_phase::Bool = false, do_normalize::Bool = true)
 
     # multiplication with 1000 should no longer be necessary after MRIReco 0.7.1
     spacing = 1000.0 .* resolution_mm .* Unitful.mm
@@ -841,7 +841,7 @@ function saveMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0]
 end
 
 """
-    loadMap(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
+    load_map(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
 Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
 
 For complex-valued data, magnitude and phase can be split into separate files
@@ -852,7 +852,7 @@ For complex-valued data, magnitude and phase can be split into separate files
 # Output
 * `calib_map`                    - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
 """
-function loadMap(filename; do_split_phase::Bool = false)
+function load_map(filename; do_split_phase::Bool = false)
 
     # if separate mag and phase are saved, load and combine them
     if do_split_phase

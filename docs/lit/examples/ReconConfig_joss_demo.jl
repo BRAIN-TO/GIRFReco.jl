@@ -130,7 +130,7 @@ Assembling directories and file names for final full pathes.
 These are automated operations.
 =#
 params_general[:gradient_fullpath] = joinpath(params_general[:gradients_path], params_general[:gradient_filename]) # Full paths of spiral readout gradients
-#src # params_general[:pathLoadMaps] = 
+#src # params_general[:pathload_maps] = 
 #src # joinpath(params_general[:results_path], "recon", params_general[:recon_id]) # NOTE: If loaded from other recon_id, this path might differ
 params_general[:girf_fullpath] = joinpath.(params_general[:girf_path], params_general[:girf_filename]) # Full paths of GIRF files
 params_general[:map_scan_fullpath] = joinpath(params_general[:data_path], params_general[:map_scan_filename]) # Full path of dual-echo Cartesian data

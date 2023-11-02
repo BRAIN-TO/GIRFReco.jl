@@ -1,7 +1,7 @@
-export readGradientTextFile
+export read_gradient_text_file
 
 "Reads in text file containing gradient waveform information"
-function readGradientTextFile(filename, reconsize, delay)
+function read_gradient_text_file(filename, reconsize, delay)
 
     gradient_data = readdlm(filename, '\n')
 
@@ -99,7 +99,7 @@ function testGradReader()
     # gradFile = "data/Gradients/gradients523.txt"
 
     # ##
-    # kSpaceTrajectory_2 = readGradientTextFile(gradFile, (200, 200), 0.00000)
+    # kSpaceTrajectory_2 = read_gradient_text_file(gradFile, (200, 200), 0.00000)
 
     # ##
     # pulledTrajectory21 = kspaceNodes(kSpaceTrajectory_2)[1, :]

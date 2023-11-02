@@ -31,7 +31,7 @@ gamma = 42577478
 ## Choose diffusion direction; starting from 0 (b=0) to the total number in MDDW protocol, e.g. for 6 diffusion directions, 1-6 stands for 6 DWIs)
 diffusionDirection = selector[:dif]
 idxAverage = selector[:avg]
-nDiffusionDirections = paramsGeneral[:nDiffusionDirections] # TODO: Read from ISMRMRD itself
+nDiffusionDirections = params_general[:nDiffusionDirections] # TODO: Read from ISMRMRD itself
 
 # Which interleave to be reconstructed. For single-interleave data, it will always be set as 1; for multi-interleave data, the value set here will be used.
 # For multi-interleaved data, this value is ranging from [1:TotNumIntlv] (total number of interleaves), indicating which interleave to be reconstructed
@@ -39,25 +39,25 @@ startIndexIntlv = selector[:seg]
 
 
 ## Determine to reconstruct single-interleave data, or one interleave out of multi-interleave data.
-isDataSingleIntlv = isa(paramsGeneral[:fullPathScan], String)
+isDataSingleIntlv = isa(params_general[:fullPathScan], String)
 
 
 ## ------------------------------------------------ Calculation Starts Here ---------------------------------------------------------- ##
 
-if paramsGeneral[:doLoadMaps] && isfile(paramsGeneral[:fullPathSaveB0]) # # TODO ask for sense map (but split in magn/phase)
-    @info "Loading SENSE and B0 maps from $(paramsGeneral[:fullPathSaveSense]) and $(paramsGeneral[:fullPathSaveB0])"
+if params_general[:do_load_maps] && isfile(params_general[:fullPathSaveB0]) # # TODO ask for sense map (but split in magn/phase)
+    @info "Loading SENSE and B0 maps from $(params_general[:fullPathSaveSense]) and $(params_general[:fullPathSaveB0])"
     # load maps, permute slice, sice files have geometric slice order
-    b0Maps = loadMap(paramsGeneral[:fullPathSaveB0])
+    b0Maps = load_map(params_general[:fullPathSaveB0])
 
     nSlices = size(b0Maps, 3)
-    sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
+    sliceIndexArray = get_slice_order(nSlices, isSliceInterleaved = true)
 
     b0Maps = b0Maps[:, :, invperm(sliceIndexArray)]
-    senseCartesian = loadMap(paramsGeneral[:fullPathSaveSense]; doSplitPhase = true)[:, :, invperm(sliceIndexArray), :]
+    cartesian_sensitivity = load_map(params_general[:fullPathSaveSense]; doSplitPhase = true)[:, :, invperm(sliceIndexArray), :]
 else
     ## Only calculate sensitivity and B0 maps when they have not been done yet, or it's specifically required.
     ## Executing Cartesian recon from which B0/sensitivity maps have been computed
-    @info "Running CartesianRecon to retrieve maps (senseCartesian and b0Maps)"
+    @info "Running CartesianRecon to retrieve maps (cartesian_sensitivity and b0Maps)"
     include("CartesianRecon_Mar2022_Human.jl")
     nSlices = size(b0Maps, 3)
 end
@@ -88,15 +88,15 @@ sliceSelection = excitationList[selectedSlice]
 
 # adjustmentDict is the dictionary that sets the information for correct data loading and trajectory and data synchronization
 adjustmentDict = Dict{Symbol,Any}()
-adjustmentDict[:reconSize] = paramsGeneral[:reconSize]
+adjustmentDict[:reconSize] = params_general[:reconSize]
 adjustmentDict[:interleave] = startIndexIntlv
 adjustmentDict[:slices] = 1
-adjustmentDict[:numSamples] = paramsGeneral[:numADCSamples]
+adjustmentDict[:numSamples] = params_general[:numADCSamples]
 adjustmentDict[:delay] = 0.00000 # naive delay correction
 
-adjustmentDict[:interleaveDataFileNames] = paramsGeneral[:fullPathScan]
+adjustmentDict[:interleaveDataFileNames] = params_general[:fullPathScan]
 
-adjustmentDict[:trajFilename] = paramsGeneral[:fullPathGradient]
+adjustmentDict[:trajFilename] = params_general[:fullPathGradient]
 adjustmentDict[:excitations] = sliceSelection
 
 adjustmentDict[:doMultiInterleave] = !isDataSingleIntlv
@@ -106,17 +106,17 @@ adjustmentDict[:numInterleaves] = isDataSingleIntlv ? 1 : length(adjustmentDict[
 adjustmentDict[:singleSlice] = !isMultiSlice
 
 # Defined recon size and parameters for data loading
-@info "Using Parameters:\n\nreconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(adjustmentDict[:slices]) \n coils = $(size(senseCartesian, 4)) \n numSamples = $(adjustmentDict[:numSamples])\n\n"
+@info "Using Parameters:\n\nreconSize = $(adjustmentDict[:reconSize]) \n interleave = $(adjustmentDict[:interleave]) \n slices = $(adjustmentDict[:slices]) \n coils = $(size(cartesian_sensitivity, 4)) \n numSamples = $(adjustmentDict[:numSamples])\n\n"
 
 if reloadGIRFData || !(@isdefined gK1) || !(@isdefined gAK1) || !(@isdefined gK0) || !(@isdefined gAK0)
     @info "Loading Gradient Impulse Response Functions"
 
     ## Load GIRFs (K1)
-    gK1 = readGIRFFile(paramsGeneral[:fullPathGIRF][1], paramsGeneral[:fullPathGIRF][2], paramsGeneral[:fullPathGIRF][3], "GIRF_FT", false)
+    gK1 = readGIRFFile(params_general[:fullPathGIRF][1], params_general[:fullPathGIRF][2], params_general[:fullPathGIRF][3], "GIRF_FT", false)
     gAk1 = GirfApplier(gK1, gamma)
 
     ## Load K₀ GIRF
-    gK0 = readGIRFFile(paramsGeneral[:fullPathGIRF][1], paramsGeneral[:fullPathGIRF][2], paramsGeneral[:fullPathGIRF][3], "b0ec_FT", true)
+    gK0 = readGIRFFile(params_general[:fullPathGIRF][1], params_general[:fullPathGIRF][2], params_general[:fullPathGIRF][3], "b0ec_FT", true)
     gAk0 = GirfApplier(gK0, gamma)
 end
 
@@ -125,20 +125,20 @@ if reloadSpiralData || !(@isdefined acqDataImaging)
     ## Convert raw to AcquisitionData
 
     @info "Reading spiral data and merging interleaves"
-    acqDataImaging = mergeRawInterleaves(adjustmentDict)
+    acqDataImaging = merge_raw_interleaves(adjustmentDict)
 
-    if paramsGeneral[:doCorrectWithGIRFkxyz]
+    if params_general[:doCorrectWithGIRFkxyz]
         @info "Correcting For GIRF"
-        applyGIRF!(acqDataImaging, gAk1)
+        apply_girf!(acqDataImaging, gAk1)
     end
 
-    if paramsGeneral[:doCorrectWithGIRFk0]
+    if params_general[:doCorrectWithGIRFk0]
         @info "Correcting For k₀"
-        applyK0!(acqDataImaging, gAk0)
+        apply_k0!(acqDataImaging, gAk0)
     end
 
     ## Check the k-space nodes so they don't exceed frequency limits [-0.5, 0.5] (inclusive)
-    checkAcquisitionNodes!(acqDataImaging)
+    check_acquisition_nodes!(acqDataImaging)
 
 end
 
@@ -146,24 +146,24 @@ end
 @info "Resizing Sense Maps"
 
 # Resize sense maps to match encoding size of data matrix
-sensitivity = mapslices(x -> imresize(x, adjustmentDict[:reconSize]), senseCartesian, dims = [1, 2])
+sensitivity = mapslices(x -> imresize(x, adjustmentDict[:reconSize]), cartesian_sensitivity, dims = [1, 2])
 
 # Plot the sensitivity maps of each coil
 @info "Plotting SENSE Maps"
 
-if paramsGeneral[:doPlotRecon]
-    plotSenseMaps(sensitivity, size(sensitivity, 4), sliceIndex = 10)
+if params_general[:do_plot_recon]
+    plot_sense_maps(sensitivity, size(sensitivity, 4), sliceIndex = 10)
 end
 
 
 # shift FOV to middle :) 
-shiftksp!(acqDataImaging, paramsGeneral[:fovShift])
+shiftksp!(acqDataImaging, params_general[:fovShift])
 #changeFOV!(acqDataImaging,[1.5,1.5])
 
 
 ## Do coil compression to make recon faster
-if paramsGeneral[:doCoilCompression]
-    acqDataImaging, sensitivity = geometricCC_2d(acqDataImaging, sensitivity, paramsGeneral[:nVirtualCoils])
+if params_general[:doCoilCompression]
+    acqDataImaging, sensitivity = geometricCC_2d(acqDataImaging, sensitivity, params_general[:nVirtualCoils])
 end
 
 
@@ -180,12 +180,12 @@ params[:reco] = "multiCoil"
 params[:reconSize] = adjustmentDict[:reconSize]
 params[:regularization] = "L2"
 params[:λ] = 1e-2 # CHANGE THIS TO GET BETTER OR WORSE RECONSTRUCTION RESULTS
-params[:iterations] = paramsGeneral[:nReconIterations]
+params[:iterations] = params_general[:nReconIterations]
 params[:solver] = "cgnr"
 params[:solverInfo] = SolverInfo(ComplexF32, store_solutions = false)
 params[:senseMaps] = ComplexF32.(sensitivity[:, :, selectedSlice, :])
 
-if paramsGeneral[:doCorrectWithB0map]
+if params_general[:do_correct_with_b0_map]
     params[:correctionMap] = ComplexF32.(-1im .* resizedB0[:, :, selectedSlice])
 end
 
@@ -195,26 +195,26 @@ end
 #totalRecon = sum(abs2,reco.data,dims=5)
 
 # save Map recon (multi-echo etc.)
-if paramsGeneral[:doSaveRecon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
+if params_general[:do_save_recon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
     resolution_mm = fieldOfView(acqDataImaging) ./ encodingSize(acqDataImaging)
-    resolution_mm[3] = fieldOfView(acqDataImaging)[3] * (1 + paramsGeneral[:sliceDistanceFactor_percent] / 100.0) # for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
+    resolution_mm[3] = fieldOfView(acqDataImaging)[3] * (1 + params_general[:sliceDistanceFactor_percent] / 100.0) # for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
 
     # TODO: use slice ordering from cartesian scan directly!
     nSlices = numSlices(acqDataImaging)
-    sliceIndexArray = getSliceOrder(nSlices, isSliceInterleaved = true)
-    saveMap(
-        paramsGeneral[:fullPathSaveRecon],
-        paramsGeneral[:scalingFactorSaveRecon] * reco.data[:, :, sliceIndexArray],
+    sliceIndexArray = get_slice_order(nSlices, isSliceInterleaved = true)
+    save_map(
+        params_general[:fullPathSaveRecon],
+        params_general[:scalingFactorSaveRecon] * reco.data[:, :, sliceIndexArray],
         resolution_mm;
         doSplitPhase = true,
-        doNormalize = paramsGeneral[:doNormalizeRecon],
+        doNormalize = params_general[:doNormalizeRecon],
     )
 end
 
-if paramsGeneral[:doPlotRecon]
+if params_general[:do_plot_recon]
     @info "Plotting Reconstruction"
     pygui(true)
-    plotReconstruction(
+    plot_reconstruction(
         reco,
         1:length(selectedSlice),
         resizedB0[:, :, selectedSlice],

@@ -26,7 +26,7 @@ if params_general[:do_process_map_scan]
     # raw.params["reconFOV"] = [230, 230, 2]
 
     # Preprocess Data and save!
-    preprocessCartesianData(raw::RawAcquisitionData, true; filename = processed_filename)
+    preprocess_cartesian_data(raw::RawAcquisitionData, true; filename = processed_filename)
 
 end
 
@@ -45,7 +45,7 @@ num_slices = numSlices(cartesian_acq_data)
 TE1 = raw_new.params["TE"][1]
 TE2 = raw_new.params["TE"][2]
 
-slice_idx_array = getSliceOrder(num_slices, is_slice_interleaved = true)
+slice_idx_array = get_slice_order(num_slices, is_slice_interleaved = true)
 # shift FOV to middle :) 
 #TODO: in MRIReco v0.7, try: correctOffset(cartesian_acq_data, [0 -20 0])
 shift_kspace!(cartesian_acq_data, params_general[:fov_shift]) # amount of FOV shift; in unit of number of voxels in [x,y] direction
@@ -76,7 +76,7 @@ resolution_mm = (res_x, res_y, res_z)
 # save SENSE maps
 if params_general[:do_save_recon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
     # TODO: use correct slice order everywhere, e.g., when saving/loading maps for spiral recon
-    saveMap(params_general[:sensitivity_save_fullpath], cartesian_sensitivity[:, :, slice_idx_array, :], resolution_mm; do_split_phase = true)
+    save_map(params_general[:sensitivity_save_fullpath], cartesian_sensitivity[:, :, slice_idx_array, :], resolution_mm; do_split_phase = true)
 end
 
 ## Parameter dictionary definition for reconstruction
@@ -100,7 +100,7 @@ params_cartesian[:senseMaps] = ComplexF32.(cartesian_sensitivity) # set sensitiv
 
 # save Map recon (multi-echo etc.)
 if params_general[:do_save_recon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
-    saveMap(params_general[:map_save_fullpath], cartesian_reco.data[:, :, slice_idx_array, :, :, :], resolution_mm; do_split_phase = true)
+    save_map(params_general[:map_save_fullpath], cartesian_reco.data[:, :, slice_idx_array, :, :, :], resolution_mm; do_split_phase = true)
 end
 
 ## Calculate B0 maps from the acquired images (if two TEs)
@@ -129,15 +129,15 @@ end
 
 # save B0 map
 if params_general[:do_save_recon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
-    saveMap(params_general[:b0_map_save_fullpath], b0_maps[:, :, slice_idx_array], resolution_mm; do_normalize = false) # no normalization, we want absolute values for offres maps
+    save_map(params_general[:b0_map_save_fullpath], b0_maps[:, :, slice_idx_array], resolution_mm; do_normalize = false) # no normalization, we want absolute values for offres maps
 end
 
 
 if params_general[:do_plot_recon]
     @info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps)"
-    # plotSenseMaps(sensitivity,num_coils)
+    # plot_sense_maps(sensitivity,num_coils)
     plotlyjs()
-    plotReconstruction(cartesian_reco[:, :, :, 1], 1:size(cartesian_reco, 3), b0_maps, is_slice_interleaved = false, rotation = 180)
+    plot_reconstruction(cartesian_reco[:, :, :, 1], 1:size(cartesian_reco, 3), b0_maps, is_slice_interleaved = false, rotation = 180)
 end
 
 # cleanup unused file

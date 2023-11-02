@@ -8,7 +8,7 @@ include("../io/GradientReader.jl")
 include("../utils/Utils.jl")
 
 ## Executing Cartesian recon from which B0/sensitivity maps have been computed
-@info "Running julia_recon_cartesian to retrieve maps (senseCartesian and b0Maps)"
+@info "Running julia_recon_cartesian to retrieve maps (cartesian_sensitivity and b0Maps)"
 include("../recon/CartesianRecon.jl")
 
 ## Set figures to be unlocked from the window (i.e use matplotlib backend with controls)
@@ -66,7 +66,7 @@ adjustmentDict[:singleSlice] = !multiSlice
 ## Convert raw to AcquisitionData
 
 @info "Merging interleaves and reading data \n"
-acqDataImaging = mergeRawInterleaves(adjustmentDict)
+acqDataImaging = merge_raw_interleaves(adjustmentDict)
 
 @info "Loading Gradient Impulse Response Functions \n"
 ## Load GIRFs!
@@ -74,28 +74,28 @@ gK1 = loadGirf(1, 1)
 gAk1 = GirfApplier(gK1, 42577478)
 
 @info "Correcting For GIRF \n"
-applyGIRF!(acqDataImaging, gAk1)
+apply_girf!(acqDataImaging, gAk1)
 
 # # Load K₀ GIRF
 # gK0 = loadGirf(0,1)
 # gAk0 = GirfApplier(gK0, 42577478)
 
 # @info "Correcting For k₀ \n"
-# applyK0!(acqDataImaging, gAk0)
+# apply_k0!(acqDataImaging, gAk0)
 
 ## Check the k-space nodes so they don't exceed frequency limits [-0.5, 0.5] (inclusive)
-checkAcquisitionNodes!(acqDataImaging)
+check_acquisition_nodes!(acqDataImaging)
 
 ## Sense Map loading
 @info "Validating Sense Maps \n"
 
 # Resize sense maps to match encoding size of data matrix
-sensitivity = mapslices(x -> imresize(x, (acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), senseCartesian, dims = [1, 2])
+sensitivity = mapslices(x -> imresize(x, (acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), cartesian_sensitivity, dims = [1, 2])
 sensitivity = mapslices(rotl90, sensitivity, dims = [1, 2])
 
 # ## Plot the sensitivity maps of each coil
 @info "Plotting SENSE Maps \n"
-plotSenseMaps(sensitivity, adjustmentDict[:coils])
+plot_sense_maps(sensitivity, adjustmentDict[:coils])
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Validating B0 Maps \n"
@@ -138,7 +138,7 @@ params[:sparseTrafo] = "Wavelet"
 @time reco = reconstruction(acqDataImaging, params)
 
 #totalRecon = sum(abs2,reco.data,dims=5)
-plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice])
+plot_reconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice])
 
 ## Plot the image edges (feature comparison)
 

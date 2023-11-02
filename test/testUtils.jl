@@ -1,8 +1,8 @@
-function test_getSliceOrder()
+function test_get_slice_order()
 
 end
 
-function test_syncTrajAndData!()
+function test_sync_traj_and_data!()
 
 end
 
@@ -10,47 +10,47 @@ function test_do_k0_correction!()
 
 end
 
-function test_adjustHeader!()
+function test_adjust_header!()
 
 end
 
-function test_checkAcquisitionNodes!()
+function test_check_acquisition_nodes!()
 
 end
 
-function test_validateSiemensMRD!()
+function test_validate_siemens_mrd!()
 
 end
 
-function test_validateAcqData!()
+function test_validate_acq_data!()
 
 end
 
-function test_preprocessCartesianData()
+function test_preprocess_cartesian_data()
 
 end
 
-function test_removeOversampling!()
+function test_remove_oversampling!()
 
 end
 
-function test_mergeRawInterleaves()
+function test_merge_raw_interleaves()
 
 end
 
-function test_applyGIRF!()
+function test_apply_girf!()
 
 end
 
-function test_applyK0!()
+function test_apply_k0!()
 
 end
 
-function test_saveMap()
+function test_save_map()
 
 end
 
-function test_loadMap()
+function test_load_map()
 
 end
 
@@ -61,21 +61,21 @@ end
 function testUtils(N=32)
     @testset "Utilities" begin
         
-        test_adjustHeader!()
-        test_applyGIRF!()
-        test_applyK0!()
-        test_checkAcquisitionNodes!()
+        test_adjust_header!()
+        test_apply_girf!()
+        test_apply_k0!()
+        test_check_acquisition_nodes!()
         test_do_k0_correction!()
-        test_getSliceOrder()
-        test_loadMap()
-        test_mergeRawInterleaves()
-        test_preprocessCartesianData()
-        test_removeOversampling!()
-        test_saveMap()
+        test_get_slice_order()
+        test_load_map()
+        test_merge_raw_interleaves()
+        test_preprocess_cartesian_data()
+        test_remove_oversampling!()
+        test_save_map()
         test_shift_kspace!()
-        test_syncTrajAndData!()
-        test_validateAcqData!()
-        test_validateSiemensMRD!()
+        test_sync_traj_and_data!()
+        test_validate_acq_data!()
+        test_validate_siemens_mrd!()
 
     end
 end

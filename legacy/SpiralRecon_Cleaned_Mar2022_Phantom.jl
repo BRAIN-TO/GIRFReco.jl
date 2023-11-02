@@ -15,9 +15,9 @@ reloadSpiralData = true
 gamma = 42577478
 
 ## Only calculate sensitivity and B0 maps when they have not been done yet, or it's specifically required.
-if reloadCartesianData || !((@isdefined senseCartesian) && (@isdefined b0Maps))
+if reloadCartesianData || !((@isdefined cartesian_sensitivity) && (@isdefined b0Maps))
     ## Executing Cartesian recon from which B0/sensitivity maps have been computed
-    @info "Running CartesianRecon to retrieve maps (senseCartesian and b0Maps)"
+    @info "Running CartesianRecon to retrieve maps (cartesian_sensitivity and b0Maps)"
     include("CartesianRecon_Mar2022_Phantom.jl")
 end
 
@@ -88,7 +88,7 @@ if reloadSpiralData || !(@isdefined acqDataImaging)
     ## Convert raw to AcquisitionData
 
     @info "Merging interleaves and reading data \n"
-    acqDataImaging = mergeRawInterleaves(adjustmentDict)
+    acqDataImaging = merge_raw_interleaves(adjustmentDict)
 
     @info "Loading Gradient Impulse Response Functions \n"
     ## Load GIRFs!
@@ -98,7 +98,7 @@ if reloadSpiralData || !(@isdefined acqDataImaging)
     gAk1 = GirfApplier(gK1, gamma)
 
     @info "Correcting For GIRF \n"
-    applyGIRF!(acqDataImaging, gAk1)
+    apply_girf!(acqDataImaging, gAk1)
 
     # Load K₀ GIRF
     # Tim Wu, use new read GIRF function
@@ -107,10 +107,10 @@ if reloadSpiralData || !(@isdefined acqDataImaging)
     gAk0 = GirfApplier(gK0, gamma)
 
     @info "Correcting For k₀ \n"
-    applyK0!(acqDataImaging, gAk0)
+    apply_k0!(acqDataImaging, gAk0)
 
     ## Check the k-space nodes so they don't exceed frequency limits [-0.5, 0.5] (inclusive)
-    checkAcquisitionNodes!(acqDataImaging)
+    check_acquisition_nodes!(acqDataImaging)
 
 end
 
@@ -118,12 +118,12 @@ end
 @info "Validating Sense Maps \n"
 
 # Resize sense maps to match encoding size of data matrix
-sensitivity = mapslices(x -> imresize(x, (acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), senseCartesian, dims = [1, 2])
+sensitivity = mapslices(x -> imresize(x, (acqDataImaging.encodingSize[1], acqDataImaging.encodingSize[2])), cartesian_sensitivity, dims = [1, 2])
 # sensitivity = mapslices(rotl90,sensitivity,dims=[1,2])
 
 # ## Plot the sensitivity maps of each coil
 @info "Plotting SENSE Maps \n"
-plotSenseMaps(sensitivity, adjustmentDict[:coils])
+plot_sense_maps(sensitivity, adjustmentDict[:coils])
 
 ## B0 Maps (Assumes we have a B0 map from gradient echo scan named b0)
 @info "Resizing B0 Maps \n"
@@ -151,6 +151,6 @@ params[:correctionMap] = ComplexF32.(-1im .* resizedB0[:, :, selectedSlice])
 @info "Plotting Reconstruction \n"
 ## Set figures to be unlocked from the win9ow (i.e use matplotlib backend with controls)
 pygui(true)
-plotReconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice])
+plot_reconstruction(reco, 1:length(selectedSlice), resizedB0[:, :, selectedSlice])
 
 @info "Successfully Completed SpiralRecon \n"
