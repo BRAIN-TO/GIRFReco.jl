@@ -1,10 +1,10 @@
 using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
 
-include("../utils/Utils.jl")
-include("../utils/FieldMapEstimator.jl")
+include("../utils/utils.jl")
+include("../utils/fieldmap_estimator.jl")
 
 ## Dictionary of frequently changed parameters
-include("ReconConfig.jl")
+include("recon_config.jl")
 
 ## Load data files
 
@@ -136,5 +136,5 @@ if !params_general[:do_save_processed_map_scan] && params_general[:do_process_ma
     rm(processed_filename)
 end
 
-@info "Successfully Completed CartesianReconstruction"
+@info "Successfully Completed cartesian_reconstruction"
 

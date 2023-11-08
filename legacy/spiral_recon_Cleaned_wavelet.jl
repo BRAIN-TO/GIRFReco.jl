@@ -4,12 +4,12 @@ using PyPlot, HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBin
 # Include tools and reader functions for running the spiral reconstruction recipe
 # Note: the files are found relative of the location of the folder, not the
 # environment current folder
-include("../io/GradientReader.jl")
-include("../utils/Utils.jl")
+include("../io/gradient_reader.jl")
+include("../utils/utils.jl")
 
 ## Executing Cartesian recon from which B0/sensitivity maps have been computed
 @info "Running julia_recon_cartesian to retrieve maps (cartesian_sensitivity and b0_maps)"
-include("../recon/CartesianRecon.jl")
+include("../recon/cartesian_recon.jl")
 
 ## Set figures to be unlocked from the window (i.e use matplotlib backend with controls)
 pygui(true)

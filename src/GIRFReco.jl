@@ -22,7 +22,7 @@ using FileIO
 using MRIFiles
 using MosaicViews
 
-include("../utils/Utils.jl")
-include("../io/GradientReader.jl")
+include("../utils/utils.jl")
+include("../io/gradient_reader.jl")
 
 end # module

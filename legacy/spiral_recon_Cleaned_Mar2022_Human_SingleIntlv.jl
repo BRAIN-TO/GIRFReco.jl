@@ -1,14 +1,14 @@
 using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarization, ImageEdgeDetection, MRIGradients
 
 # All data-specific recon parameters
-include("ReconConfig.jl")
+include("recon_config.jl")
 
 ##
 # Include tools and reader functions for running the spiral reconstruction recipe
 # Note: the files are found relative of the location of the folder, not the
 # environment current folder
-include("../io/GradientReader.jl")
-include("../utils/Utils.jl")
+include("../io/gradient_reader.jl")
+include("../utils/utils.jl")
 
 ## ----------------------------- User-defined Variables -------------------------- ##
 
@@ -57,8 +57,8 @@ if params_general[:do_load_maps] && isfile(params_general[:b0_map_save_fullpath]
 else
     ## Only calculate sensitivity and B0 maps when they have not been done yet, or it's specifically required.
     ## Executing Cartesian recon from which B0/sensitivity maps have been computed
-    @info "Running CartesianRecon to retrieve maps (cartesian_sensitivity and b0_maps)"
-    include("CartesianRecon_Mar2022_Human.jl")
+    @info "Running cartesian_recon to retrieve maps (cartesian_sensitivity and b0_maps)"
+    include("cartesian_recon_Mar2022_Human.jl")
     num_slices = size(b0_maps, 3)
 end
 
@@ -224,4 +224,4 @@ if params_general[:do_plot_recon]
     )
 end
 
-@info "Successfully Completed SpiralRecon"
+@info "Successfully Completed Spiral Reconstruction"

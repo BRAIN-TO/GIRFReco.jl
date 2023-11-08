@@ -58,7 +58,7 @@ function test_shift_kspace!()
 
 end
 
-function testUtils(N=32)
+function test_utils(N=32)
     @testset "Utilities" begin
         
         test_adjust_header!()
@@ -80,4 +80,4 @@ function testUtils(N=32)
     end
 end
 
-testUtils()
+test_utils()

@@ -1,9 +1,9 @@
 using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients, MRIFiles, MRIFieldmaps
 
-include("../utils/FieldMapEstimator.jl")
+include("../utils/fieldmap_estimator.jl")
 
 ## Dictionary of frequently changed parameters
-# include("ReconConfig.jl")
+# include("recon_config.jl")
 
 ## Load data files
 

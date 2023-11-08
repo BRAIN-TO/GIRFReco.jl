@@ -1,6 +1,6 @@
 using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients
 
-include("../utils/Utils.jl")
+include("../utils/utils.jl")
 
 ## function to calculate the B0 maps from the two images with different echo times
 # TODO have the b0 map calculation be capable of handling variable echo times
@@ -97,4 +97,4 @@ pygui(true) # Leave this code till we need plotting.
 # plot_sense_maps(sensitivity,num_coils)
 plot_reconstruction(cartesian_reco[:, :, :, 1], 1:size(cartesian_reco, 3), b0_maps, isSliceInterleaved = true, rotateAngle = 270)
 
-@info "Successfully Completed CartesianReconstruction"
+@info "Successfully Completed cartesian_reconstruction"

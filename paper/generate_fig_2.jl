@@ -23,7 +23,7 @@ We need to provide a location for the NIfTI files with each successive correctio
 
 =#
 root_project_path = "/Your/Project/Path/Here"
-include("Your/Project/Path/docs/lit/examples/ReconConfig_joss_demo.jl")
+include("Your/Project/Path/docs/lit/examples/recon_config_joss_demo.jl")
 
 #=
 

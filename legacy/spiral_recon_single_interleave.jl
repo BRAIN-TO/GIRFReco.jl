@@ -17,7 +17,7 @@ using HDF5,
     Images
 
 # All data-specific recon parameters
-include("ReconConfig_SPIDI_0007.jl")
+include("recon_config_SPIDI_0007.jl")
 
 ## ----------------------------- User-defined Variables -------------------------- ##
 
@@ -60,8 +60,8 @@ if params_general[:do_load_maps] && isfile(params_general[:b0_map_save_fullpath]
 else
     ## Only calculate sensitivity and B0 maps when they have not been done yet, or it's specifically required.
     ## Executing Cartesian recon from which B0/sensitivity maps have been computed
-    @info "Running CartesianRecon to retrieve maps (cartesian_sensitivity and b0_maps)"
-    include("CartesianRecon.jl")
+    @info "Running cartesian_recon to retrieve maps (cartesian_sensitivity and b0_maps)"
+    include("cartesian_recon.jl")
     num_slices = size(b0_maps, 3)
 end
 
@@ -223,4 +223,4 @@ if params_general[:do_plot_recon]
     )
 end
 
-@info "Successfully Completed SpiralRecon"
+@info "Successfully Completed Spiral Reconstruction"

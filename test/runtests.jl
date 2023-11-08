@@ -1,4 +1,5 @@
 using GIRFReco
 using Test
 
-include("testUtils.jl")
+include("testutils.jl")
+include("testintegration.jl")

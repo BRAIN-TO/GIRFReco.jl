@@ -4,8 +4,8 @@ using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarizatio
 # Include tools and reader functions for running the spiral reconstruction recipe
 # Note: the files are found relative of the location of the folder, not the
 # environment current folder
-include("../io/GradientReader.jl")
-include("../utils/Utils.jl")
+include("../io/gradient_reader.jl")
+include("../utils/utils.jl")
 
 ## Set true if we need to reload Cartesian and/or spiral data compulsively.
 reload_cartesian_data = true
@@ -18,8 +18,8 @@ gamma = 42577478
 ## Only calculate sensitivity and B0 maps when they have not been done yet, or it's specifically required.
 if reload_cartesian_data || !((@isdefined cartesian_sensitivity) && (@isdefined b0_maps))
     ## Executing Cartesian recon from which B0/sensitivity maps have been computed
-    @info "Running CartesianRecon to retrieve maps (cartesian_sensitivity and b0_maps)"
-    include("CartesianRecon_Mar2022_Human.jl")
+    @info "Running cartesian_recon to retrieve maps (cartesian_sensitivity and b0_maps)"
+    include("cartesian_recon_Mar2022_Human.jl")
 end
 
 ## Set figures to be unlocked from the win9ow (i.e use matplotlib backend with controls)
@@ -177,4 +177,4 @@ plot_reconstruction(cartesian_reco, 1:length(selected_slice), resized_b0_maps[:,
 # figure("Edge Differences")
 # imshow(imEdges)
 
-@info "Successfully Completed SpiralRecon \n"
+@info "Successfully Completed Spiral Reconstruction \n"

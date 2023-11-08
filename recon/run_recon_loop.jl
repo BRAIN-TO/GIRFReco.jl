@@ -1,5 +1,5 @@
 ## Recon loop manipulator dimension selector of what has to be reconstructed
-# Probably the SpiralRecon-Wrapper should be a function to take selector as Argument
+# Probably the spiral_recon-Wrapper should be a function to take selector as Argument
 # but then running as a script for debugging might be less convenient
 @info "Starting in $(pwd())"
 
@@ -11,7 +11,7 @@ for avg = 1:4 #1:4
         selector[:seg] = 1
         selector[:dif] = dif
         @info "\n\n\n\tReconstructing avg=$(selector[:avg]), seg=$(selector[:seg]), dif=$(selector[:dif])\n\n"
-        include("SpiralRecon_SingleIntlv.jl")
+        include("spiral_recon_single_interleave.jl")
     end
 end
 is_called_from_global_recon = false;

@@ -1,4 +1,4 @@
-## This ReconConfig.jl file describes all reconstruction parameters, as well as data locations and selections for an iterative non-Cartesian reconstruction that relies 
+## This recon_config.jl file describes all reconstruction parameters, as well as data locations and selections for an iterative non-Cartesian reconstruction that relies 
 #  on an external reference scan (Cartesian) to estimate calibration maps (coil sensitivities, B0 maps)
 
 using Dates
@@ -136,5 +136,5 @@ if ~ispath(params_general[:recon_save_path])
 end
 
 # copies this config file to the recon path for later checks of parameter functions
-cp("recon/ReconConfig.jl", joinpath(params_general[:recon_save_path], "ReconConfig.jl"); force = true)
+cp("recon/recon_config.jl", joinpath(params_general[:recon_save_path], "recon_config.jl"); force = true)
 

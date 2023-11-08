@@ -7,7 +7,7 @@ This page demonstrates an example script for using GIRFReco.jl
 
 This page was generated from the following Julia file: [`joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/examples/joss_demo.jl)
 
-The configuration file is [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/examples/ReconConfig_joss_demo.jl)
+The configuration file is [`recon_config_joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/examples/recon_config_joss_demo.jl)
 =#
 
 #=
@@ -31,7 +31,7 @@ using MRIReco, FileIO, MRIFiles, MRICoilSensitivities
 #=
 ## 2. Configurations for reconstruction
 
-The following file, [`ReconConfig_joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/examples/ReconConfig_joss_demo.jl),
+The following file, [`recon_config_joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/examples/recon_config_joss_demo.jl),
 includes general configuration for spiral reconstruction.
 It is necessary to execute this file to make sure all parameters are loaded.
 Sample Data that works with this script can be found at: https://doi.org/10.5281/zenodo.7779044
@@ -41,7 +41,7 @@ Please download, extract and set the root_project_path as the top level folder (
 
 root_project_path = "Your/Extracted/Data/Folder" # Root path of the data extracted from Zenodo
 root_project_path = "/srv/data/ajaffray/TORONTO_COLLAB/data/joss_data_zenodo/"
-include("ReconConfig_joss_demo.jl")
+include("recon_config_joss_demo.jl")
 
 
 # Two user defined parameters, just for this script.
@@ -82,7 +82,7 @@ The steps of image reconstruction starts here.
 
 The first step in reconstruction pipeline is to calculate the off-resonance (B0) maps `b0_map` 
 and coil sensitivity maps `cartesian_sensitivity` through the Cartesian reconstruction script 
-[CartesianRecon.jl](@__REPO_ROOT_URL__/recon/CartesianRecon.jl). 
+[cartesian_recon.jl](@__REPO_ROOT_URL__/recon/cartesian_recon.jl). 
 Ideally this script is execute once and the calculated maps are 
 saved into files, which are loaded for future usage to save calculation time. 
 This is controlled by `do_load_maps` in general parameters. 
@@ -98,8 +98,8 @@ if params_general[:do_load_maps] && isfile(params_general[:b0_map_save_fullpath]
     b0_maps = b0_maps[:, :, invperm(slice_idx_array)]
     cartesian_sensitivity = load_map(params_general[:sensitivity_save_fullpath]; do_split_phase = true)[:, :, invperm(slice_idx_array), :]
 else
-    @info "Running CartesianRecon to retrieve maps (cartesian_sensitivity and b0_maps)"
-    include("../../../recon/CartesianRecon.jl")
+    @info "Running cartesian_recon to retrieve maps (cartesian_sensitivity and b0_maps)"
+    include("../../../recon/cartesian_recon.jl")
     num_slices = size(b0_maps, 3)
 end
 
@@ -176,7 +176,7 @@ Here we synchronize the spiral k-space data with trajectory by upsampling the tr
 Subsequently, data of all the selected spiral interleaves and the corresponding trajectories 
 are merged into `imaging_acq_data`. 
 This step is done through the function `merge_raw_interleaves`, which can be viewed in 
-[Utils.jl](@__REPO_ROOT_URL__/utils/Utils.jl).
+[utils.jl](@__REPO_ROOT_URL__/utils/utils.jl).
 
 Note that we only do these steps when they have not been done yet or it's specifically required.
 =#
@@ -302,7 +302,7 @@ GC.gc()
 
 All results could be saved into NIfTI files using the `save_map` function 
 and be plotted using the `plot_reconstruction` function, both located in 
-the file [Utils.jl](@__REPO_ROOT_URL__/utils/Utils.jl).
+the file [utils.jl](@__REPO_ROOT_URL__/utils/utils.jl).
 
 =#
 if params_general[:do_save_recon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load

@@ -4,12 +4,12 @@ using HDF5, MRIReco, LinearAlgebra, Dierckx, DSP, FourierTools, ImageBinarizatio
 # Include tools and reader functions for running the spiral reconstruction recipe
 # Note: the files are found relative of the location of the folder, not the
 # environment current folder
-include("../io/GradientReader.jl")
-include("../utils/Utils.jl")
+include("../io/gradient_reader.jl")
+include("../utils/utils.jl")
 
 ## Executing Cartesian recon from which B0/sensitivity maps have been computed
-@info "Running CartesianRecon to retrieve maps (cartesian_sensitivity and b0_maps)"
-include("../recon/CartesianRecon.jl")
+@info "Running cartesian_recon to retrieve maps (cartesian_sensitivity and b0_maps)"
+include("../recon/cartesian_recon.jl")
 
 ## Set figures to be unlocked from the window (i.e use matplotlib backend with controls)
 
@@ -149,4 +149,4 @@ plot_reconstruction(reco, 1:length(selected_slice), resized_b0_maps[:, :, select
 # figure("Edge Differences")
 # PyPlot.imshow(imEdges)
 
-@info "Successfully Completed SpiralRecon \n"
+@info "Successfully Completed Spiral Reconstruction \n"
