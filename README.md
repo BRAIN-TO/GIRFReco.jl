@@ -8,7 +8,7 @@ This package provides an image reconstruction pipeline for real-world non-Cartes
 
 This repository includes working [examples](./docs/lit/examples/) for spiral reconstruction with GIRF correction of trajectory (kx-ky-kz, or k<sub>1</sub> as the first order GIRF) and B0 eddy currents (k<sub>0</sub> as zeroth order GIRF), iterative reconstruction (cg-SENSE) and a Cartesian reconstruction example for coil sensitivity and off-resonance map calculation.
 
-The data for the phantom reconstruction [`joss_demo.jl`](./docs/lit/examples/joss_demo.jl) is publicly available [here](https://www.doi.org/10.5281/zenodo.7779045). The path of the data, `params_general[:pathProject]`, needs to be modified accordingly in the [config file](./docs/lit/examples/ReconConfig_joss_demo.jl).
+The data for the phantom reconstruction [`joss_demo.jl`](./docs/lit/examples/joss_demo.jl) is publicly available [here](https://www.doi.org/10.5281/zenodo.7779045). The path of the data, `params_general[:project_path]`, needs to be modified accordingly in the [config file](./docs/lit/examples/ReconConfig_joss_demo.jl).
 
 For a full introduction, please refer to our [manuscript](./paper/paper.md) for a full description of this package, including background, purpose, implementation, and the information of dependent packages.
 

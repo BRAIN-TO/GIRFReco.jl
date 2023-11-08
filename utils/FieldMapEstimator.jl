@@ -1,3 +1,5 @@
+export estimate_b0_maps
+
 using Flux
 
 """
@@ -74,7 +76,7 @@ function pcg_ml_est_fieldmap(y::AbstractMatrix{Complex{T}}, z::AbstractMatrix{Co
 end
 
 """
-estimateB0Maps(im_data,slices, TE1,TE2,β,isrotated)
+estimate_b0_maps(im_data,slices, TE1,TE2,β,isrotated)
 Processes 3D volume data as output from MRIReco.reconstruction to estimate fieldmaps using the method presented by Funai and Fessler
 # Required Arguments
 * `im_data` - 5-D array with complex image data -> first 

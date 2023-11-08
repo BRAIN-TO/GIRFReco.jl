@@ -186,18 +186,18 @@ end
 
 Calculate  B0 map from the two images with different echo times via their phase difference (obtained from imTE2.*conj(imTE1))
 TODO have the b0 map calculation be capable of handling variable echo times
-TODO2: Do we need this basic B0 map calculation or is it superseded by estimateB0Maps?
+TODO2: Do we need this basic B0 map calculation or is it superseded by estimate_b0_maps?
 
 # Arguments
-* `me_data`                          - [nX nY nZ 2 nCoils] 5D image array, 4th dim echo time
+* `me_data`                          - [nX nY nZ 2 num_coils] 5D image array, 4th dim echo time
 * `slices::NTuple{num_slices,Int}`     - slice index vector (tuple?) for which map is computed
 * `echotime_1::AbstractFloat`        - TE1 [ms]
 * `echotime_2::AbstractFloat`        - TE2 [ms]
 """
 function calculate_b0_maps(me_data, slices, echotime_1, echotime_2)
 
-    # b0Maps = mapslices(x -> rotl90(x),ROMEO.unwrap(angle.(me_data[:,:,slices,2,1].*conj(me_data[:,:,slices,1,1]))),dims=(1,2))./((7.38-4.92)/1000)
-    b0Maps =
+    # b0_maps = mapslices(x -> rotl90(x),ROMEO.unwrap(angle.(me_data[:,:,slices,2,1].*conj(me_data[:,:,slices,1,1]))),dims=(1,2))./((7.38-4.92)/1000)
+    b0_maps =
         mapslices(x -> x, ROMEO.unwrap(angle.(me_data[:, :, slices, 2, 1] .* conj(me_data[:, :, slices, 1, 1]))), dims = (1, 2)) ./
         ((echotime_2 - echotime_1) / 1000)
 
@@ -206,7 +206,7 @@ end
 """
     get_slice_order(num_slices, is_slice_interleaved)
 
-Returns array mapping from acquisition number to slice number (geometric position) (indexArray[slice = 1:9] = [acquisitionNumbers])
+Returns array mapping from acquisition number to slice number (geometric position) (index_array[slice = 1:9] = [acquisitionNumbers])
 TODO: Add ascending/descending options
 
 # Arguments
@@ -578,7 +578,7 @@ function merge_raw_interleaves(params)
         end
 
         # if there is the choice to do odd or opposing interleaves, add the 2nd interleave
-    elseif params[:doOddInterleave]
+    elseif params[:do_odd_interleave]
 
         data_file_temp = ISMRMRDFile(params[:interleave_data_filenames][3])
         raw_data_temp = RawAcquisitionData(data_file_temp)

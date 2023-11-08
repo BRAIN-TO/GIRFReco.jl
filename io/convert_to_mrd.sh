@@ -18,7 +18,7 @@ while getopts p:c:s:h flag
 do
     case "${flag}" in
         p)
-            pathData="$OPTARG"
+            data_path="$OPTARG"
             ;;
         c)
             set -f # disable globbing temporarily
@@ -45,7 +45,7 @@ set +f # Turn globbing on
 for id in ${idsCartesian[@]}; do
     printf -v filepattern "meas_MID%05d" "${id}"
     echo $filepattern 
-    foundFiles=$(ls "${pathData}"/${filepattern}*.dat)
+    foundFiles=$(ls "${data_path}"/${filepattern}*.dat)
     echo "Converting $foundFiles to mrd using IsmrmrdParameterMap_Siemens_NX.xsl"
     siemens_to_ismrmrd -f "$foundFiles" -z 2 -x IsmrmrdParameterMap_Siemens_NX.xsl --skipSyncData
 done
@@ -53,7 +53,7 @@ done
 for id in ${idsSpiral[@]}; do
     printf -v filepattern "meas_MID%05d" "${id}"
     echo $filepattern 
-    foundFiles=$(ls "${pathData}"/${filepattern}*.dat)
+    foundFiles=$(ls "${data_path}"/${filepattern}*.dat)
     echo "Converting $foundFiles to mrd using IsmrmrdParameterMap_Siemens_NX_ReadinSpiral.xsl"
     siemens_to_ismrmrd -f "$foundFiles" -z 2 -x IsmrmrdParameterMap_Siemens_NX_ReadinSpiral.xsl --skipSyncData
 done
