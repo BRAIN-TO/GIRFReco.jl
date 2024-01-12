@@ -7,7 +7,7 @@ module GIRFReco
 # using FourierTools
 # using ImageBinarization
 # using ImageEdgeDetection
-# using Printf
+using Printf
 # using ROMEO
 # using NIfTI
 # using Unitful
