@@ -12,7 +12,7 @@ using ROMEO
 using NIfTI
 using Unitful
 using AxisArrays
-# using ImageUtils
+using ImageUtils
 # using Plots
 using MRIGradients
 # using DelimitedFiles
