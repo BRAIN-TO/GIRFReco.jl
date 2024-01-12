@@ -18,6 +18,7 @@ using MRIGradients
 # using DelimitedFiles
 using FileIO
 using MRIBase
+using MRIFiles
 # using MosaicViews
 
 export plot_reconstruction,
