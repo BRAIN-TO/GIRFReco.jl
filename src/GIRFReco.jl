@@ -15,7 +15,6 @@ using Unitful
 using AxisArrays
 using ImageUtils
 using Plots
-# using PlotlyJS
 using MRIGradients
 using FileIO
 using MRIBase
