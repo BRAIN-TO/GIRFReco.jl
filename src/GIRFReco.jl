@@ -2,7 +2,7 @@ module GIRFReco
 
 # using HDF5
 # using LinearAlgebra
-# using Dierckx
+using Dierckx
 # using DSP
 using FourierTools
 # using ImageBinarization
@@ -13,9 +13,8 @@ using ROMEO
 using Unitful
 using AxisArrays
 using ImageUtils
-# using Plots
+using Plots
 using MRIGradients
-# using DelimitedFiles
 using FileIO
 using MRIBase
 using MRIFiles
