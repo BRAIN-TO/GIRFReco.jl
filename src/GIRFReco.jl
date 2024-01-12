@@ -14,7 +14,7 @@ using Printf
 # using AxisArrays
 # using ImageUtils
 # using Plots
-# using MRIGradients
+using MRIGradients
 # using DelimitedFiles
 # using MAT
 # using FileIO
