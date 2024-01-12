@@ -18,7 +18,7 @@ using Printf
 # using DelimitedFiles
 # using MAT
 # using FileIO
-# using MRIFiles
+using MRIBase
 # using MosaicViews
 
 export plot_reconstruction,
