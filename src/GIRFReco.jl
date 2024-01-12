@@ -8,16 +8,15 @@ using FourierTools
 # using ImageBinarization
 # using ImageEdgeDetection
 using Printf
-# using ROMEO
-# using NIfTI
+using ROMEO
+using NIfTI
 # using Unitful
-# using AxisArrays
+using AxisArrays
 # using ImageUtils
 # using Plots
 using MRIGradients
 # using DelimitedFiles
-# using MAT
-# using FileIO
+using FileIO
 using MRIBase
 # using MosaicViews
 
