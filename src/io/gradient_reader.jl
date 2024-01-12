@@ -1,4 +1,3 @@
-export read_gradient_text_file
 
 "Reads in text file containing gradient waveform information"
 function read_gradient_text_file(filename, reconsize, delay)
