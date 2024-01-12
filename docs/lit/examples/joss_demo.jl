@@ -32,7 +32,7 @@ using RegularizedLeastSquares, Flux
 
 using ImageTransformations
 
-using PlotlyJS
+using PlotlyJS, Plots
 
 #=
 ## 2. Configurations for reconstruction
@@ -49,6 +49,7 @@ root_project_path = "Your/Extracted/Data/Folder" # Root path of the data extract
 root_project_path = "/srv/data/ajaffray/TORONTO_COLLAB/data/joss_data_zenodo/"
 include("recon_config_joss_demo.jl")
 
+plotlyjs()
 
 # Two user defined parameters, just for this script.
 reload_spiral_data = true; # Set true if we need to reload raw data compulsively.
