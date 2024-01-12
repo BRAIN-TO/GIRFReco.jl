@@ -10,7 +10,7 @@ using FourierTools
 using Printf
 using ROMEO
 using NIfTI
-# using Unitful
+using Unitful
 using AxisArrays
 # using ImageUtils
 # using Plots
