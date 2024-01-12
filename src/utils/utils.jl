@@ -54,7 +54,7 @@ function plot_reconstruction(images, slices_index, b0; fig_handles = [], is_slic
     end
     magnitude_mosaic = mosaicview(magnitude_images, nrow = Int(floor(sqrt(num_slices))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    heatmap(magnitude_mosaic, show = true, plot_title = "|Images|", plot_titlevspan = 0.1, color = :grays, aspectratio = :equal)
+    Plots.heatmap(magnitude_mosaic, show = true, plot_title = "|Images|", plot_titlevspan = 0.1, color = :grays, aspectratio = :equal)
     # display(plot!())
 
     phase_images = angle.(images[:, :, reordered_slice_indices, 1, 1])
@@ -67,7 +67,7 @@ function plot_reconstruction(images, slices_index, b0; fig_handles = [], is_slic
     end
     phase_mosaic = mosaicview(phase_images, nrow = Int(floor(sqrt(num_slices))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    heatmap(phase_mosaic, show = true, plot_title = "∠ Images", plot_titlevspan = 0.1, color = :plasma, aspectratio = :equal)
+    Plots.heatmap(phase_mosaic, show = true, plot_title = "∠ Images", plot_titlevspan = 0.1, color = :plasma, aspectratio = :equal)
     #colorbar()
     # display(plot!())
 
@@ -92,7 +92,7 @@ function plot_reconstruction(images, slices_index, b0; fig_handles = [], is_slic
     end
     b0_map_mosaic = mosaicview(b0_map_images[:, :, reordered_slice_indices], nrow = Int(floor(sqrt(num_slices))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    heatmap(b0_map_mosaic, show = true, plot_title = "B₀ Map Images", plot_titlevspan = 0.1, color = :plasma)
+    Plots.heatmap(b0_map_mosaic, show = true, plot_title = "B₀ Map Images", plot_titlevspan = 0.1, color = :plasma)
     # colorbar()
     # display(plot!())
 
@@ -136,7 +136,7 @@ function plot_sense_maps(sensitivity, num_channels; slice_index = 1)
     # gcf()
 
     magnitude_mosaic = mosaicview((abs.(sensitivity[:, :, slice_index, :])), nrow = Int(floor(sqrt(num_channels))), npad = 5, rowmajor = true, fillvalue = 0)
-    heatmap(magnitude_mosaic, show = true, plot_title = "|Sensitivity|", plot_titlevspan = 0.1, color = :gnuplot2)
+    Plots.heatmap(magnitude_mosaic, show = true, plot_title = "|Sensitivity|", plot_titlevspan = 0.1, color = :gnuplot2)
 
     # # Phase maps
     # figure(@sprintf("Sensitivity Map Phase of Slice %d / %d", slice_index, num_slices)); clf(); for ch in 1:num_channels; subplot(8,4,ch); imshow(angle.(sensitivity[:,:,slice_index,ch]), cmap = "gray"); end;
@@ -144,7 +144,7 @@ function plot_sense_maps(sensitivity, num_channels; slice_index = 1)
     # gcf()
 
     phase_mosaic = mosaicview((angle.(sensitivity[:, :, slice_index, :])), nrow = Int(floor(sqrt(num_channels))), npad = 5, rowmajor = true, fillvalue = 0)
-    heatmap(phase_mosaic, show = true, plot_title = "∠ Sensitivity", plot_titlevspan = 0.1, color = :plasma)
+    Plots.heatmap(phase_mosaic, show = true, plot_title = "∠ Sensitivity", plot_titlevspan = 0.1, color = :plasma)
 
 end
 
