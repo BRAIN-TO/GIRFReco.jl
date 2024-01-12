@@ -9,7 +9,7 @@ using FourierTools
 # using ImageEdgeDetection
 using Printf
 using ROMEO
-using NIfTI
+# using NIfTI
 using Unitful
 using AxisArrays
 using ImageUtils
