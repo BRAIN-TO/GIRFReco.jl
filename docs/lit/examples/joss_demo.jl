@@ -28,9 +28,11 @@ using GIRFReco, MRIGradients
 #MRIReco and its sub-packages
 using MRIReco, FileIO, MRIFiles, MRIBase, MRICoilSensitivities
 
-using RegularizedLeastSquares, Flux, Plots
+using RegularizedLeastSquares, Flux
 
 using ImageTransformations
+
+using PlotlyJS
 
 #=
 ## 2. Configurations for reconstruction
