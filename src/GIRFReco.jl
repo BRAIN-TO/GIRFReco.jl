@@ -4,7 +4,7 @@ module GIRFReco
 # using LinearAlgebra
 # using Dierckx
 # using DSP
-# using FourierTools
+using FourierTools
 # using ImageBinarization
 # using ImageEdgeDetection
 using Printf
