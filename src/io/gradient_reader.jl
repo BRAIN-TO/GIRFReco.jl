@@ -1,5 +1,14 @@
 
-"Reads in text file containing gradient waveform information"
+
+"""
+    read_gradient_text_file(filename, reconsize, delay)
+Reads in text file containing gradient waveform information
+
+# Arguments
+* `filename` - filename (with full path) of text file with gradient waveform information
+* `reconsize::Tuple{Int64,Int64,Int64}` - size of reconstructed image (trailing dimension 1 for 2D acquisitions)
+* `delay` - delay in seconds from the nominal first sampling point to the actual first sampling point
+"""
 function read_gradient_text_file(filename, reconsize, delay)
 
     gradient_data = readdlm(filename, '\n')

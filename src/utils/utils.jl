@@ -167,8 +167,6 @@ end
     calculate_b0_maps(me_data,slices,echotime_1,echotime_2)
 
 Calculate  B0 map from the two images with different echo times via their phase difference (obtained from imTE2.*conj(imTE1))
-TODO have the b0 map calculation be capable of handling variable echo times
-TODO2: Do we need this basic B0 map calculation or is it superseded by estimate_b0_maps?
 
 # Arguments
 * `me_data`                          - [nX nY nZ 2 num_coils] 5D image array, 4th dim echo time
@@ -189,7 +187,6 @@ end
     get_slice_order(num_slices, is_slice_interleaved)
 
 Returns array mapping from acquisition number to slice number (geometric position) (index_array[slice = 1:9] = [acquisitionNumbers])
-TODO: Add ascending/descending options
 
 # Arguments
 * `num_slices::Int`                    - number of slices in total acquired stack (FOV)
