@@ -17,16 +17,20 @@ The necessary Julia packages needed for spiral reconstruction.
 =#
 
 #Base packages for computation
-using HDF5, LinearAlgebra, Dierckx, DSP, FourierTools, RegularizedLeastSquares, ImageUtils, PolygonInbounds
+# using HDF5, LinearAlgebra, Dierckx, DSP, FourierTools, RegularizedLeastSquares, ImageUtils, PolygonInbounds
 
 #Packages for figure displaying
-using MosaicViews, Plots, Images
+# using MosaicViews, Plots, Images
 
 #Our developed packages
 using GIRFReco, MRIGradients
 
 #MRIReco and its sub-packages
-using MRIReco, FileIO, MRIFiles, MRICoilSensitivities
+using MRIReco, FileIO, MRIFiles, MRIBase, MRICoilSensitivities
+
+using RegularizedLeastSquares, Flux, Plots
+
+using ImageTransformations
 
 #=
 ## 2. Configurations for reconstruction

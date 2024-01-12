@@ -1,4 +1,4 @@
-using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients, MRIFiles, MRIFieldmaps
+# using HDF5, MRIReco, LinearAlgebra, DSP, FourierTools, ROMEO, MRIGradients, MRIFiles, MRIFieldmaps
 
 include("../src/utils/fieldmap_estimator.jl")
 

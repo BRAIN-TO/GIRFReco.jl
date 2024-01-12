@@ -153,5 +153,5 @@ if ~ispath(params_general[:recon_save_path])
     mkpath(params_general[:recon_save_path])
 end
 
-cp("recon/recon_config.jl", joinpath(params_general[:recon_save_path], "recon_config.jl"); force = true)
+cp("/srv/data/ajaffray/TORONTO_COLLAB/revision/GIRFReco.jl/recon/recon_config.jl", joinpath(params_general[:recon_save_path], "recon_config.jl"); force = true)
 

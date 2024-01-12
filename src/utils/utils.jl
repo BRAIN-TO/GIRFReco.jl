@@ -422,7 +422,7 @@ function validate_acq_data!(a::AcquisitionData)
 end
 
 """
-    preprocess_cartesian_data!(raw::RawAcquisitionData; dims = 1)
+    preprocess_cartesian_data(raw::RawAcquisitionData; dims = 1)
 Prepares Cartesian for reconstruction
 
 # Arguments

@@ -1,5 +1,5 @@
 
-using Flux
+# using Flux
 
 """
 ml_cost(x::Matrix{T},y::Matrix{Complex{T}},z::Matrix{Complex{T}}, β)
