@@ -182,7 +182,7 @@ Note that we only do these steps when they have not been done yet or it's specif
 =#
 if reload_spiral_data || !(@isdefined imaging_acq_data)
     @info "Reading spiral data and merging interleaves"
-    imaging_acq_data = merge_raw_interleaves(params_spiral)
+    imaging_acq_data = merge_raw_interleaves(params_spiral, false)
 end
 
 #=
@@ -230,8 +230,6 @@ We need to preprocess the coil sensitivity maps before reconstruction.
 This includes resizing the coil maps to the size of output encoding matrix size; 
 compress the channels according to user's setting to achieve a faster reconstruction.
 =#
-low_freq_mask = hanning((30, 30), padding = 170, zerophase = true)
-
 sensitivity = mapslices(x -> imresize(x, params_spiral[:recon_size][1], params_spiral[:recon_size][2]), cartesian_sensitivity, dims = [1, 2])
 
 # Optional: Plot the sensitivity maps of each coil on a given slice.

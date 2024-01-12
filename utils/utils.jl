@@ -513,13 +513,14 @@ end
 
 
 """
-    merge_raw_interleaves(params)
+    merge_raw_interleaves(params, output_raw)
 Merges multiple interleave data together from individually acquired interleave scans
 
 # Arguments
 * `params`          - Dictionary
+* `output_raw`      - Bool
 """
-function merge_raw_interleaves(params)
+function merge_raw_interleaves(params, output_raw)
 
     # Get the other interleave indexes other than the one asked for
     interleave_complement = [x for x ∈ 1:params[:num_interleaves] if x ∉ params[:interleave]]
@@ -593,28 +594,37 @@ function merge_raw_interleaves(params)
 
     end
 
-    # converting raw_data to AcquisitionData
-    @info "Converting RawAcquisitionData to AcquisitionData"
-    acqdata = AcquisitionData(raw_data, estimateProfileCenter = true)
+    if output_raw
 
-    ## Assume all of the slices share a trajectory
-    for l = 1:length(acqdata.traj)
+        # return the RawAcquisition data object (missing some corrections but maybe better for some users)
+        return raw_data
 
-        acqdata.traj[l].times = time_track_vector # set times to the total time vector
-        acqdata.traj[l].TE = 0.00 # set the TE to 0
-        acqdata.traj[l].AQ = times[end] # set the acquisition time to the last element of the time vector (should be the latest time)
-        acqdata.traj[l].circular = true # set whether to use a circular filter on the kspace data
+    else
+
+        # converting raw_data to AcquisitionData
+        @info "Converting RawAcquisitionData to AcquisitionData"
+        acq_data = AcquisitionData(raw_data, estimateProfileCenter = true)
+
+        ## Assume all of the slices share a trajectory
+        for l = 1:length(acq_data.traj)
+
+            acq_data.traj[l].times = time_track_vector # set times to the total time vector
+            acq_data.traj[l].TE = 0.00 # set the TE to 0
+            acq_data.traj[l].AQ = times[end] # set the acquisition time to the last element of the time vector (should be the latest time)
+            acq_data.traj[l].circular = true # set whether to use a circular filter on the kspace data
+
+        end
+
+        for l = 1:length(acq_data.subsampleIndices) # Cannot avoid camelcase
+
+            acq_data.subsampleIndices[l] = 1:size(acq_data.traj[l].nodes, 2) 
+
+        end
+
+        # return the acquisition data object with everything corrected
+        return acq_data
 
     end
-
-    for l = 1:length(acqdata.subsampleIndices) # Cannot avoid camelcase
-
-        acqdata.subsampleIndices[l] = 1:size(acqdata.traj[l].nodes, 2) 
-
-    end
-
-    # return the acquisition data object with everything corrected
-    return acqdata
 
 end
 
