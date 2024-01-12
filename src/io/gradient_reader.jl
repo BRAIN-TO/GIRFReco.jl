@@ -76,10 +76,10 @@ function read_gradient_text_file(filename, reconsize, delay)
     converted_kspace_trajectory_array_new[:, :, 1] *= gradient_dict[:fov][1] ./ reconsize[1]
     converted_kspace_trajectory_array_new[:, :, 2] *= gradient_dict[:fov][2] ./ reconsize[2]
     
-    if dataDict[:numDims] == 3
-        convertedKSpaceArrayFlexible[:,:,3] *= dataDict[:FOV][3] ./ reconSize[3] # Normalized to -0.5 to 0.5, no unit.
+    if gradient_dict[:num_dims] == 3
+        converted_kspace_trajectory_array_new[:,:,3] *= gradient_dict[:FOV][3] ./ reconsize[3] # Normalized to -0.5 to 0.5, no unit.
     end
-    
+
     ## Construction of the trajectory object ##
 
     ## Reshaping of the array to the format expected by the Trajectory constructor in MRIReco.jl
