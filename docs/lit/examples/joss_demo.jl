@@ -45,8 +45,8 @@ Please download, extract and set the root_project_path as the top level folder (
 
 =#
 
-root_project_path = "Your/Extracted/Data/Folder" # Root path of the data extracted from Zenodo
-root_project_path = "/srv/data/ajaffray/TORONTO_COLLAB/data/joss_data_zenodo/"
+# root_project_path = "Your/Extracted/Data/Folder" # Root path of the data extracted from Zenodo
+root_project_path = "/home/wuz/spiralDiffusion/joss_data_zenodo/"
 include("recon_config_joss_demo.jl")
 
 plotlyjs()
@@ -97,13 +97,10 @@ This is controlled by `do_load_maps` in general parameters.
 
 if params_general[:do_load_maps] && isfile(params_general[:b0_map_save_fullpath])
     @info "Loading SENSE and B0 maps from $(params_general[:sensitivity_save_fullpath]) and $(params_general[:b0_map_save_fullpath])"
+    cartesian_sensitivity = load_map(params_general[:sensitivity_save_fullpath]; do_split_phase = true)
     b0_maps = load_map(params_general[:b0_map_save_fullpath])
-
+    
     num_slices = size(b0_maps, 3)
-    slice_idx_array = get_slice_order(num_slices, is_slice_interleaved = true)
-
-    b0_maps = b0_maps[:, :, invperm(slice_idx_array)]
-    cartesian_sensitivity = load_map(params_general[:sensitivity_save_fullpath]; do_split_phase = true)[:, :, invperm(slice_idx_array), :]
 else
     @info "Running cartesian_recon to retrieve maps (cartesian_sensitivity and b0_maps)"
     include("../../../recon/cartesian_recon.jl")
@@ -187,9 +184,16 @@ This step is done through the function `merge_raw_interleaves`, which can be vie
 
 Note that we only do these steps when they have not been done yet or it's specifically required.
 =#
-if reload_spiral_data || !(@isdefined imaging_acq_data)
+if reload_spiral_data || !(@isdefined imaging_acq_data) || !(@isdefined slice_idx_array_spiral)
     @info "Reading spiral data and merging interleaves"
     imaging_acq_data = merge_raw_interleaves(params_spiral, false)
+    raw_temp  = RawAcquisitionData(ISMRMRDFile(params_general[:scan_fullpath][1]))
+    slice_idx_array_spiral = get_slice_order(raw_temp, num_slices, num_slices+2, 2)
+
+    # The loaded/calculated sens maps and B0 maps are in ascending slice order
+    # need to reorder them according to spiral RawAcqData
+    b0_maps = b0_maps[:, :, invperm(slice_idx_array_spiral)]
+    cartesian_sensitivity = cartesian_sensitivity[:, :, invperm(slice_idx_array_spiral), :]
 end
 
 #=
@@ -316,10 +320,9 @@ if params_general[:do_save_recon] # TODO: include elements to save as tuple, e.g
 
     # TODO: use slice ordering from cartesian scan directly!
     num_slices = numSlices(imaging_acq_data)
-    slice_idx_array = get_slice_order(num_slices, is_slice_interleaved = true)
     save_map(
         params_general[:recon_save_fullpath],
-        params_general[:saving_scalefactor] * reco.data[:, :, slice_idx_array],
+        params_general[:saving_scalefactor] * reco.data[:, :, slice_idx_array_spiral],
         resolution_mm;
         do_split_phase = true,
         do_normalize = params_general[:do_normalize_recon],

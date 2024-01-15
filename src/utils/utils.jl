@@ -184,27 +184,28 @@ function calculate_b0_maps(me_data, slices, echotime_1, echotime_2)
 end
 
 """
-    get_slice_order(num_slices, is_slice_interleaved)
-
-Returns array mapping from acquisition number to slice number (geometric position) (index_array[slice = 1:9] = [acquisitionNumbers])
+    get_slice_order(r::RawAcquisitionData, sliceNum::Int, startProfile::Int, incProfile:Int)
+Return a array of slice order index with ascending order of Z position.
+e.g. For an interleaved pattern of slice position in RawAcquisitionData given below:
+[-7, -3, 1, 5, 9, -9, -5, -1, 3, 7] (in mm)
+The output will be [6, 1, 7, 2, 8, 3, 9, 4, 10, 5]
 
 # Arguments
-* `num_slices::Int`                    - number of slices in total acquired stack (FOV)
-* `is_slice_interleaved::Bool=true`   - if true, interleaved slice order is created, otherwise ascending slice order is returned
+* `r::RawAcquisitionData`       - A RawAcquisitionData that directly reads from original MRD file
+* `sliceNum::Int`               - Total slice number that included in the RawAcquisitionData
+* `startProfile::Int`           - Starting index of the profile in the RawAcqData for the first valid slice to be processed
+* `incProfile::Int`             - Increment of profile index for the next valid slices
+
+# Output
+* `orderedIndex`                    - array with slice index of RawAcquisitionData with ascending order of position in Z.
 """
-function get_slice_order(num_slices; is_slice_interleaved::Bool = true)
-
-    slice_index_array = 1:num_slices
-    reordered_slice_indices = zeros(Int16, size(slice_index_array))
-    if is_slice_interleaved && num_slices > 1
-        reordered_slice_indices[1:2:end] = slice_index_array[1:Int(ceil(num_slices / 2))]
-        reordered_slice_indices[2:2:end] = slice_index_array[Int(ceil(num_slices / 2) + 1):end]
-    else
-        reordered_slice_indices = slice_index_array
+function get_slice_order(r::RawAcquisitionData, sliceNum::Int, startProfile::Int, incProfile::Int)
+    origZPos = zeros(Float32, sliceNum)
+    for m = 1 : sliceNum
+        profileIndex = startProfile + (m - 1) * incProfile
+        origZPos[m] = r.profiles[profileIndex].head.position[3]
     end
-
-    return reordered_slice_indices
-
+    return sortperm(origZPos)
 end
 
 """

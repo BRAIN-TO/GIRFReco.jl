@@ -14,17 +14,13 @@ b0_filename = params_general[:map_scan_fullpath];
 # filename for preprocessed data (remove oversampling, permute dimensions wrt MRIReco)
 processed_filename = params_general[:processed_map_scan_fullpath]
 
-if params_general[:do_process_map_scan]
+# Set the data file name (Change this for your own system)
+cartesian_data_file = ISMRMRDFile(b0_filename)
 
-    # Set the data file name (Change this for your own system)
-    cartesian_data_file = ISMRMRDFile(b0_filename)
+# read in the raw data from the ISMRMRD file into a RawAcquisitionData object
+raw = RawAcquisitionData(cartesian_data_file)
 
-    # read in the raw data from the ISMRMRD file into a RawAcquisitionData object
-    raw = RawAcquisitionData(cartesian_data_file)
-
-    # does not change anything...
-    # raw.params["reconFOV"] = [230, 230, 2]
-
+if params_general[:do_process_map_scan] 
     # Preprocess Data and save!
     preprocess_cartesian_data(raw::RawAcquisitionData, true; filename = processed_filename)
 
@@ -40,12 +36,14 @@ cartesian_acq_data = AcquisitionData(raw_new, estimateProfileCenter = true)
 num_coils = size(cartesian_acq_data.kdata[1], 2)
 num_slices = numSlices(cartesian_acq_data)
 
+# Get the order of slices from the RawAcqData header
+slice_idx_array_cartesian = get_slice_order(raw, num_slices, 1, 1)
+
 # Define TEs 
 # Echo times for field map raw data, in ms
 TE1 = raw_new.params["TE"][1]
 TE2 = raw_new.params["TE"][2]
 
-slice_idx_array = get_slice_order(num_slices, is_slice_interleaved = true)
 # shift FOV to middle :) 
 #TODO: in MRIReco v0.7, try: correctOffset(cartesian_acq_data, [0 -20 0])
 shift_kspace!(cartesian_acq_data, params_general[:fov_shift]) # amount of FOV shift; in unit of number of voxels in [x,y] direction
@@ -76,7 +74,7 @@ resolution_mm = (res_x, res_y, res_z)
 # save SENSE maps
 if params_general[:do_save_recon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
     # TODO: use correct slice order everywhere, e.g., when saving/loading maps for spiral recon
-    save_map(params_general[:sensitivity_save_fullpath], cartesian_sensitivity[:, :, slice_idx_array, :], resolution_mm; do_split_phase = true)
+    save_map(params_general[:sensitivity_save_fullpath], cartesian_sensitivity[:, :, slice_idx_array_cartesian, :], resolution_mm; do_split_phase = true)
 end
 
 ## Parameter dictionary definition for reconstruction
@@ -100,12 +98,12 @@ params_cartesian[:senseMaps] = ComplexF32.(cartesian_sensitivity) # set sensitiv
 
 # save Map recon (multi-echo etc.)
 if params_general[:do_save_recon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
-    save_map(params_general[:map_save_fullpath], cartesian_reco.data[:, :, slice_idx_array, :, :, :], resolution_mm; do_split_phase = true)
+    save_map(params_general[:map_save_fullpath], cartesian_reco.data[:, :, slice_idx_array_cartesian, :, :, :], resolution_mm; do_split_phase = true)
 end
 
 ## Calculate B0 maps from the acquired images (if two TEs)
 @info "Calculating B0 Maps"
-slices = 1:length(slice_idx_array)
+slices = 1:length(slice_idx_array_cartesian)
 b0_maps = zeros(200, 200, num_slices)
 b0_method = "2D_2008" # Can be "Simple","2D_2008" or "3D_2020" (How do we incorporate this into the recon demo?)
 
@@ -129,14 +127,14 @@ end
 
 # save B0 map
 if params_general[:do_save_recon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
-    save_map(params_general[:b0_map_save_fullpath], b0_maps[:, :, slice_idx_array], resolution_mm; do_normalize = false) # no normalization, we want absolute values for offres maps
+    save_map(params_general[:b0_map_save_fullpath], b0_maps[:, :, slice_idx_array_cartesian], resolution_mm; do_normalize = false) # no normalization, we want absolute values for offres maps
 end
 
 
 if params_general[:do_plot_recon]
     @info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps)"
     # plot_sense_maps(sensitivity,num_coils)
-    plot_reconstruction(cartesian_reco[:, :, :, 1], 1:size(cartesian_reco, 3), b0_maps, is_slice_interleaved = false, rotation = 180)
+    plot_reconstruction(cartesian_reco[:, :, slice_idx_array_cartesian, 1], 1:size(cartesian_reco, 3), b0_maps[:, :, slice_idx_array_cartesian], is_slice_interleaved = false, rotation = 180)
 end
 
 # cleanup unused file

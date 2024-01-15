@@ -18,7 +18,7 @@ params_general = Dict{Symbol,Any}();
 params_general[:gamma] = 42577478;
 
 # General options for reconstruction script:
-params_general[:do_load_maps] = false              # if true, reloads B0/SENSE maps instead of recalculating
+params_general[:do_load_maps] = true              # if true, reloads B0/SENSE maps instead of recalculating
 params_general[:do_save_recon] = true              # if true, saves reconstruction and all auxiliary image data (maps) as NIfTI files
 params_general[:do_plot_recon] = true              # if true, plots intermediate debugging and output recon figures (needs graphics, not recommended in multi-thread mode due to PyPlot)
 params_general[:do_process_map_scan] = true         # if true, compute sensitivity and B0 maps from reconstructed Cartesian scan   
@@ -153,5 +153,7 @@ if ~ispath(params_general[:recon_save_path])
     mkpath(params_general[:recon_save_path])
 end
 
-cp("/srv/data/ajaffray/TORONTO_COLLAB/revision/GIRFReco.jl/recon/recon_config.jl", joinpath(params_general[:recon_save_path], "recon_config.jl"); force = true)
+cp(@__FILE__, joinpath(params_general[:recon_save_path], "recon_config.jl"); force = true)
+
+
 
