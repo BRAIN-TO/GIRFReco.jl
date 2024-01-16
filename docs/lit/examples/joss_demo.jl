@@ -188,7 +188,7 @@ if reload_spiral_data || !(@isdefined imaging_acq_data) || !(@isdefined slice_id
     @info "Reading spiral data and merging interleaves"
     imaging_acq_data = merge_raw_interleaves(params_spiral, false)
     raw_temp  = RawAcquisitionData(ISMRMRDFile(params_general[:scan_fullpath][1]))
-    slice_idx_array_spiral = get_slice_order(raw_temp, num_slices, num_slices+2, 2)
+    slice_idx_array_spiral = get_slice_order(raw_temp, num_slices, (num_slices+1)*2, 2)
 
     # The loaded/calculated sens maps and B0 maps are in ascending slice order
     # need to reorder them according to spiral RawAcqData
@@ -306,6 +306,10 @@ to perform final spiral image reconstruction.
 
 GC.gc()
 
+# Reorder slices to an ascending order
+reco = reco[:,:,slice_idx_array_spiral[selected_slice]]
+resized_b0_maps = resized_b0_maps[:, :, slice_idx_array_spiral[selected_slice]]
+
 #=
 ## 4. Save and Plot the Results (Optional)
 
@@ -335,7 +339,7 @@ if params_general[:do_plot_recon]
     plot_reconstruction(
         reco,
         1:length(selected_slice),
-        resized_b0_maps[:, :, selected_slice],
+        resized_b0_maps,
         fig_handles = ["Original Magnitude", "Original Phase", "B0"],
         is_slice_interleaved = false,
         rotation = 90,
