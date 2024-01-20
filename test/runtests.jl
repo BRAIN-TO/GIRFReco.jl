@@ -1,4 +1,6 @@
 using GIRFReco
+using MRISimulation
+using ImageUtils
 using Test
 using Scratch
 
