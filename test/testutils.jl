@@ -33,10 +33,7 @@ function test_check_acquisition_nodes!()
 
     check_acquisition_nodes!(acqData)
 
-    @test maximum()
-
-    
-
+    @test abs.(maximum(acqData.nodes,dims = [1,2])) .< 0.51
 
 end
 

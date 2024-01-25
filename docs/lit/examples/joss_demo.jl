@@ -26,7 +26,7 @@ The necessary Julia packages needed for spiral reconstruction.
 using GIRFReco, MRIGradients
 
 #MRIReco and its sub-packages
-using MRIReco, FileIO, MRIFiles, MRIBase, MRICoilSensitivities, GIRFReco
+using MRIReco, FileIO, MRIFiles, MRIBase, MRICoilSensitivities
 
 using RegularizedLeastSquares, Flux
 
