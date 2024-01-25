@@ -26,7 +26,7 @@ The necessary Julia packages needed for spiral reconstruction.
 using GIRFReco, MRIGradients
 
 #MRIReco and its sub-packages
-using MRIReco, FileIO, MRIFiles, MRIBase, MRICoilSensitivities
+using MRIReco, FileIO, MRIFiles, MRIBase, MRICoilSensitivities, GIRFReco
 
 using RegularizedLeastSquares, Flux
 
@@ -46,7 +46,7 @@ Please download, extract and set the root_project_path as the top level folder (
 =#
 
 # root_project_path = "Your/Extracted/Data/Folder" # Root path of the data extracted from Zenodo
-root_project_path = "/home/wuz/spiralDiffusion/joss_data_zenodo/"
+root_project_path = "/srv/data/ajaffray/TORONTO_COLLAB/data/joss_data_zenodo"
 include("recon_config_joss_demo.jl")
 
 plotlyjs()

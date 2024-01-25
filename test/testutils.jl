@@ -16,6 +16,28 @@ end
 
 function test_check_acquisition_nodes!()
 
+    N = 256
+    I = shepp_logan(N)
+
+    # simulation parameters
+    params = Dict{Symbol, Any}()
+    params[:simulation] = "fast"
+    params[:trajName] = "Radial"
+    params[:numProfiles] = floor(Int64, pi/2*N)
+    params[:numSamplingPerProfile] = 2*N
+
+    # do simulation
+    acqData = simulation(I, params)
+
+    acqData.nodes .*= 1.5
+
+    check_acquisition_nodes!(acqData)
+
+    @test maximum()
+
+    
+
+
 end
 
 function test_validate_siemens_mrd!()
