@@ -6,6 +6,25 @@ function test_sync_traj_and_data!()
 
 end
 
+function test_calculate_b0_maps()
+
+    N = 32
+    T = ComplexF32
+    nCh = 4
+    slices = 5
+    nEchos = 2
+    TE = 7.0
+
+    medata = ones(ComplexF32,N,N,slices,2,nCh)
+    medata[:,:,:,1,:] .*= exp(-1im .* 2*pi * 0.01)
+    medata[:,:,:,2,:] .*= exp(-1im .* 2*pi *0.02)
+
+    b0_maps = calculate_b0_maps(medata,1:slices,2.0,4.0)
+
+    @test median(b0_maps) + 2*pi*0.01 ./ 2e-3 < 1e-5 
+
+end
+
 function test_do_k0_correction!()
 
     N = 32
@@ -237,13 +256,42 @@ function test_save_and_load_map()
 end
 
 function test_shift_kspace!()
+    N = 32
+    I = shepp_logan(N)
+    I[16,16] = 500
 
+    # simulation parameters
+    params = Dict{Symbol, Any}()
+    params[:simulation] = "fast"
+    params[:trajName] = "Radial"
+    params[:numProfiles] = floor(Int64, pi/2*N)
+    params[:numSamplingPerProfile] = 2*N
+
+    acqData = simulation(I, params)
+    
+    # reco parameters
+    params = Dict{Symbol, Any}()
+    params[:reco] = "direct"
+    params[:reconSize] = (N,N)
+    params[:alpha] = 1.75
+    params[:m] = 4.0
+    params[:K] = 28
+    Ireco = reconstruction(acqData, params)
+
+    shift_kspace!(acqData,[5,5])
+
+    Ireco_shifted = reconstruction(acqData,params)
+
+    @test (abs.(Ireco[16,16]) > 300) & (abs.(Ireco[21,21]) < 300)
+    @test (abs.(Ireco_shifted[16,16]) < 300) & (abs.(Ireco_shifted[21,21]) > 300)
+    @test abs.(Ireco_shifted[21,21]) .- abs.(Ireco[16,16]) < 1e1
 end
 
 function test_utils(N=32)
     @testset "Utilities" begin
         
         test_adjust_header!()
+        test_calculate_b0_maps()
         test_apply_girf!()
         test_apply_k0!()
         test_check_acquisition_nodes!()
