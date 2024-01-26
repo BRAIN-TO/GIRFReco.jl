@@ -308,7 +308,7 @@ function do_k0_correction!(raw_data, k0_phase_modulation, interleave)
         # ylabel("k₀ [rad]")
         # title("B₀ Eddy Current Fluctuation During Readout ")
 
-        plot(t_s, angle.(exp.(1im .* k0_interpolated)), show = true, title = "B₀ Eddy Current Fluctuation During Readout ")
+        # plot(t_s, angle.(exp.(1im .* k0_interpolated)), show = true, title = "B₀ Eddy Current Fluctuation During Readout ")
 
     end
 
@@ -417,7 +417,7 @@ function validate_acq_data!(a::AcquisitionData)
     # kdata dimensions: dim1:=contrast/echo | dim2:=slices | dim3:=repetitions 
     # kdata element dimensions: dim1:=kspace nodes | dim2:=channels/coils
 
-    permutedims(a.kdata, [3, 2, 1])
+    # permutedims(a.kdata, [3, 2, 1])
     check_acquisition_nodes!(a)
 
 end

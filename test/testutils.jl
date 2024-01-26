@@ -8,11 +8,31 @@ end
 
 function test_do_k0_correction!()
 
+    N = 32
+    I = shepp_logan(N)
+
+    # simulation parameters
+    params = Dict{Symbol, Any}()
+    params[:simulation] = "fast"
+    params[:trajName] = "Radial"
+    params[:numProfiles] = floor(Int64, pi/2*N)
+    params[:numSamplingPerProfile] = 2*N
+
+    acqData = simulation(I, params)
+    rawData = RawAcquisitionData(acqData)
+    rawData.params["encodedSize"] = [rawData.params["encodedSize"][1],rawData.params["encodedSize"][2],1]
+    rawData_orig = deepcopy(rawData)
+    phase_mod = pi .* 0.1 .* ones(ComplexF32, length(rawData.profiles[1].data),2)
+    do_k0_correction!(rawData,phase_mod,1)
+    acqData2 = AcquisitionData(rawData)
+
+    @test median(angle.(acqData2.kdata[1]) .- angle.(acqData.kdata[1])) .- pi .* 0.1 < 1e-4
+
 end
 
 function test_adjust_header!()
 
-    N = 256
+    N = 32
     I = shepp_logan(N)
 
     # simulation parameters
@@ -59,17 +79,109 @@ end
 
 function test_validate_siemens_mrd!()
 
+    N = 32
+    I = shepp_logan(N)
+
+    # simulation parameters
+    params = Dict{Symbol, Any}()
+    params[:simulation] = "fast"
+    params[:trajName] = "Radial"
+    params[:numProfiles] = floor(Int64, pi/2*N)
+    params[:numSamplingPerProfile] = 2*N
+
+    # do simulation
+    acqData = simulation(I, params)
+
+    rawData = RawAcquisitionData(acqData)
+
+    rawData.params["encodedFOV"] = 800
+
+    validate_siemens_mrd!(rawData)
+
+    @test rawData.params["encodedFOV"] == 0.8
+
 end
 
 function test_validate_acq_data!()
+
+    N = 128
+    T = ComplexF32
+    nCh = 4
+    nEchos = 2
+    TE = 7.0
+    
+    x = T.(shepp_logan(N))
+
+    rmap = 0.05*abs.(x)
+    TEnum = Float64.(collect(TE:TE:TE*nEchos))
+
+    coilsens = T.(birdcageSensitivity(N, nCh, 4.))
+    params = Dict{Symbol,Any}()
+    params[:simulation] = "fast"
+    params[:trajName] = "Cartesian"
+    params[:numProfiles] = floor(Int64, N)
+    params[:numSamplingPerProfile] = N
+    params[:r2map] = rmap
+    params[:T_echo] = TEnum
+    params[:seqName] = "ME"
+    params[:refocusingAngles] = Float64.(repeat([pi], length(TEnum)))
+    params[:senseMaps] = coilsens
+
+    acqData = simulation(real(x), params)
+
+    validate_acq_data!(acqData)
+
+    @test size(acqData.kdata) == (2,1,1)
 
 end
 
 function test_preprocess_cartesian_data()
 
+    N = 32
+    I = shepp_logan(N)
+
+    # simulation parameters
+    params = Dict{Symbol, Any}()
+    params[:simulation] = "fast"
+    params[:trajName] = "Cartesian"
+    params[:numProfiles] = floor(Int64, N)
+    params[:numSamplingPerProfile] = N
+
+    # do simulation
+    acqData = simulation(I, params)
+    acqData.traj[1].nodes .*= 1.5
+
+    rawData = RawAcquisitionData(acqData)
+    rawData.params["encodedSize"] = [rawData.params["encodedSize"][1],rawData.params["encodedSize"][2],1]
+
+    acqData2 = preprocess_cartesian_data(rawData,false)
+
+    @test length(acqData2.kdata[1]) == length(acqData.kdata[1])÷2
+    @test maximum(abs.(acqData2.traj[1].nodes),dims=[1,2])[1] <= 0.5 
+
 end
 
 function test_remove_oversampling!()
+
+    N = 32
+    I = shepp_logan(N)
+
+    # simulation parameters
+    params = Dict{Symbol, Any}()
+    params[:simulation] = "fast"
+    params[:trajName] = "Cartesian"
+    params[:numProfiles] = floor(Int64, N)
+    params[:numSamplingPerProfile] = N
+
+    # do simulation
+    acqData = simulation(I, params)
+
+    rawData = RawAcquisitionData(acqData)
+
+    remove_oversampling!(rawData)
+
+    @test rawData.params["encodedSize"] == [N÷2,N]
+    @test length(rawData.profiles[1].data) == N÷2
 
 end
 
@@ -86,7 +198,7 @@ function test_apply_k0!()
 end
 
 function test_save_and_load_map()
-    N = 256
+    N = 128
     I = shepp_logan(N)
 
     # simulation parameters
