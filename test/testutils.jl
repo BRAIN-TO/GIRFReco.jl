@@ -17,7 +17,7 @@ function test_calculate_b0_maps()
 
     medata = ones(ComplexF32,N,N,slices,2,nCh)
     medata[:,:,:,1,:] .*= exp(-1im .* 2*pi * 0.01)
-    medata[:,:,:,2,:] .*= exp(-1im .* 2*pi *0.02)
+    medata[:,:,:,2,:] .*= exp(-1im .* 2*pi * 0.02)
 
     b0_maps = calculate_b0_maps(medata,1:slices,2.0,4.0)
 
