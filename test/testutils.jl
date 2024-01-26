@@ -12,6 +12,26 @@ end
 
 function test_adjust_header!()
 
+    N = 256
+    I = shepp_logan(N)
+
+    # simulation parameters
+    params = Dict{Symbol, Any}()
+    params[:simulation] = "fast"
+    params[:trajName] = "Radial"
+    params[:numProfiles] = floor(Int64, pi/2*N)
+    params[:numSamplingPerProfile] = 2*N
+
+    # do simulation
+    acqData = simulation(I, params)
+
+    rawData = RawAcquisitionData(acqData)
+
+    adjust_header!(rawData,[N,N,1],2*N,1,true)
+
+    @test rawData.profiles[1].head.discard_post == 0
+    @test rawData.profiles[1].head.discard_pre == 0
+
 end
 
 function test_check_acquisition_nodes!()
@@ -29,11 +49,11 @@ function test_check_acquisition_nodes!()
     # do simulation
     acqData = simulation(I, params)
 
-    acqData.nodes .*= 1.5
+    acqData.traj[1].nodes .*= 1.5
 
     check_acquisition_nodes!(acqData)
 
-    @test abs.(maximum(acqData.traj[1].nodes,dims = [1,2])) .< 0.51
+    @test abs.(maximum(acqData.traj[1].nodes,dims = [1,2]))[1] .< 0.51
 
 end
 
