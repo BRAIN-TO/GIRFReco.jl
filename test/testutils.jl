@@ -1,5 +1,34 @@
 function test_get_slice_order()
 
+    slice_positions = [-7, -3, 1, 5, 9, -9, -5, -1, 3, 7]
+
+    N = 32
+    I_slice = shepp_logan(N)
+    I = I_slice .* ones(N,N,10)
+
+    # simulation parameters
+    params = Dict{Symbol, Any}()
+    params[:simulation] = "fast"
+    params[:trajName] = "Radial"
+    params[:numProfiles] = floor(Int64, pi/2*N)
+    params[:numSamplingPerProfile] = 2*N
+
+    acqData = simulation(I, params)
+    rawData = RawAcquisitionData(acqData)
+
+    tempNum = 0
+    for ii = 1:params[:numProfiles]:500
+        tempNum = tempNum + 1
+        for jj = 1:params[:numProfiles]
+
+            rawData.profiles[ii + jj - 1].head.position = (0.0,0.0,slice_positions[tempNum])
+
+        end
+
+    end
+
+    @test get_slice_order(rawData, 10,1,50) == [6,1,7,2,8,3,9,4,10,5]
+
 end
 
 function test_sync_traj_and_data!()
