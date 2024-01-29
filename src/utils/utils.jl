@@ -609,13 +609,12 @@ function merge_raw_interleaves(params, output_raw)
 end
 
 """
-    apply_girf!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
+    apply_girf!(raw::RawAcquisitionData, g::GirfApplier)
 Applies the GIRF to the trajectories inside of a::AcquisitionData
 
 # Arguments
 * `a::AcquisitionData{T}`          - AcquisitionData object
-* `freq::AbstractVector`           - Vector containing frequencies of GIRF data
-* `g_data::AbstractMatrix`         - Matrix of size N x length(freq) containing complex GIRF data
+* `g::GirfApplier`                 - GirfApplier object containing GIRF definition
 """
 function apply_girf!(a::AcquisitionData{T}, g::GirfApplier) where {T}
 
@@ -672,13 +671,12 @@ function apply_girf!(a::AcquisitionData{T}, g::GirfApplier) where {T}
 end
 
 """
-    apply_k0!(raw::RawAcquisitionData, freq::AbstractVector, g_data::AbstractMatrix)
+    apply_k0!(raw::RawAcquisitionData, g::GirfApplier)
 Applies the K0 modulation due to imaging gradients to the data inside of a::AcquisitionData
 
 # Arguments
 * `a::AcquisitionData{T}`          - AcquisitionData object
-* `freq::AbstractVector`           - Vector containing frequencies of GIRF data
-* `k0_data::AbstractMatrix`         - Matrix of size N x length(freq) containing complex k0 function data
+* `g::GirfApplier`                 - GirfApplier containing GIRF definition
 """
 function apply_k0!(a::AcquisitionData{T}, g::GirfApplier) where {T}
 

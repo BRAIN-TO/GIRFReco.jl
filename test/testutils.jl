@@ -255,18 +255,6 @@ function test_remove_oversampling!()
 
 end
 
-function test_merge_raw_interleaves()
-
-end
-
-function test_apply_girf!()
-
-end
-
-function test_apply_k0!()
-
-end
-
 function test_save_and_load_map()
     N = 128
     I = shepp_logan(N)
@@ -343,12 +331,9 @@ function test_utils(N=32)
         
         test_adjust_header!()
         test_calculate_b0_maps()
-        test_apply_girf!()
-        test_apply_k0!()
         test_check_acquisition_nodes!()
         test_do_k0_correction!()
         test_get_slice_order()
-        test_merge_raw_interleaves()
         test_preprocess_cartesian_data()
         test_remove_oversampling!()
         test_save_and_load_map()

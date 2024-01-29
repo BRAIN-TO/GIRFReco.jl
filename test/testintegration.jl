@@ -1,20 +1,22 @@
-function test_integration_1()
+function test_merge_raw_interleaves()
 
 end
 
-function test_integration_2()
+function test_apply_girf!()
 
 end
 
-function test_integration_3()
+function test_apply_k0!()
 
 end
 
 function test_integration()
     @testset "Integration" begin
-        test_integration_1()
-        test_integration_2()
-        test_integration_3()
+        test_merge_raw_interleaves()
+        test_apply_girf!()
+        test_apply_k0!()
     end
 end
+
+test_integration()
 
