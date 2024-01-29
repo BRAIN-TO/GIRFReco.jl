@@ -33,6 +33,28 @@ end
 
 function test_sync_traj_and_data!()
 
+    # General strategy for this test: Get traj from simulated object, interpolate it onto different grid then reinterpolate and verify that things still work
+    traj_input = trajectory(Float64,"Spiral",10,400)
+
+    N = 32
+    I_slice = shepp_logan(N)
+    I = I_slice .* ones(N,N,10)
+
+    # simulation parameters
+    params = Dict{Symbol, Any}()
+    params[:simulation] = "fast"
+    params[:trajName] = "Spiral"
+    params[:numProfiles] = 10
+    params[:numSamplingPerProfile] = 2000
+
+    acqData = simulation(I, params)
+    rawData = RawAcquisitionData(acqData)
+    rawData_old = deepcopy(rawData)
+
+    sampTimes = sync_traj_and_data!(rawData,traj_input,2000,1)
+
+    @test mean(√,abs2.(rawData.profiles[1].traj[:] .- rawData_old.profiles[1].traj[:])) < 1e-2
+
 end
 
 function test_calculate_b0_maps()
