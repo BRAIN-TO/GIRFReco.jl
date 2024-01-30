@@ -104,28 +104,3 @@ function read_gradient_text_file(filename, reconsize, delay)
     return trajectory_object
 
 end
-
-function testGradReader()
-
-    # ## Testing
-    # gradFile = "data/Gradients/gradients523.txt"
-
-    # ##
-    # kSpaceTrajectory_2 = read_gradient_text_file(gradFile, (200, 200), 0.00000)
-
-    # ##
-    # pulledTrajectory21 = kspaceNodes(kSpaceTrajectory_2)[1, :]
-    # pulledTrajectory22 = kspaceNodes(kSpaceTrajectory_2)[2, :]
-
-    # #
-    # fig = figure(234, figsize = (10, 10))
-    # ax = fig.gca()
-    # ax.scatter(pulledTrajectory21, pulledTrajectory22, label = "Nominal")
-    # xlabel("kx")
-    # ylabel("ky")
-    # title("K-space Center")
-    # xlim((-0.05, 0.05))
-    # ylim((-0.05, 0.05))
-    # legend()
-
-end
