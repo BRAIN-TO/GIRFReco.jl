@@ -74,7 +74,7 @@ end
 function test_apply_k0!(acq_data,girf_applier)
 
     acq_data_ref = deepcopy(acq_data)
-    apply_girf!(acq_data,girf_applier)
+    apply_k0!(acq_data,girf_applier)
 
     # these should be pretty unique checks against ground-truth
     @test  mean(angle.(acq_data_ref.kdata[1]) .- angle.(acq_data.kdata[1])) - 0.00118 < 1e-5
