@@ -1,4 +1,4 @@
 ```@autodocs
 Modules = [GIRFReco]
-Pages   = ["Utils.jl", "GradientReader.jl"]
+Pages   = ["utils.jl", "gradient_reader.jl", "fieldmap_estimator.jl"]
 ```

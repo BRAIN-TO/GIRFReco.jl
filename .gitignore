@@ -3,3 +3,4 @@ LocalPreferences.toml
 GIRFReco.code-workspace
 docs/build/
 docs/src/generated/
+.vscode/
