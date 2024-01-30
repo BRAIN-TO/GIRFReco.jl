@@ -1,6 +1,6 @@
-push!(LOAD_PATH, "../src")
-push!(LOAD_PATH, "../recon/")
-push!(LOAD_PATH, "../utils/")
+push!(LOAD_PATH, "../src/")
+push!(LOAD_PATH, "../src/io/")
+push!(LOAD_PATH, "../src/utils/")
 
 using Documenter, Literate, GIRFReco
 
@@ -25,7 +25,7 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/BRAIN-TO/GIRFReco.git",
+    repo = "github.com/BRAIN-TO/GIRFReco.jl.git",
     push_preview = true,
     # deploy_config = Documenter.GitHubActions(),
     devbranch = "main",
