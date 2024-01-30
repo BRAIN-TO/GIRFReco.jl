@@ -1,6 +1,7 @@
 using GIRFReco
 using MRISimulation
 using MRIReco
+using MRIFiles
 using ImageUtils
 using Test
 using Scratch
