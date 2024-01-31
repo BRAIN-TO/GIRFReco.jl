@@ -182,16 +182,16 @@ are merged into `imaging_acq_data`.
 This step is done through the function `merge_raw_interleaves`, which can be viewed in 
 [utils.jl](@__REPO_ROOT_URL__/utils/utils.jl).
 
-Note that we only do these steps when they have not been done yet or it's specifically required.
+Since the loaded/calculated sens maps and B0 maps are in ascending slice order,
+they need to be reordered according to the slice order in the spiral RawAcqData
+
+We only do these steps when they have not been done yet or it's specifically required.
 =#
 if reload_spiral_data || !(@isdefined imaging_acq_data) || !(@isdefined slice_idx_array_spiral)
     @info "Reading spiral data and merging interleaves"
     imaging_acq_data = merge_raw_interleaves(params_spiral, false)
     raw_temp  = RawAcquisitionData(ISMRMRDFile(params_general[:scan_fullpath][1]))
     slice_idx_array_spiral = get_slice_order(raw_temp, num_slices, (num_slices+1)*2, 2)
-
-    # The loaded/calculated sens maps and B0 maps are in ascending slice order
-    # need to reorder them according to spiral RawAcqData
     b0_maps = b0_maps[:, :, invperm(slice_idx_array_spiral)]
     cartesian_sensitivity = cartesian_sensitivity[:, :, invperm(slice_idx_array_spiral), :]
 end
@@ -321,8 +321,6 @@ the file [utils.jl](@__REPO_ROOT_URL__/utils/utils.jl).
 if params_general[:do_save_recon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
     resolution_tmp = fieldOfView(imaging_acq_data)[1:2] ./ encodingSize(imaging_acq_data)
     resolution_mm = (resolution_tmp[1], resolution_tmp[2], fieldOfView(imaging_acq_data)[3] * (1 + params_general[:slice_distance_factor_percent] / 100.0)) #for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
-
-    # TODO: use slice ordering from cartesian scan directly!
     num_slices = numSlices(imaging_acq_data)
     save_map(
         params_general[:recon_save_fullpath],
