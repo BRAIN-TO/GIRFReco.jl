@@ -1,16 +1,15 @@
 """
-    plot_reconstruction(images, slices_index, b0; fig_handles = [], is_slice_interleaved = false, rotation = 0)
+    plot_reconstruction(images, slices_index, b0; is_slice_interleaved = false, rotation = 0)
 Plots the magnitude and phase of the reconstructed images for a given slice or slices, along with a B₀ map if applicable
 
 # Arguments
 * `images` - Complex-valued images reconstructed using MRIReco.jl
 * `slices_index::Vector{Int}` - slices to plot
 * `b0` - off-resonance map to plot along with images
-* `fig_handles` - String vectors in size of [3,1] for titles of three figures (Magnitude & Phase of reconstructed images, and B₀ maps)
 * `is_slice_interleaved::Bool` - for 2D scanning, indicate this value as `true` to make sure the slice order on the displayed results is correct
 * `rotation::Int` - Counterclock-wise rotation angle for each slice, should be a value from 0, 90, 180, 270 degrees
 """
-function plot_reconstruction(images, slices_index, B₀; fig_handles = [], is_slice_interleaved = false, rotation = 0)
+function plot_reconstruction(images, slices_index, b0; is_slice_interleaved = false, rotation = 0)
 
     num_slices = length(slices_index)
     reordered_slice_indices = zeros(Int16, size(slices_index))
@@ -51,13 +50,13 @@ function plot_reconstruction(images, slices_index, B₀; fig_handles = [], is_sl
 
     Plots.heatmap(phase_mosaic, show = true, plot_title = "∠ Images", plot_titlevspan = 0.1, color = :plasma, aspectratio = :equal)
 
-    b0_map_images = mapslices(x -> x, B₀, dims = [1, 2])
+    b0_map_images = mapslices(x -> x, b0, dims = [1, 2])
     if rotation == 90
-        b0_map_images = mapslices(x -> rotr90(x), B₀, dims = [1, 2])
+        b0_map_images = mapslices(x -> rotr90(x), b0, dims = [1, 2])
     elseif rotation == 180
-        b0_map_images = mapslices(x -> rot180(x), B₀, dims = [1, 2])
+        b0_map_images = mapslices(x -> rot180(x), b0, dims = [1, 2])
     else
-        b0_map_images = mapslices(x -> rotl90(x), B₀, dims = [1, 2])
+        b0_map_images = mapslices(x -> rotl90(x), b0, dims = [1, 2])
     end
     b0_map_mosaic = mosaicview(b0_map_images[:, :, reordered_slice_indices], nrow = Int(floor(sqrt(num_slices))), npad = 5, rowmajor = true, fillvalue = 0)
 
