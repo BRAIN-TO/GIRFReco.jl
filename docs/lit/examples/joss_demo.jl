@@ -35,10 +35,10 @@ The following file, [`recon_config_joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/ex
 includes general configuration for spiral reconstruction.
 It is necessary to execute this file to make sure all parameters are loaded.
 Sample Data that works with this script can be found [here](https://doi.org/10.5281/zenodo.7779044).
-Please download, extract and set the `root_project_path` as the top level folder (should be something like `/your/path/here/data`)
+Please download, extract and set the `root_project_path` as the top level folder (should be something like `/your/path/joss_data_zenodo/`)
 =#
 
-root_project_path = "[Your/Extracted/Data/Folder]" # Root path of the data extracted from Zenodo
+root_project_path = "/your/path/joss_data_zenodo/" # Root path of the data extracted from Zenodo
 include("recon_config_joss_demo.jl")
 
 plotlyjs()
@@ -48,7 +48,7 @@ reload_spiral_data = true; # Set true if we need to reload raw data compulsively
 reload_girf_data = true; # Set true if we need to reload GIRF data compulsively.
 
 #=
-Choose Slice ([single number] OR [1,2,31,...]）
+Choose Slice ([single number] OR [1, 2, 31, ...]）
 Leave an empty array ([]) or remove this line to select all slices
 =#
 slice_choice = [];
