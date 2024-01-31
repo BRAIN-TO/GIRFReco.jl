@@ -51,13 +51,13 @@ function plot_reconstruction(images, slices_index, B₀; fig_handles = [], is_sl
 
     Plots.heatmap(phase_mosaic, show = true, plot_title = "∠ Images", plot_titlevspan = 0.1, color = :plasma, aspectratio = :equal)
 
-    b0_map_images = mapslices(x -> x, b0, dims = [1, 2])
+    b0_map_images = mapslices(x -> x, B₀, dims = [1, 2])
     if rotation == 90
-        b0_map_images = mapslices(x -> rotr90(x), b0, dims = [1, 2])
+        b0_map_images = mapslices(x -> rotr90(x), B₀, dims = [1, 2])
     elseif rotation == 180
-        b0_map_images = mapslices(x -> rot180(x), b0, dims = [1, 2])
+        b0_map_images = mapslices(x -> rot180(x), B₀, dims = [1, 2])
     else
-        b0_map_images = mapslices(x -> rotl90(x), b0, dims = [1, 2])
+        b0_map_images = mapslices(x -> rotl90(x), B₀, dims = [1, 2])
     end
     b0_map_mosaic = mosaicview(b0_map_images[:, :, reordered_slice_indices], nrow = Int(floor(sqrt(num_slices))), npad = 5, rowmajor = true, fillvalue = 0)
 

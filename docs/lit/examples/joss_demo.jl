@@ -240,7 +240,7 @@ sensitivity = mapslices(x -> imresize(x, params_spiral[:recon_size][1], params_s
 # Optional: Plot the sensitivity maps of each coil on a given slice.
 if params_general[:do_plot_recon]
     plotlyjs()
-    plot_sense_maps(sensitivity)
+    plot_sense_maps(sensitivity,20)
 end
 
 # Do coil compression to make recon faster
