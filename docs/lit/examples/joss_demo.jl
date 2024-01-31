@@ -16,12 +16,6 @@ The configuration file is [`recon_config_joss_demo.jl`](@__REPO_ROOT_URL__/docs/
 The necessary Julia packages needed for spiral reconstruction.
 =#
 
-#Base packages for computation
-# using HDF5, LinearAlgebra, Dierckx, DSP, FourierTools, RegularizedLeastSquares, ImageUtils, PolygonInbounds
-
-#Packages for figure displaying
-# using MosaicViews, Plots, Images
-
 #Our developed packages
 using GIRFReco, MRIGradients
 
@@ -40,13 +34,12 @@ using PlotlyJS, Plots
 The following file, [`recon_config_joss_demo.jl`](@__REPO_ROOT_URL__/docs/lit/examples/recon_config_joss_demo.jl),
 includes general configuration for spiral reconstruction.
 It is necessary to execute this file to make sure all parameters are loaded.
-Sample Data that works with this script can be found at: https://doi.org/10.5281/zenodo.7779044
+Sample Data that works with this script can be found [here](https://doi.org/10.5281/zenodo.7779044).
 Please download, extract and set the root_project_path as the top level folder (should be something like /your/path/here/data-2, I've renamed mine to SPIDI)
 
 =#
 
-# root_project_path = "Your/Extracted/Data/Folder" # Root path of the data extracted from Zenodo
-root_project_path = "/srv/data/ajaffray/TORONTO_COLLAB/data/joss_data_zenodo"
+root_project_path = "[Your/Extracted/Data/Folder]" # Root path of the data extracted from Zenodo
 include("recon_config_joss_demo.jl")
 
 plotlyjs()
@@ -57,7 +50,7 @@ reload_girf_data = true # Set true if we need to reload GIRF data compulsively.
 
 #=
 Choose Slice ([single number] OR [1,2,31,...]）
-Leave empty ([]) or remove this line to later select all slices
+Leave an empty array ([]) or remove this line to select all slices
 =#
 slice_choice = []
 
@@ -75,19 +68,19 @@ is_single_interleave = isa(params_general[:scan_fullpath], String)
 
 #=
 Choose which interleave to be reconstructed. 
-For multi-interleave data, the range of this value is [1:num_total_interleaves] (total number of interleaves)
+For multi-interleave data, the range of this value is [1:num_total_interleaves].
 For single-interleave data, it should always be set as 1; for multi-interleave data, the value set here will be used, indicating which interleaves to be merged and reconstructed.
 =#
-start_idx_interleave = 1
+start_idx_interleave = 1;
 
 #===================================================
 ## 3. Image Reconstruction
 
 The steps of image reconstruction starts here.
 
-### 3.1 Calculation of B0 and Coil Sensitivity Maps
+### 3.1 Calculation of B₀ and Coil Sensitivity Maps
 
-The first step in reconstruction pipeline is to calculate the off-resonance (B0) maps `b0_map` 
+The first step in reconstruction pipeline is to calculate the off-resonance (B₀) maps `b0_map` 
 and coil sensitivity maps `cartesian_sensitivity` through the Cartesian reconstruction script 
 [cartesian_recon.jl](@__REPO_ROOT_URL__/recon/cartesian_recon.jl). 
 Ideally this script is execute once and the calculated maps are 
@@ -96,7 +89,7 @@ This is controlled by `do_load_maps` in general parameters.
 ===================================================#
 
 if params_general[:do_load_maps] && isfile(params_general[:b0_map_save_fullpath])
-    @info "Loading SENSE and B0 maps from $(params_general[:sensitivity_save_fullpath]) and $(params_general[:b0_map_save_fullpath])"
+    @info "Loading SENSE and B₀ maps from $(params_general[:sensitivity_save_fullpath]) and $(params_general[:b0_map_save_fullpath])"
     cartesian_sensitivity = load_map(params_general[:sensitivity_save_fullpath]; do_split_phase = true)
     b0_maps = load_map(params_general[:b0_map_save_fullpath])
     
@@ -110,7 +103,7 @@ end
 #=
 ### 3.2 Preparation of Spiral Reconstruction
 
-With off-resonance (B0) maps and coil sensitivity maps calculated, 
+With off-resonance (B₀) maps and coil sensitivity maps calculated, 
 before the reconstruction of spiral images, there are necessary steps to prepare for 
 the related data. 
 
@@ -180,9 +173,9 @@ Here we synchronize the spiral k-space data with trajectory by upsampling the tr
 Subsequently, data of all the selected spiral interleaves and the corresponding trajectories 
 are merged into `imaging_acq_data`. 
 This step is done through the function `merge_raw_interleaves`, which can be viewed in 
-[utils.jl](@__REPO_ROOT_URL__/utils/utils.jl).
+[utils.jl](@__REPO_ROOT_URL__/src/utils/utils.jl).
 
-Since the loaded/calculated sens maps and B0 maps are in ascending slice order,
+Since the loaded/calculated sens maps and B₀ maps are in ascending slice order,
 they need to be reordered according to the slice order in the spiral RawAcqData
 
 We only do these steps when they have not been done yet or it's specifically required.
@@ -208,6 +201,7 @@ Finally we check if the k-space trajectory is normalized to the range [-0.5, 0.5
 #Load GIRFs (K1)
 girf_k1 = readGIRFFile(params_general[:girf_fullpath][1], params_general[:girf_fullpath][2], params_general[:girf_fullpath][3], "GIRF_FT", false)
 girf_applier_k1 = GirfApplier(girf_k1, params_general[:gamma])
+
 #Load K0 GIRF
 girf_k0 = readGIRFFile(params_general[:girf_fullpath][1], params_general[:girf_fullpath][2], params_general[:girf_fullpath][3], "b0ec_FT", true)
 girf_applier_k0 = GirfApplier(girf_k0, params_general[:gamma])
@@ -222,7 +216,7 @@ if params_general[:do_correct_with_girf_k0]
     apply_k0!(imaging_acq_data, girf_applier_k0)
 end
 
-# Check the k-space nodes so they don't exceed frequency limits [-0.5, 0.5] (inclusive)
+# Check the k-space nodes so they don't exceed frequency limits [-0.5, 0.5]
 check_acquisition_nodes!(imaging_acq_data)
 
 #=
@@ -255,9 +249,9 @@ if params_general[:do_coil_compression]
 end
 
 #=
-#### 3.2.6 Processing Off-Resonance (B0) Maps
+#### 3.2.6 Processing Off-Resonance (B₀) Maps
 
-We need to resize the B0 maps to the size of output encoding matrix size.
+We need to resize the B₀ maps to the size of output encoding matrix size.
 =#
 resized_b0_maps = mapslices(x -> imresize(x, params_spiral[:recon_size][1], params_spiral[:recon_size][2]), b0_maps, dims = [1, 2])
 
@@ -265,10 +259,12 @@ resized_b0_maps = mapslices(x -> imresize(x, params_spiral[:recon_size][1], para
 #### 3.2.7 Alignment of Off-Resonance, Sensitivity, and Spiral Data
 
 We need to make sure that the axes line up so we rotate the sensitivities and the off-resonance maps  
-Depending on your geometry, this might not be necessary but it is here
+Depending on your geometry, this might not be necessary but in case you need them:
+
+resized_b0_maps = mapslices(x->rotl90(x),resized_b0_maps,dims=[1,2])
+sensitivity = mapslices(x->rotl90(x),sensitivity,dims=[1,2])
+
 =#
-# resized_b0_maps = mapslices(x->rotl90(x),resized_b0_maps,dims=[1,2])
-# sensitivity = mapslices(x->rotl90(x),sensitivity,dims=[1,2])
 
 #=
 ### 3.3 Spiral Image Reconstruction
@@ -276,10 +272,10 @@ Depending on your geometry, this might not be necessary but it is here
 Here we start the spiral image reconstruction.
 
 First we need to set necessary parameters for reconstruction, 
-including iterative solver's setting, coil maps, B0 maps, etc. 
+including iterative solver's setting, coil maps, B₀ maps, etc. 
 These parameters are held under the dictionary `params_recon`.
 
-Note that it is safer to cast B0 maps to ComplexF32 if the current version of MRIReco.jl is used.
+Note that it is safer to cast B₀ maps to ComplexF32 if the current version of MRIReco.jl is used.
 =#
 
 @info "Setting Reconstruction Parameters"
@@ -304,7 +300,7 @@ to perform final spiral image reconstruction.
 @info "Performing Spiral Reconstruction"
 @time reco = reconstruction(imaging_acq_data, params_recon)
 
-GC.gc()
+GC.gc() # Recommended to use especially when encountering memory issue due to improper garbage collection.
 
 # Reorder slices to an ascending order
 reco = reco[:,:,slice_idx_array_spiral[selected_slice]]
@@ -315,7 +311,7 @@ resized_b0_maps = resized_b0_maps[:, :, slice_idx_array_spiral[selected_slice]]
 
 All results could be saved into NIfTI files using the `save_map` function 
 and be plotted using the `plot_reconstruction` function, both located in 
-the file [utils.jl](@__REPO_ROOT_URL__/utils/utils.jl).
+the file [utils.jl](@__REPO_ROOT_URL__/src/utils/utils.jl).
 
 =#
 if params_general[:do_save_recon] # TODO: include elements to save as tuple, e.g., ["b0", "sense", "recon"], same for load
