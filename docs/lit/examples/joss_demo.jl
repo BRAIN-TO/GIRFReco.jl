@@ -52,14 +52,14 @@ include("recon_config_joss_demo.jl")
 plotlyjs()
 
 # Two user defined parameters, just for this script.
-reload_spiral_data = true; # Set true if we need to reload raw data compulsively.
-reload_girf_data = true; # Set true if we need to reload GIRF data compulsively.
+reload_spiral_data = true # Set true if we need to reload raw data compulsively.
+reload_girf_data = true # Set true if we need to reload GIRF data compulsively.
 
 #=
 Choose Slice ([single number] OR [1,2,31,...]）
 Leave empty ([]) or remove this line to later select all slices
 =#
-slice_choice = [];
+slice_choice = []
 
 #=
 Choose which diffusion directions and averages to be processed. 
@@ -246,7 +246,7 @@ sensitivity = mapslices(x -> imresize(x, params_spiral[:recon_size][1], params_s
 # Optional: Plot the sensitivity maps of each coil on a given slice.
 if params_general[:do_plot_recon]
     plotlyjs()
-    plot_sense_maps(sensitivity, size(sensitivity, 4), slice_index = 2)
+    plot_sense_maps(sensitivity)
 end
 
 # Do coil compression to make recon faster

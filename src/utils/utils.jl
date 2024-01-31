@@ -1,25 +1,17 @@
-
-## Choose plotting backend to be PlotlyJS!
-# plotlyjs()
-
-## General Plotting function for the reconstruction
-
-# "Mosaic-plots reconstruction for selected slices and corresponding B0 map"
 """
-    plot_reconstruction(images, slices_index, b0; fig_handles = [], is_slice_interleaved = false)
+    plot_reconstruction(images, slices_index, b0; fig_handles = [], is_slice_interleaved = false, rotation = 0)
 Plots the magnitude and phase of the reconstructed images for a given slice or slices, along with a B₀ map if applicable
 
 # Arguments
 * `images` - Complex-valued images reconstructed using MRIReco.jl
 * `slices_index::Vector{Int}` - slices to plot
 * `b0` - off-resonance map to plot along with images
-* `fig_handles` - String vectors in size of [3,1] for titles of three figures (Magnitude & Phase of reconstructed images, and B0 maps)
+* `fig_handles` - String vectors in size of [3,1] for titles of three figures (Magnitude & Phase of reconstructed images, and B₀ maps)
 * `is_slice_interleaved::Bool` - for 2D scanning, indicate this value as `true` to make sure the slice order on the displayed results is correct
 * `rotation::Int` - Counterclock-wise rotation angle for each slice, should be a value from 0, 90, 180, 270 degrees
 """
-function plot_reconstruction(images, slices_index, b0; fig_handles = [], is_slice_interleaved = false, rotation = 0)
-    # plot()
-    ## If we need to re-order all slices
+function plot_reconstruction(images, slices_index, B₀; fig_handles = [], is_slice_interleaved = false, rotation = 0)
+
     num_slices = length(slices_index)
     reordered_slice_indices = zeros(Int16, size(slices_index))
 
@@ -35,15 +27,6 @@ function plot_reconstruction(images, slices_index, b0; fig_handles = [], is_slic
         error("rotation must be 0, 90, 180 or 270 degrees.")
     end
 
-    # Plot magnitude images (normalize)
-    # if length(fig_handles) < 1
-    #     figure("Magnitude Images")
-    # else
-    #     figure(fig_handles[1])
-    # end
-
-    # clf()
-
     magnitude_images = mapslices(x -> abs.(x) ./ maximum(abs.(x)), images[:, :, reordered_slice_indices], dims = [1, 2])
     if rotation == 90
         magnitude_images = mapslices(x -> rotr90(x), magnitude_images, dims = [1, 2])
@@ -55,7 +38,6 @@ function plot_reconstruction(images, slices_index, b0; fig_handles = [], is_slic
     magnitude_mosaic = mosaicview(magnitude_images, nrow = Int(floor(sqrt(num_slices))), npad = 5, rowmajor = true, fillvalue = 0)
 
     Plots.heatmap(magnitude_mosaic, show = true, plot_title = "|Images|", plot_titlevspan = 0.1, color = :grays, aspectratio = :equal)
-    # display(plot!())
 
     phase_images = angle.(images[:, :, reordered_slice_indices, 1, 1])
     if rotation == 90
@@ -68,20 +50,7 @@ function plot_reconstruction(images, slices_index, b0; fig_handles = [], is_slic
     phase_mosaic = mosaicview(phase_images, nrow = Int(floor(sqrt(num_slices))), npad = 5, rowmajor = true, fillvalue = 0)
 
     Plots.heatmap(phase_mosaic, show = true, plot_title = "∠ Images", plot_titlevspan = 0.1, color = :plasma, aspectratio = :equal)
-    #colorbar()
-    # display(plot!())
 
-    #gcf().suptitle("∠Images")
-
-    # # Plot B0 maps
-    # if length(fig_handles) < 3
-    #     figure("B₀ Map Images")
-    # else
-    #     figure(fig_handles[3])
-    # end
-
-    # clf()
-    # plot()
     b0_map_images = mapslices(x -> x, b0, dims = [1, 2])
     if rotation == 90
         b0_map_images = mapslices(x -> rotr90(x), b0, dims = [1, 2])
@@ -93,19 +62,18 @@ function plot_reconstruction(images, slices_index, b0; fig_handles = [], is_slic
     b0_map_mosaic = mosaicview(b0_map_images[:, :, reordered_slice_indices], nrow = Int(floor(sqrt(num_slices))), npad = 5, rowmajor = true, fillvalue = 0)
 
     Plots.heatmap(b0_map_mosaic, show = true, plot_title = "B₀ Map Images", plot_titlevspan = 0.1, color = :plasma)
-    # colorbar()
-    # display(plot!())
-
-    # gcf().suptitle("B₀ Maps [rad/s]")
-
-    1
 
 end
 
-"Function plots all profiles in the acquisition to check consistency with ISMRMRD file"
-function check_profiles(raw_data)
+"""
+    check_profiles(raw_data::RawAcquisitionData)
+Sanity check of RawAcqData object by ploting all profiles to confirm its consistency with ISMRMRD file
 
-    num_profiles = 128 # Set to the number of profiles that you would like to see
+# Arguments
+* `raw_data::RawAcquisitionData` - RawAcquisitionData object
+* `num_profiles_display` - The number of profiles to be displayed
+"""
+function check_profiles(raw_data; num_profiles_display = 128)
 
     for l = 1:num_profiles
         p1 = plot(abs.(raw_data.profiles[l].data[:, 1]))
@@ -115,33 +83,30 @@ function check_profiles(raw_data)
 end
 
 """
-    plot_sense_maps!(sensitivity, num_channels)
+    plot_sense_maps(sensitivity, num_channels; slice_index = 1)
 Plots coil sensitivity maps from the channels, for a total of num_channels plots
 
 # Arguments
-* `sensitivity` - sensitivity maps
-* `num_channels::Int` - number of coils (usually last dimension of sensitivity)
-* `slice_index::Int` - The index of the slice to be displayed (if multislice)
+* `sensitivity` - sensitivity maps, a 4D array: [nX, nY, nZ, nCoil]
+* `num_channels` - number of coils (usually the last dimension of sensitivity)
+* `slice_index` - The index of the slice to be displayed (if multislice)
 """
-function plot_sense_maps(sensitivity, num_channels; slice_index = 1)
-    num_slices = size(sensitivity, 3)
+function plot_sense_maps(sensitivity; slice_index = 1)
+    if ndims(sensitivity) == 4
+        num_slices = size(sensitivity, 3)
+        num_channels = size(sensitivity, 4)
+    else
+        err_msg = @sprintf("sensitivity must be a 4D array with a size of [nX, nY, nZ, nCoil]. Current input has %d dimensions.", ndims(sensitivity))
+        error(err_msg)
+    end
+
     if slice_index > num_slices
         err_msg = @sprintf("The index of slice to be displayed is %d, but total slice number is %d.", slice_index, num_slices)
         error(err_msg)
     end
 
-    # # Magnitude maps
-    # figure(@sprintf("Sensitivity Map Magnitude of Slice %d / %d", slice_index, num_slices)); clf(); for ch in 1:num_channels; subplot(8,4,ch); imshow((abs.(sensitivity[:,:,slice_index,ch])), cmap = "gray"); end;
-    # subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
-    # gcf()
-
     magnitude_mosaic = mosaicview((abs.(sensitivity[:, :, slice_index, :])), nrow = Int(floor(sqrt(num_channels))), npad = 5, rowmajor = true, fillvalue = 0)
     Plots.heatmap(magnitude_mosaic, show = true, plot_title = "|Sensitivity|", plot_titlevspan = 0.1, color = :gnuplot2)
-
-    # # Phase maps
-    # figure(@sprintf("Sensitivity Map Phase of Slice %d / %d", slice_index, num_slices)); clf(); for ch in 1:num_channels; subplot(8,4,ch); imshow(angle.(sensitivity[:,:,slice_index,ch]), cmap = "gray"); end;
-    # subplots_adjust(wspace=0.05,hspace=0.05,left=0.05,bottom=0.0,right=1.0,top=0.95)
-    # gcf()
 
     phase_mosaic = mosaicview((angle.(sensitivity[:, :, slice_index, :])), nrow = Int(floor(sqrt(num_channels))), npad = 5, rowmajor = true, fillvalue = 0)
     Plots.heatmap(phase_mosaic, show = true, plot_title = "∠ Sensitivity", plot_titlevspan = 0.1, color = :plasma)
@@ -164,13 +129,13 @@ end
 ## PREPROCESSING
 
 """
-    calculate_b0_maps(me_data,slices,echotime_1,echotime_2)
+    calculate_b0_maps(me_data, slices, echotime_1, echotime_2)
 
-Calculate  B0 map from the two images with different echo times via their phase difference (obtained from imTE2.*conj(imTE1))
+Calculate B₀ map from the two images with different echo times via their phase difference (phase of img_TE2.*conj(img_TE1))
 
 # Arguments
-* `me_data`                          - [nX nY nZ 2 num_coils] 5D image array, 4th dim echo time
-* `slices::NTuple{num_slices,Int}`     - slice index vector (tuple?) for which map is computed
+* `me_data`                          - [nX nY nZ 2 num_coils] 5D image array, 4th dim is echo time
+* `slices::NTuple{num_slices,Int}`   - slice index vector (tuple?) for which map is computed
 * `echotime_1::AbstractFloat`        - TE1 [ms]
 * `echotime_2::AbstractFloat`        - TE2 [ms]
 """
@@ -186,9 +151,9 @@ end
 """
     get_slice_order(r::RawAcquisitionData, sliceNum::Int, startProfile::Int, incProfile:Int)
 Return a array of slice order index with ascending order of Z position.
-e.g. For an interleaved pattern of slice position in RawAcquisitionData given below:
-[-7, -3, 1, 5, 9, -9, -5, -1, 3, 7] (in mm)
-The output will be [6, 1, 7, 2, 8, 3, 9, 4, 10, 5]
+
+e.g. For an interleaved pattern of slice position in RawAcquisitionData given below (in unit of mm):
+[-7, -3, 1, 5, 9, -9, -5, -1, 3, 7], the output will be [6, 1, 7, 2, 8, 3, 9, 4, 10, 5]
 
 # Arguments
 * `r::RawAcquisitionData`       - A RawAcquisitionData that directly reads from original MRD file
@@ -423,14 +388,15 @@ function validate_acq_data!(a::AcquisitionData)
 end
 
 """
-    preprocess_cartesian_data(raw::RawAcquisitionData; dims = 1)
+    preprocess_cartesian_data(r::RawAcquisitionData, do_save; filename = "data/processed_cartesian_file.h5")
 Prepares Cartesian for reconstruction
 
 # Arguments
-* `r::RawAcquisitionData{T}`          - RawAcquisitionData object
-* `filename`                             - filename to save the preprocessed data to
+* `r::RawAcquisitionData{T}`   - RawAcquisitionData object
+* `do_save::Boolean`           - Save the processed Cartesian data as a HDF5 file
+* `filename`                   - filename to save the preprocessed data
 """
-function preprocess_cartesian_data(r::RawAcquisitionData, do_save; filename = "data/testFile.h5")
+function preprocess_cartesian_data(r::RawAcquisitionData, do_save; filename = "data/processed_cartesian_file.h5")
 
     remove_oversampling!(r)
 
@@ -463,16 +429,15 @@ function preprocess_cartesian_data(r::RawAcquisitionData, do_save; filename = "d
 end
 
 """
-    remove_oversampling!(raw::RawAcquisitionData; dims = 1)
-Removes 2x readout oversampling in specified raw data dimensions by iFFT, cropping FOV and FFT
+    remove_oversampling!(raw::RawAcquisitionData)
+Removes 2x readout oversampling in raw data along read-out dimension.
 
 # Arguments
 * `raw::RawAcquisitionData{T}`          - RawAcquisitionData object
-* `dims`                                - dimension alongside which oversampling is removed (default: 1)
 """
-function remove_oversampling!(raw::RawAcquisitionData; dims = [1])
+function remove_oversampling!(raw::RawAcquisitionData)
 
-    dimension_index = dims[1]
+    dimension_index = 1
     num_data_samples = raw.params["encodedSize"][dimension_index]
     index_crop_fov = convert(Vector{Int32}, [1:floor(num_data_samples / 4); ceil(3 / 4 * num_data_samples + 1):num_data_samples])
 
@@ -609,7 +574,7 @@ function merge_raw_interleaves(params, output_raw)
 end
 
 """
-    apply_girf!(raw::RawAcquisitionData, g::GirfApplier)
+    apply_girf!(a::AcquisitionData{T}, g::GirfApplier)
 Applies the GIRF to the trajectories inside of a::AcquisitionData
 
 # Arguments
@@ -671,7 +636,7 @@ function apply_girf!(a::AcquisitionData{T}, g::GirfApplier) where {T}
 end
 
 """
-    apply_k0!(raw::RawAcquisitionData, g::GirfApplier)
+    apply_k0!(a::AcquisitionData{T}, g::GirfApplier)
 Applies the K0 modulation due to imaging gradients to the data inside of a::AcquisitionData
 
 # Arguments
@@ -771,17 +736,18 @@ end
 ## Input/Output, File handling
 
 """
-    save_map(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
-Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
+    save_map(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0], do_split_phase::Bool = false, do_normalize::Bool = true)
+Saves calibration maps (sensitivity or B₀) as 4D NIfTI file(s)
 
 For complex-valued data, magnitude and phase can be split into separate files
 # Arguments
-* `filename::String`            - string filename with extension .nii, example "sensemap.nii"
-* `calib_map`                   - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
-* `resolution_mm`               - resolution in mm, 3 element vector, e.g., [1.0, 1.0, 2.0]
-* `offset_mm`                   - isocenter offset in mm, default: [0.0, 0.0, 0.0]
-* `do_split_phase::Bool=false`    - if true, data is saved in two nifti files with suffix "_magn" and "_phase", respectively
+* `filename::String`              - string filename with extension .nii, example "sensemap.nii"
+* `calib_map`                     - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B₀ map array 
+* `resolution_mm`                 - resolution in mm, 3 element vector, e.g., [1.0, 1.0, 2.0]
+* `offset_mm`                     - isocenter offset in mm, default: [0.0, 0.0, 0.0]
+* `do_split_phase::Bool = false`  - if true, data is saved in two nifti files with suffix "_magn" and "_phase", respectively
                                   to enable display in typical NIfTI viewers
+* `do_normalize::Bool = true`     - if true, normalize the image by its magnitude maxima
 """
 function save_map(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0], do_split_phase::Bool = false, do_normalize::Bool = true)
 
@@ -829,16 +795,17 @@ function save_map(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0
 end
 
 """
-    load_map(filename, calib_map, resolution_mm; offset_mm = [0.0, 0.0, 0.0])
-Saves calibration maps (sensitivity or B0) as 4D NIfTI file(s)
+    load_map(filename; do_split_phase::Bool = false)
+Load calibration maps (sensitivity or B₀) from 4D NIfTI file(s)
 
-For complex-valued data, magnitude and phase can be split into separate files
+For complex-valued data, magnitude and phase parts are stored in two files with suffix "_magn" and "_phase".
+
 # Arguments
 * `filename::String`            - string filename with extension .nii, example "sensemap.nii"
 * `do_split_phase::Bool=false`    - if true, data is saved in two nifti files with suffix "_magn" and "_phase", respectively
                                   to enable display in typical NIfTI viewers
 # Output
-* `calib_map`                    - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B0 map array 
+* `calib_map`                    - [nX nY nZ {nChannels}] 4-D sensitivity or 3D B₀ map array 
 """
 function load_map(filename; do_split_phase::Bool = false)
 
@@ -869,12 +836,13 @@ end
 
 """
     shift_kspace!(acqdata, shift)
-Shifts image to different location by applying phase ramp to image
+This function applys additional phase ramps to k-space data to achive a given shift of center of image FOV in X and Y directions.
 
-Perhaps this should be called shift_fov
+Perhaps this should be called shift_fov; however, since this function is modifying kspace data, it is named shift_kspace for now.
+
 # Arguments
-* `acqdata::AcquisitionData{T}`          - AcquisitionData object
-* `shift::AbstractVector`           - Vector containing shift
+* `acqdata::AcquisitionData{T}`     - AcquisitionData object to be modified
+* `shift::AbstractVector`           - Vector containing shift with size [shift_X, shift_Y]
 """
 function shift_kspace!(acqdata, shift)
 

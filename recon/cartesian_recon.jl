@@ -133,7 +133,7 @@ end
 
 if params_general[:do_plot_recon]
     @info "Plotting Cartesian Results (Sensitivity Maps and B0 Maps)"
-    # plot_sense_maps(sensitivity,num_coils)
+    # plot_sense_maps(sensitivity)
     plot_reconstruction(cartesian_reco[:, :, slice_idx_array_cartesian, 1], 1:size(cartesian_reco, 3), b0_maps[:, :, slice_idx_array_cartesian], is_slice_interleaved = false, rotation = 180)
 end
 
