@@ -29,13 +29,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
-
-[extras]
-CPUSummary = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
-FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
-
 [compat]
-julia = "1.9"
 AxisArrays = "0.4.6"
 DSP = "0.7.8"
 DelimitedFiles = "1.9.1"
@@ -45,7 +39,7 @@ FileIO = "1.16.1"
 FourierTools = "0.4.2"
 ImageUtils = "0.2.9"
 MAT = "0.10.5"
-MRIBase = "0.3.3"
+MRIBase = "0.3.3, 0.4"
 MRIFiles = "0.1.6"
 MRIGradients = "0.1.2"
 Measures = "0.3.2"
@@ -55,6 +49,11 @@ NFFTTools = "0.2.6"
 Plots = "1.38.16"
 ROMEO = "1.0.1"
 Scratch = "1.2.0"
+Statistics = "1.9.0"
 StatsBase = "0.33.21"
 Unitful = "1.14.0"
-Statistics = "1.9.0"
+julia = "1.9"
+
+[extras]
+CPUSummary = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
+FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
