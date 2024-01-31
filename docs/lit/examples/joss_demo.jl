@@ -250,7 +250,8 @@ end
 
 # Optional: Coil compression to further reduce the time of recon
 if params_general[:do_coil_compression]
-    imaging_acq_data, sensitivity = geometricCC_2d(imaging_acq_data, sensitivity, params_general[:num_virtual_coils])
+    imaging_acq_data, ccMat_vec = softwareCoilCompression(imaging_acq_data, params_general[:num_virtual_coils])
+    sensitivity = applyCoilCompressionSensitivityMaps(sensitivity, ccMat_vec)
 end
 
 #=
