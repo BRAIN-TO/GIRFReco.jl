@@ -15,11 +15,11 @@ Literate.markdown(ipath_script, opath; documenter = true)
 Literate.markdown(ipath_config, opath; documenter = true)
 
 makedocs(
-    sitename = "GIRFReco Documentation",
+    sitename = "GIRFReco.jl Documentation",
     modules = [GIRFReco],
     pages = [
         "Home" => "index.md",
-        "Utilities" => "Utilities.md",
+        "API" => "Utilities.md",
         "Examples" => [joinpath("generated/", "joss_demo.md"), joinpath("generated/", "recon_config_joss_demo.md")],
     ],
 )

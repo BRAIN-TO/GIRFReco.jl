@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------------
-# # [GIRFReco.jl Example Configuration File](@id example_config)
+# # [GIRFReco.jl Example Configuration](@id example_config)
 #-----------------------------------------------------------------------------------
 
 #=
