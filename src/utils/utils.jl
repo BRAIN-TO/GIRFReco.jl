@@ -83,19 +83,24 @@ end
 
 """
     plot_sense_maps(sensitivity, num_channels; slice_index = 1)
-Plots coil sensitivity maps from the channels, for a total of num_channels plots
+Plots coil sensitivity maps from the channels, for a given number of num_channels plots on a given slice index.
 
 # Arguments
 * `sensitivity` - sensitivity maps, a 4D array: [nX, nY, nZ, nCoil]
-* `num_channels` - number of coils (usually the last dimension of sensitivity)
+* `num_channels` - number of coils to be displayed.
 * `slice_index` - The index of the slice to be displayed (if multislice)
 """
-function plot_sense_maps(sensitivity; slice_index = 1)
+function plot_sense_maps(sensitivity, num_channels; slice_index = 1)
     if ndims(sensitivity) == 4
         num_slices = size(sensitivity, 3)
-        num_channels = size(sensitivity, 4)
+        num_channels_total = size(sensitivity, 4)
     else
         err_msg = @sprintf("sensitivity must be a 4D array with a size of [nX, nY, nZ, nCoil]. Current input has %d dimensions.", ndims(sensitivity))
+        error(err_msg)
+    end
+
+    if num_channels > num_channels_total
+        err_msg = @sprintf("The number of coils to be displayed is %d, but total available coil number is %d.", num_channels, num_channels_total)
         error(err_msg)
     end
 
