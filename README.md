@@ -13,7 +13,7 @@ The data for the phantom reconstruction [`joss_demo.jl`](./docs/lit/examples/jos
 For a full introduction, please refer to our [manuscript](./paper/paper.md) for a full description of this package, including background, purpose, implementation, and the information of dependent packages.
 
 ## Quick Installation
-To install the package, **type** the following command:
+To install the package, start Julia and **type** the following command in the REPL:
 ```
 julia>]add GIRFReco
 ```
@@ -23,6 +23,29 @@ It is also possible to install the package with the following code:
 using Pkg
 Pkg.add("GIRFReco")
 ```
+
+## Getting Started
+
+You can switch to the GIRFReco.jl example directory and activate the example environment by entering
+```julia
+dir = joinpath(dirname(pathof(GIRFReco)), "examples")
+cd(dir)
+Pkg.activate(".")
+using GIRFReco
+```
+
+Then, you can download the example data via
+
+```julia
+include("download_example_data.jl")
+```
+
+and finally run the example via
+
+```julia
+include("joss_demo.jl")
+```
+
 
 ## Development Installation
 
