@@ -41,7 +41,7 @@ export plot_reconstruction,
     shift_kspace!,
     estimate_b0_maps,
     read_gradient_text_file,
-    run_example
+    download_example
 
 include("utils/utils.jl")
 include("io/gradient_reader.jl")

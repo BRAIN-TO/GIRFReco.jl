@@ -1,13 +1,7 @@
 # Getting necessary files
-using Pkg
-
-Pkg.activate(".") #Maybe something else is necessary here
-Pkg.add("ZipFile")
-
 using Downloads
-using ZipFile
 
-function run_example()
+function download_example()
 
     example_zenodo_data_url = "https://zenodo.org/records/7779045/files/data_girfreco_03_28_2023.zip?download=1"
     example_config_url = ""
@@ -22,13 +16,5 @@ function run_example()
     Downloads.download(example_cartesian_reco_script_url,"./cartesian_recon.jl")
     Downloads.download(example_fieldmap_estimator_url,"./fieldmap_estimator.jl")
     Downloads.download(example_env_url, "./Project.toml")
-
-    # Unzip data
-    unzip("./data.zip", exdir="./data")
-
-    # Setting environment
-
-    include("joss_demo.jl")
-    include("fieldmap_estimator.jl")
 
 end
