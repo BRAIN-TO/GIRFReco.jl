@@ -40,11 +40,9 @@ export plot_reconstruction,
     load_map,
     shift_kspace!,
     estimate_b0_maps,
-    read_gradient_text_file,
-    download_example
+    read_gradient_text_file
 
 include("utils/utils.jl")
 include("io/gradient_reader.jl")
-include("utils/example_setup.jl") # convenience file for example
 
 end # module
