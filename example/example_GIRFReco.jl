@@ -1,9 +1,6 @@
 using Pkg
 
 Pkg.activate(".")
-Pkg.add("ZipFile")
-Pkg.add("Downloads")
-Pkg.add("ZipFile")
 Pkg.add("Flux")
 Pkg.add("HTTP")
 
@@ -16,7 +13,9 @@ if ~isfile("./data.zip")
 end
 
 if ~isdir("./joss_data_zenodo") # need to download
-    Base.prompt("Please navigate to $(pwd()) and unzip data.zip")
-else # Run the Demo
+    Base.prompt("Please navigate to $(pwd()) and unzip data.zip using your favourite unzip tool. Once complete, press any key to proceed")
+end
+
+if isdir("./joss_data_zenodo") # need to download # Run the Demo
     include("joss_demo.jl")
 end
