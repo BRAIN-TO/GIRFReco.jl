@@ -4,7 +4,7 @@ Pkg.activate(".")
 Pkg.add("Flux")
 Pkg.add("HTTP")
 
-using HTTP, Downloads, ZipFile, Flux
+using HTTP, Flux
 
 example_zenodo_data_url = "https://zenodo.org/records/7779045/files/data_girfreco_03_28_2023.zip?download=1"
 
