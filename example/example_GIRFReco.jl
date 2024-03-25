@@ -15,7 +15,7 @@ if ~isfile("./data.zip")
     HTTP.download(example_zenodo_data_url, "./data.zip") #Then uncompress
 end
 
-if ~isdir("./data") # need to download
+if ~isdir("./joss_data_zenodo") # need to download
     Base.prompt("Please navigate to $(pwd()) and unzip data.zip")
 else # Run the Demo
     include("joss_demo.jl")
