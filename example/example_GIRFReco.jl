@@ -5,6 +5,7 @@ Pkg.add("ZipFile")
 Pkg.add("Downloads")
 Pkg.add("ZipFile")
 Pkg.add("Flux")
+Pkg.add("HTTP")
 
 using HTTP, Downloads, ZipFile, Flux
 
