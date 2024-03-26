@@ -26,25 +26,7 @@ Pkg.add("GIRFReco")
 
 ## Getting Started
 
-You can switch to the GIRFReco.jl example directory and activate the example environment by entering
-```julia
-dir = joinpath(dirname(pathof(GIRFReco)), "examples")
-cd(dir)
-Pkg.activate(".")
-using GIRFReco
-```
-
-Then, you can download the example data via
-
-```julia
-include("download_example_data.jl")
-```
-
-and finally run the example via
-
-```julia
-include("joss_demo.jl")
-```
+There is an example script in the `example` folder. A quick start guide of this script can be found [here](./example/README.md).
 
 
 ## Development Installation
