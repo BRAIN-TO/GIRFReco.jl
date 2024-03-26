@@ -1,6 +1,6 @@
 using Pkg
-Pkg.add("HTTP")
-using HTTP
+
+Pkg.activate(".")
 
 example_zenodo_data_url = "https://zenodo.org/records/7779045/files/data_girfreco_03_28_2023.zip?download=1"
 
