@@ -24,7 +24,7 @@ using GIRFReco, MRIGradients
 #MRIReco and its sub-packages
 using MRIReco, FileIO, MRIFiles, MRIBase, MRICoilSensitivities
 
-using RegularizedLeastSquares, Flux
+using RegularizedLeastSquares
 
 using ImageTransformations
 
@@ -99,7 +99,7 @@ if params_general[:do_load_maps] && isfile(params_general[:b0_map_save_fullpath]
     num_slices = size(b0_maps, 3)
 else
     @info "Running cartesian_recon to retrieve maps (cartesian_sensitivity and b0_maps)"
-    include("cartesian_recon.jl")
+    cartesian_sensitivity, b0_maps = run_cartesian_recon(params_general)
     num_slices = size(b0_maps, 3)
 end
 

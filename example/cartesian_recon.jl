@@ -103,7 +103,7 @@ end
 @info "Calculating B0 Maps"
 slices = 1:length(slice_idx_array_cartesian)
 b0_maps = zeros(200, 200, num_slices)
-b0_method = "2D_2008" # Can be "Simple","2D_2008" or "3D_2020" (How do we incorporate this into the recon demo?)
+b0_method = "3D_2020" # Can be "Simple","2D_2008" or "3D_2020" (How do we incorporate this into the recon demo?)
 
 if b0_method == "2D_2008"
 
@@ -114,6 +114,7 @@ elseif b0_method == "3D_2020"
     b0_maps, times, out = b0map(
         reshape(cartesian_reco.data[:, :, :, :, 1, 1], (200, 200, num_slices,1, 2)),
         (TE1 / 1000.0, TE2 / 1000.0);
+        smap = ones(ComplexF64,size(b0_maps,1),size(b0_maps,2),size(b0_maps,3),1),
         track =true,
         chat = true,
         chat_iter = 2

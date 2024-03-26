@@ -115,7 +115,8 @@ elseif b0_method == "3D_2020"
 
     b0_maps, times, out = b0map(
         reshape(cartesian_reco.data[:, :, :, :, 1, 1], (200, 200, num_slices,1, 2)),
-        (TE1 / 1000.0, TE2 / 1000.0);
+        (TE1 / 1000.0, TE2 / 1000.0); 
+        smap = ones(size(b0_maps)),
         track =true,
         chat = true,
         chat_iter = 2
