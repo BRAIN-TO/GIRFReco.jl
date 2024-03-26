@@ -4,3 +4,5 @@ GIRFReco.code-workspace
 docs/build/
 docs/src/generated/
 .vscode/
+example/data.zip
+example/joss_data_zenodo/*
