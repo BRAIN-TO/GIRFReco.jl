@@ -6,6 +6,8 @@ You may find code details of the example script [here](https://brain-to.github.i
 
 Though other lower versions may still be compatible, our testing environment is Julia with version 1.9.3, and we recommend to use the same or higher version of Julia.
 
+We also recommend to leave at least 30 GB disk space for the deta of demonstration and all dependent Julia packages.
+
 ## Steps of Running the GIRFReco Example
 
 ### (1) Cloning the package
