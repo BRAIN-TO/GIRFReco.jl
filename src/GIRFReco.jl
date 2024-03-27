@@ -21,6 +21,7 @@ using FileIO
 using MRIBase
 using MRIFiles
 using MRICoilSensitivities
+using RegularizedLeastSquares
 using Flux
 # using MosaicViews
 
