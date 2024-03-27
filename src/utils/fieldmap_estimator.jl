@@ -1,6 +1,4 @@
 
-# using Flux
-
 """
 ml_cost(x::Matrix{T},y::Matrix{Complex{T}},z::Matrix{Complex{T}}, β)
 Calculates the ML estimator cost between an estimated phase map and the underlying multi-echo scan data

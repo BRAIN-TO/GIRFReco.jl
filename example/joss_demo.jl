@@ -16,13 +16,15 @@ The configuration file is [`recon_config_joss_demo.jl`](@__REPO_ROOT_URL__/docs/
 The necessary Julia packages needed for spiral reconstruction.
 =#
 
+# mktempdir(parent=tempdir(); prefix="jl_", cleanup=true) -> path
+
 #Our developed packages
 using GIRFReco, MRIGradients
 
 #MRIReco and its sub-packages
 using MRIReco, FileIO, MRIFiles, MRIBase, MRICoilSensitivities
 
-using RegularizedLeastSquares, Flux
+using RegularizedLeastSquares
 
 using ImageTransformations
 
@@ -38,7 +40,7 @@ Sample Data that works with this script can be found [here](https://doi.org/10.5
 Please download, extract and set the `root_project_path` as the top level folder (should be something like `/your/path/joss_data_zenodo/`)
 =#
 
-root_project_path = "/your/path/joss_data_zenodo/" # Root path of the data extracted from Zenodo
+root_project_path = "./joss_data_zenodo" # Root path of the data extracted from Zenodo
 include("recon_config_joss_demo.jl")
 
 plotlyjs()

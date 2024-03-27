@@ -11,6 +11,7 @@ using Printf
 using ROMEO
 using DelimitedFiles
 # using NIfTI
+using MRIFieldmaps
 using Unitful
 using AxisArrays
 using ImageUtils
@@ -19,6 +20,7 @@ using MRIGradients
 using FileIO
 using MRIBase
 using MRIFiles
+using Flux
 # using MosaicViews
 
 export plot_reconstruction,
@@ -40,8 +42,11 @@ export plot_reconstruction,
     load_map,
     shift_kspace!,
     estimate_b0_maps,
-    read_gradient_text_file
+    read_gradient_text_file,
+    run_cartesian_recon,
+    estimate_b0_maps
 
+include("utils/fieldmap_estimator.jl")
 include("utils/utils.jl")
 include("io/gradient_reader.jl")
 
