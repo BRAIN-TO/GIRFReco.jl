@@ -23,7 +23,7 @@ params_general[:do_save_recon] = true                # if true, saves reconstruc
 params_general[:do_plot_recon] = true                # if true, plots intermediate debugging and output recon figures (needs graphics, not recommended in multi-thread mode due to PyPlot)
 params_general[:do_process_map_scan] = true          # if true, compute sensitivity and B₀ maps from reconstructed Cartesian scan   
 params_general[:do_save_processed_map_scan] = false  # save ISMRMD file of preprocessed Cartesian data (before recon)
-params_general[:recon_id] = "v7"                     # unique identifier for the saved result files
+params_general[:recon_id] = "v1"                     # unique identifier for the saved result files
 params_general[:do_correct_with_b0_map] = true       # whether perform off-resonance correction
 params_general[:do_correct_with_girf_k1] = true      # whether perform 1st order GIRF correction
 params_general[:do_correct_with_girf_k0] = true      # whether perform 1st order GIRF correction
@@ -33,7 +33,7 @@ params_general[:do_normalize_recon] = false;         # if true, set the range of
 # General parameters for reconstruction:
 params_general[:num_adc_samples] = 15650             # total number of ADC points BEFORE the rewinder at the end of the spiral readout. Need to check with data. # 15504 for 523, 15655 for gradient 508
 params_general[:recon_size] = [200, 200, 1]          # the matrix size of the reconstructed images. Needs to specify 1 on Z dimension for 2D images
-params_general[:num_recon_iterations] = 40             # number of recon iterations (for both Cartesian and Spiral recon)
+params_general[:num_recon_iterations] = 80             # number of recon iterations (for both Cartesian and Spiral recon)
 params_general[:b0_map_beta] = 0.1             # for estimate_b0_maps, * `β` - Regularization parameter controlling roughness penalty (larger = smoother, default 5e-4)
 params_general[:saving_scalefactor] = 1.0e9    # typical range of recon intensities is 1e-7, rescale when saving, e.g., to 0...1000 roughly for fMRI analysis
 params_general[:num_virtual_coils] = 8                 # if perform coil compression, the number of coils to be compressed to
