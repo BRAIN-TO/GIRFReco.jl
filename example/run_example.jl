@@ -1,6 +1,7 @@
 using Pkg
 
 Pkg.activate(".")
+Pkg.instantiate()
 
 include("download_data.jl")
 
