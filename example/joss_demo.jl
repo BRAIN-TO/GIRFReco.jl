@@ -92,16 +92,16 @@ saved into files, which are loaded for future usage to save calculation time.
 This is controlled by `do_load_maps` in general parameters. 
 ===================================================#
 
-if params_general[:do_load_maps] && isfile(params_general[:b0_map_save_fullpath])
-    @info "Loading SENSE and B₀ maps from $(params_general[:sensitivity_save_fullpath]) and $(params_general[:b0_map_save_fullpath])"
-    cartesian_sensitivity = load_map(params_general[:sensitivity_save_fullpath]; do_split_phase = true)
-    b0_maps = load_map(params_general[:b0_map_save_fullpath])
-    num_slices = size(b0_maps, 3)
-else
+if ~(params_general[:do_load_maps] && isfile(params_general[:b0_map_save_fullpath]))
     @info "Running cartesian_recon to retrieve maps (cartesian_sensitivity and b0_maps)"
-    cartesian_sensitivity, b0_maps = run_cartesian_recon(params_general)
-    num_slices = size(b0_maps, 3)
+    run_cartesian_recon(params_general) # Only run when coil/B0 maps have not been calculated
 end
+
+# Load the maps of coil and B0 from the previously calculated NIfTI files.
+@info "Loading SENSE and B₀ maps from $(params_general[:sensitivity_save_fullpath]) and $(params_general[:b0_map_save_fullpath])"
+cartesian_sensitivity = load_map(params_general[:sensitivity_save_fullpath]; do_split_phase = true)
+b0_maps = load_map(params_general[:b0_map_save_fullpath])
+num_slices = size(b0_maps, 3)
 
 #=
 ### 3.2 Preparation of Spiral Reconstruction
@@ -246,7 +246,7 @@ sensitivity = mapslices(x -> imresize(x, params_spiral[:recon_size][1], params_s
 
 # Optional: Plot the sensitivity maps of each coil on a given slice.
 if params_general[:do_plot_recon]
-    plotlyjs()
+    plotlyjs(size=(1000, 800))
     plot_sense_maps(sensitivity, 20)
 end
 
@@ -341,7 +341,7 @@ end
 
 if params_general[:do_plot_recon]
     @info "Plotting Reconstruction"
-    plotlyjs()
+    plotlyjs(size=(1000, 800))
     plot_reconstruction(
         reco,
         1:length(selected_slice),

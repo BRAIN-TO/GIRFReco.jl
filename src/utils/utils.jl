@@ -1004,7 +1004,5 @@ function run_cartesian_recon(params_general)
     end
 
     @info "Successfully Completed cartesian_reconstruction"
-
-    return cartesian_sensitivity, b0_maps
-
+    
 end
