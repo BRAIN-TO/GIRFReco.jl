@@ -20,6 +20,7 @@ using MRIGradients
 using FileIO
 using MRIBase
 using MRIFiles
+using MRICoilSensitivities
 using Flux
 # using MosaicViews
 
