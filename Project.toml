@@ -1,7 +1,7 @@
 name = "GIRFReco"
 uuid = "cf1bd817-9e2d-403d-b1e7-15ef5a867bae"
 authors = ["Tim Wu <tim.wuzhe@gmail.com>"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 AxisArrays = "39de3d68-74b9-583c-8d2d-e117c070f3a9"
