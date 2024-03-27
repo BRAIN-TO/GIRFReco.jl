@@ -23,6 +23,8 @@ using MRIFiles
 using MRICoilSensitivities
 using RegularizedLeastSquares
 using Flux
+using MRIReco
+
 # using MosaicViews
 
 export plot_reconstruction,
