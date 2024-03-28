@@ -20,5 +20,5 @@ Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 RegularizedLeastSquares = "1e9c538a-f78c-5de5-8ffb-0b6dbe892d23"
 
 [compat]
-GIRFReco = "0.1.2"
+GIRFReco = "0.1.4"
 MRIReco = "0.7.1"
