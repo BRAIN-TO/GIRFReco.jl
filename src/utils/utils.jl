@@ -36,7 +36,7 @@ function plot_reconstruction(images, slices_index, b0; is_slice_interleaved = fa
     end
     magnitude_mosaic = mosaicview(magnitude_images, nrow = Int(floor(sqrt(num_slices))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    p1 = Plots.heatmap(magnitude_mosaic, show = true, title = "|Images|", color = :grays, aspectratio = :equal, ticks=:native,title_x=0.5)
+    p1 = Plots.heatmap(magnitude_mosaic, show = false, title = "|Images|", color = :grays, aspect_ratio = 1, colorbar=:none, grid=:none, showaxis=:false)
     display(p1)
 
     phase_images = angle.(images[:, :, reordered_slice_indices, 1, 1])
@@ -49,7 +49,7 @@ function plot_reconstruction(images, slices_index, b0; is_slice_interleaved = fa
     end
     phase_mosaic = mosaicview(phase_images, nrow = Int(floor(sqrt(num_slices))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    p2 = Plots.heatmap(phase_mosaic, show = true, title = "∠ Images", color = :plasma, aspectratio = :equal,ticks=:native,title_x=0.5)
+    p2 = Plots.heatmap(phase_mosaic, show = false, title = "∠ Images", color = :plasma, aspect_ratio = 1, colorbar=:none, grid=:none, showaxis=:false)
     display(p2)
 
     b0_map_images = mapslices(x -> x, b0, dims = [1, 2])
@@ -62,7 +62,7 @@ function plot_reconstruction(images, slices_index, b0; is_slice_interleaved = fa
     end
     b0_map_mosaic = mosaicview(b0_map_images[:, :, reordered_slice_indices], nrow = Int(floor(sqrt(num_slices))), npad = 5, rowmajor = true, fillvalue = 0)
 
-    p3 = Plots.heatmap(b0_map_mosaic, show = true, title = "B₀ Map Images", color = :plasma,ticks=:native, title_x=0.5)
+    p3 = Plots.heatmap(b0_map_mosaic, show = false, title = "B₀ Map Images", color = :plasma, aspect_ratio = 1, colorbar=:right, grid=:none, showaxis=:false)
     display(p3)
 end
 
@@ -112,10 +112,10 @@ function plot_sense_maps(sensitivity, num_channels; slice_index = 1)
     end
 
     magnitude_mosaic = mosaicview((abs.(sensitivity[:, :, slice_index, :])), nrow = Int(floor(sqrt(num_channels))), npad = 5, rowmajor = true, fillvalue = 0)
-    p4 = Plots.heatmap(magnitude_mosaic, show = true, title = "|Sensitivity|", color = :gnuplot2,ticks=:native,title_x=0.5)
+    p4 = Plots.heatmap(magnitude_mosaic, show = false, title = "|Sensitivity|", color = :gnuplot2, aspect_ratio = 1, colorbar=:none, grid=:none, showaxis=:false)
 
     phase_mosaic = mosaicview((angle.(sensitivity[:, :, slice_index, :])), nrow = Int(floor(sqrt(num_channels))), npad = 5, rowmajor = true, fillvalue = 0)
-    p5 = Plots.heatmap(phase_mosaic, show = true, title = "∠ Sensitivity", color = :plasma,ticks=:native,title_x=0.5)
+    p5 = Plots.heatmap(phase_mosaic, show = false, title = "∠ Sensitivity", color = :plasma, aspect_ratio = 1, colorbar=:none, grid=:none, showaxis=:false)
 
     display(p4)
     display(p5)
