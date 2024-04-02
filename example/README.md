@@ -24,31 +24,22 @@ Then enter the `example` folder:
 cd GIRFReco.jl/example
 ```
 
-Now you have two options to run the example script in Julia command-line or REPL.
+Alternatively, for the one who are using Visual Studio Code, simply open the `example` sub-folder from the Menu option `File -> Open Folder...`.
 
-### (2a) Run in Julia Command-line
 
-You can run the example script by simply executing the following command in the `example` folder:
+### (2) Run in Julia REPL
 
-```
-julia --project run_example.jl
-```
+We recommend to use Visual Studio Code with Julia extension (steps of installation can be found [here](https://code.visualstudio.com/docs/languages/julia)) to avoid possible image displaying issue, especially for those using SSH and X11 forwarding.
 
-If you only want to run data downloading part, run
+The Julia REPL can be launched from the Command Palette (For Windows and Linux: Press `Shift + Ctrl + P`; For Mac: Press `Shift + command + P`) by searching the command `Julia: start REPL`.
 
-```
-julia --project download_data.jl
-```
-
-### (2b) Run in Julia REPL
-
-Simpley execute the following command after launching REPL:
+In the launched REPL, simpley execute the following command after launching REPL to run the whole demonstration script (including data download):
 
 ```julia
-include("joss_demo.jl")
+include("run_example.jl")
 ```
 
-If you only want to run data downloading part, run
+If you only want to download the demonstration dataset, run:
 
 ```julia
 include("download_data.jl")
