@@ -6,7 +6,7 @@ You may find code details of the example script [here](https://brain-to.github.i
 
 Though other lower versions may still be compatible, our testing environment is Julia with version 1.9.3, and we recommend to use the same or higher version of Julia.
 
-We also recommend to leave at least 30 GB disk space for the deta of demonstration and all dependent Julia packages.
+We also recommend to leave at least 30 GB disk space for the data of demonstration and all dependent Julia packages.
 
 ## Steps of Running the GIRFReco Example
 
@@ -31,7 +31,7 @@ Alternatively, for the one who are using Visual Studio Code, simply open the `ex
 
 We recommend to use Visual Studio Code with Julia extension (steps of installation can be found [here](https://code.visualstudio.com/docs/languages/julia)) to avoid possible image displaying issue, especially for those using SSH and X11 forwarding.
 
-The Julia REPL can be launched from the Command Palette (For Windows and Linux: Press `Shift + Ctrl + P`; For Mac: Press `Shift + command + P`) by searching the command `Julia: start REPL`.
+The Julia REPL can be launched from the Command Palette (For Windows and Linux: Press `Shift + Ctrl + P`; For Mac: Press `Shift + Command + P`) by searching the command `Julia: Start REPL`.
 
 In the launched REPL, simpley execute the following command after launching REPL to run the whole demonstration script (including data download):
 
