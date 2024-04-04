@@ -8,6 +8,8 @@ Though other lower versions may still be compatible, our testing environment is 
 
 We also recommend to leave at least 30 GB disk space for the data of demonstration and all dependent Julia packages.
 
+The reconstructed Cartesian and Spiral images in NIfTI format will be in the folder `joss_data_zenodo/results`. We recommend to use [FSLeyes](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSLeyes) as the viewer to open them.
+
 ## Steps of Running the GIRFReco Example
 
 ### (1) Cloning the package
