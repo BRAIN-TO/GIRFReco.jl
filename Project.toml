@@ -1,6 +1,6 @@
 name = "GIRFReco"
 uuid = "cf1bd817-9e2d-403d-b1e7-15ef5a867bae"
-authors = ["Tim Wu <tim.wuzhe@gmail.com>", "Alexander Jaffray <alexander.jaffray@gmail.com>","Lars Kasper <lars.kasper@utoronto.ca>]
+authors = ["Tim Wu <tim.wuzhe@gmail.com>", "Alexander Jaffray <alexander.jaffray@gmail.com>","Lars Kasper <lars.kasper@utoronto.ca>"]
 version = "0.1.6"
 
 [deps]
