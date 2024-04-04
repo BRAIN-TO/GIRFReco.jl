@@ -49,7 +49,7 @@ include("download_data.jl")
 
 ### (3) After your first example running...
 
-"Watch a movie, or be part of one". You are also encouraged to be part of our repo by playing around with the [configuration file]([`recon_config_joss_demo.jl`](@__REPO_ROOT_URL__/example/recon_config_joss_demo.jl)) and see how (and why) the results are changed. For example:
+"Watch a movie, or be part of one". You are also encouraged to be part of our repo by playing around with the [configuration file]([`recon_config_joss_demo.jl`](./recon_config_joss_demo.jl)) and see how (and why) the results are changed. For example:
 
 (1) How the results change when we turn off the B₀ correction (by setting `do_correct_with_b0_map` as `false`)?
 
