@@ -325,8 +325,8 @@ function adjust_header!(raw, recon_size, num_samples, interleave_number, single_
         # raw.profiles[l].head.idx.kspace_encode_step_1 = 0
         raw.profiles[l].head.idx.kspace_encode_step_1 = interleave_number - 1 # IF MULTI-INTERLEAVE
 
-        # Set slice to 0 for singleslice, if it is not 0 then there will be an error
-        if single_slice
+        # Set the slice index header for the first slice as 0, otherwise the trajectory will be all zeros after converting from RawData to AcqData
+        if l == 1
             raw.profiles[l].head.idx.slice = 0
         end
 

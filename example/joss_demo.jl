@@ -65,7 +65,7 @@ idx_average = 1
 num_total_diffusion_directions = params_general[:num_total_diffusion_directions]
 
 ## Determine to reconstruct single-interleave data, or one interleave out of multi-interleave data.
-is_single_interleave = isa(params_general[:scan_fullpath], String)
+is_single_interleave = ~(length(params_general[:scan_fullpath]) > 1)
 
 #=
 Choose which interleave to be reconstructed. 
@@ -131,6 +131,10 @@ else
     selected_slice = sort(vec(slice_choice))
 end
 
+# Calculate slice index with spatially ascending order in the raw kspace data file.
+raw_temp  = RawAcquisitionData(ISMRMRDFile(params_general[:scan_fullpath][1]))
+slice_idx_array_spiral = get_slice_order(raw_temp, num_slices, (num_slices+1)*2, 2)
+
 #=
 Next we select the data we would like to reconstruct from the ISMRMRD file. 
 
@@ -187,11 +191,9 @@ they need to be reordered according to the slice order in the spiral RawAcqData.
 
 We only do these steps when they have not been done yet or it's specifically required.
 =#
-if reload_spiral_data || !(@isdefined imaging_acq_data) || !(@isdefined slice_idx_array_spiral)
+if reload_spiral_data || !(@isdefined imaging_acq_data)
     @info "Reading spiral data and merging interleaves"
     imaging_acq_data = merge_raw_interleaves(params_spiral, false)
-    raw_temp  = RawAcquisitionData(ISMRMRDFile(params_general[:scan_fullpath][1]))
-    slice_idx_array_spiral = get_slice_order(raw_temp, num_slices, (num_slices+1)*2, 2)
     b0_maps = b0_maps[:, :, invperm(slice_idx_array_spiral)]
     cartesian_sensitivity = cartesian_sensitivity[:, :, invperm(slice_idx_array_spiral), :]
 end
@@ -313,10 +315,6 @@ to perform final spiral image reconstruction.
 
 GC.gc() # Recommended to force triger garbage collection especially when encountering memory issues.
 
-# Reorder slices of the reconstructed images to an ascending order
-reco = reco[:,:,slice_idx_array_spiral[selected_slice]]
-resized_b0_maps = resized_b0_maps[:, :, slice_idx_array_spiral[selected_slice]]
-
 #=
 ## 4. Save and Plot the Results (Optional)
 
@@ -329,10 +327,9 @@ the file [utils.jl](@__REPO_ROOT_URL__/src/utils/utils.jl).
 if params_general[:do_save_recon]
     resolution_tmp = fieldOfView(imaging_acq_data)[1:2] ./ encodingSize(imaging_acq_data)
     resolution_mm = (resolution_tmp[1], resolution_tmp[2], fieldOfView(imaging_acq_data)[3] * (1 + params_general[:slice_distance_factor_percent] / 100.0)) #for 2D only, since FOV[3] is slice thickness then, but gap has to be observed
-    num_slices = numSlices(imaging_acq_data)
     save_map(
         params_general[:recon_save_fullpath],
-        params_general[:saving_scalefactor] * reco.data[:, :, slice_idx_array_spiral],
+        params_general[:saving_scalefactor] * reco.data[:, :, sortperm(invperm(slice_idx_array_spiral)[selected_slice])],
         resolution_mm;
         do_split_phase = true,
         do_normalize = params_general[:do_normalize_recon],
@@ -343,11 +340,11 @@ if params_general[:do_plot_recon]
     @info "Plotting Reconstruction"
     plotlyjs(size=(1000, 800))
     plot_reconstruction(
-        reco,
+        reco[:, :, sortperm(invperm(slice_idx_array_spiral)[selected_slice]), 1, 1, 1],
         1:length(selected_slice),
         resized_b0_maps,
         is_slice_interleaved = false,
-        rotation = 90,
+        rotation = 270,
     )
 end
 

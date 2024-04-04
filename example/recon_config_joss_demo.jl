@@ -94,7 +94,7 @@ params_general[:gradient_filename] = joinpath("gradients508.txt"); # File name f
 # Select here if you want to use the first spiral interleave or all 4 interleaves for reconstruction. We are selecting the first interleave as demo.
 # If you want a multi-interleave spiral reconstruction, remove the comment mark on the 2nd line.
 params_general[:scan_filename] = ["Spirals/meas_MID00072_FID06170_diffSpiral_508_Intl0_b2k_4Avg.mrd"] # ISMRMRD Raw k-space data for spiral acquisition [Input]
-#params_general[:scan_filename] = ["Spirals/meas_MID00072_FID06170_diffSpiral_508_Intl0_b2k_4Avg.mrd","Spirals/meas_MID00074_FID06172_diffSpiral_508_Intl1_b2k_4Avg.mrd","Spirals/meas_MID00076_FID06174_diffSpiral_508_Intl2_b2k_4Avg.mrd","Spirals/meas_MID00078_FID06176_diffSpiral_508_Intl3_b2k_4Avg.mrd"]
+# params_general[:scan_filename] = ["Spirals/meas_MID00072_FID06170_diffSpiral_508_Intl0_b2k_4Avg.mrd","Spirals/meas_MID00074_FID06172_diffSpiral_508_Intl1_b2k_4Avg.mrd","Spirals/meas_MID00076_FID06174_diffSpiral_508_Intl2_b2k_4Avg.mrd","Spirals/meas_MID00078_FID06176_diffSpiral_508_Intl3_b2k_4Avg.mrd"]
 
 params_general[:scan_filename_stem] = "meas_MID00072_FID06170_diffSpiral_508_Intl0_b2k_4Avg.mrd" # Main file name when saving the result
 params_general[:processed_map_scan_filename] = "processed_cartesian_data.h5" # file name for preprocessed data (remove oversampling, permute dimensions wrt MRIReco) [Output]
