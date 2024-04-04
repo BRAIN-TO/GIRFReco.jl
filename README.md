@@ -4,9 +4,9 @@
 
 ## Introduction
 
-This package provides an image reconstruction pipeline for real-world non-Cartesian MRI, especially on spiral diffusion imaging. It is completely implemented in Julia using original code and external packages, e.g., [MRIReco.jl](https://magneticresonanceimaging.github.io/MRIReco.jl/latest/) for the off-resonance (B<sub>0</sub>) corrections & core iterative reconstruction tasks, and [MRIGradients.jl](https://github.com/BRAIN-TO/MRIGradients.jl) for the correction of gradient waveforms due to system imperfections via the Gradient Impulse Response Function (GIRF).
+This package provides an image reconstruction pipeline for real-world non-Cartesian MRI, designed particularly for spiral diffusion imaging. It is completely implemented in Julia using original code and external packages, e.g., [MRIReco.jl](https://magneticresonanceimaging.github.io/MRIReco.jl/latest/) for the off-resonance (B<sub>0</sub>) corrections & core iterative reconstruction tasks, and [MRIGradients.jl](https://github.com/BRAIN-TO/MRIGradients.jl) for the correction of gradient waveforms due to system imperfections via the Gradient Impulse Response Function (GIRF).
 
-This repository includes working [examples](./docs/lit/examples/) for spiral reconstruction with GIRF correction of trajectory (kx-ky-kz, or k<sub>1</sub> as the first order GIRF) and B<sub>0</sub> eddy currents (k<sub>0</sub> as zeroth order GIRF), iterative reconstruction (cg-SENSE) and a Cartesian reconstruction example for coil sensitivity and off-resonance map calculation.
+This repository includes working [examples](./docs/lit/examples/) for spiral reconstruction with GIRF correction of k-space trajectory (kx-ky-kz, or k<sub>1</sub> as the first order GIRF) and B<sub>0</sub> eddy currents (k<sub>0</sub> as zeroth order GIRF), iterative reconstruction (cg-SENSE) and a Cartesian reconstruction example for coil sensitivity and off-resonance map calculation.
 
 The data for the phantom reconstruction [`joss_demo.jl`](./docs/lit/examples/joss_demo.jl) is publicly available [here](https://www.doi.org/10.5281/zenodo.7779045). The path of the data, `params_general[:project_path]`, needs to be modified accordingly in the [config file](./docs/lit/examples/recon_config_joss_demo.jl).
 
