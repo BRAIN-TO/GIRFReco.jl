@@ -46,3 +46,15 @@ If you only want to download the demonstration dataset, run:
 ```julia
 include("download_data.jl")
 ```
+
+### (3) After your first example running...
+
+"Watch a movie, or be part of one". You are also encouraged to be part of our repo by playing around with the [configuration file]([`recon_config_joss_demo.jl`](@__REPO_ROOT_URL__/example/recon_config_joss_demo.jl)) and see how (and why) the results are changed. For example:
+
+(1) How the results change when we turn off the B₀ correction (by setting `do_correct_with_b0_map` as `false`)?
+
+(2) What will the images look like when we turn off the zeroth and/or the first order GIRF correction (set `do_correct_with_girf_k0` and/or `do_correct_with_girf_k1` as `false`)?
+
+(3) Try reconstruction with multiple spiral interleaves by enabling line 97.
+
+And so many more options to explore...
