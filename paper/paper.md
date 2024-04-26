@@ -26,7 +26,7 @@ authors:
     orcid: 0000-0002-2813-5930
     equal-contrib: False # (This is how you can denote equal contributions between multiple authors)
     corresponding: False # (This is how to denote the corresponding author)
-    affiliation: "1, 4" # (Multiple affiliations must be quoted)
+    affiliation: "1, 4, 5" # (Multiple affiliations must be quoted)
   - name: Lars Kasper
     orcid: 0000-0001-7667-603X
     equal-contrib: False # (This is how you can denote equal contributions between multiple authors)
@@ -41,7 +41,9 @@ affiliations:
    index: 3
  - name: Department of Medical Biophysics, University of Toronto, Canada
    index: 4
-date: 21 April 2023
+ - name: Physical Sciences, Sunnybrook Research Institute, Sunnybrook Health Sciences Centre, Toronto, ON, Canada
+   index: 5
+date: 26 April 2024
 bibliography: paper.bib
 
 # Optional fields if submitting to a AAS journal too, see this blog post:
