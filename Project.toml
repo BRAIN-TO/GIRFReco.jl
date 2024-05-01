@@ -1,6 +1,6 @@
 name = "GIRFReco"
 uuid = "cf1bd817-9e2d-403d-b1e7-15ef5a867bae"
-authors = ["Tim Wu <tim.wuzhe@gmail.com>", "Alexander Jaffray <alexander.jaffray@gmail.com>","Lars Kasper <lars.kasper@utoronto.ca>"]
+authors = ["Tim Wu <tim.wuzhe@gmail.com>", "Alexander Jaffray <alexander.jaffray@gmail.com>", "Lars Kasper <lars.kasper@utoronto.ca>"]
 version = "0.1.7"
 
 [deps]
@@ -57,7 +57,7 @@ NFFT = "0.13.3"
 NFFTTools = "0.2.6"
 Plots = "1.38.16"
 ROMEO = "1.0.1"
-RegularizedLeastSquares = "0.9.1"
+RegularizedLeastSquares = "0.9.1, 0.14"
 Scratch = "1.2.0"
 Statistics = "1.9.0"
 StatsBase = "0.33.21"
