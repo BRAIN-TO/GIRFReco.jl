@@ -1,0 +1,59 @@
+cff-version: "1.2.0"
+authors:
+- family-names: Jaffray
+  given-names: Alexander
+  orcid: "https://orcid.org/0000-0002-9571-1838"
+- family-names: Wu
+  given-names: Zhe
+  orcid: "https://orcid.org/0000-0002-2079-5977"
+- family-names: Vannesjo
+  given-names: S. Johanna
+  orcid: "https://orcid.org/0000-0003-2432-4192"
+- family-names: Uludağ
+  given-names: Kâmil
+  orcid: "https://orcid.org/0000-0002-2813-5930"
+- family-names: Kasper
+  given-names: Lars
+  orcid: "https://orcid.org/0000-0001-7667-603X"
+contact:
+- family-names: Jaffray
+  given-names: Alexander
+  orcid: "https://orcid.org/0000-0002-9571-1838"
+- family-names: Wu
+  given-names: Zhe
+  orcid: "https://orcid.org/0000-0002-2079-5977"
+doi: 10.5281/zenodo.11075548
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Jaffray
+    given-names: Alexander
+    orcid: "https://orcid.org/0000-0002-9571-1838"
+  - family-names: Wu
+    given-names: Zhe
+    orcid: "https://orcid.org/0000-0002-2079-5977"
+  - family-names: Vannesjo
+    given-names: S. Johanna
+    orcid: "https://orcid.org/0000-0003-2432-4192"
+  - family-names: Uludağ
+    given-names: Kâmil
+    orcid: "https://orcid.org/0000-0002-2813-5930"
+  - family-names: Kasper
+    given-names: Lars
+    orcid: "https://orcid.org/0000-0001-7667-603X"
+  date-published: 2024-05-02
+  doi: 10.21105/joss.05877
+  issn: 2475-9066
+  issue: 97
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 5877
+  title: "GIRFReco.jl: An Open-Source Pipeline for Spiral Magnetic
+    Resonance Image (MRI) Reconstruction in Julia"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.05877"
+  volume: 9
+title: "GIRFReco.jl: An Open-Source Pipeline for Spiral Magnetic
+  Resonance Image (MRI) Reconstruction in Julia"
