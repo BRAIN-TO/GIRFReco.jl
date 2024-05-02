@@ -1,5 +1,6 @@
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://brain-to.github.io/GIRFReco)
 [![codecov](https://codecov.io/gh/BRAIN-TO/GIRFReco.jl/graph/badge.svg?token=7E3WK1GKR3)](https://codecov.io/gh/BRAIN-TO/GIRFReco.jl)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.05877/status.svg)](https://doi.org/10.21105/joss.05877)
 # GIRFReco.jl: An open-source pipeline for spiral MRI Reconstruction in Julia
 
 ## Introduction
