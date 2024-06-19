@@ -24,6 +24,7 @@ using MRICoilSensitivities
 using RegularizedLeastSquares
 using Flux
 using MRIReco
+using MRIFieldmaps
 
 # using MosaicViews
 
