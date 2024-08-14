@@ -1,6 +1,6 @@
 name = "GIRFReco"
 uuid = "cf1bd817-9e2d-403d-b1e7-15ef5a867bae"
-authors = ["Tim Wu <tim.wuzhe@gmail.com>", "Alexander Jaffray <alexander.jaffray@gmail.com>","Lars Kasper <lars.kasper@utoronto.ca>"]
+authors = ["Tim Wu <tim.wuzhe@gmail.com>", "Alexander Jaffray <alexander.jaffray@gmail.com>", "Lars Kasper <lars.kasper@utoronto.ca>"]
 version = "0.1.7"
 
 [deps]
@@ -50,7 +50,7 @@ MRICoilSensitivities = "0.1"
 MRIFieldmaps = "0.0.3"
 MRIFiles = "0.1"
 MRIGradients = "0.1.2"
-MRIReco = "0.7.1"
+MRIReco = "0.7.1, 0.9"
 Measures = "0.3.2"
 MosaicViews = "0.3.4"
 NFFT = "0.13.3"
