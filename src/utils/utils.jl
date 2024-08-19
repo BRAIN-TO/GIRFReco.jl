@@ -981,7 +981,7 @@ function run_cartesian_recon(params_general)
         b0_maps, times, out = b0map(
             reshape(cartesian_reco.data[:, :, :, :, 1, 1], (200, 200, num_slices,1, 2)),
             (TE1 / 1000.0, TE2 / 1000.0); 
-            smap = ones(size(b0_maps)),
+            smap = ones(ComplexF32,size(b0_maps,1),size(b0_maps,2),size(b0_maps,3),1),
             track =true,
             chat = true,
             chat_iter = 2
