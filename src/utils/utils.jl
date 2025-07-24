@@ -548,6 +548,13 @@ function merge_raw_interleaves(params, output_raw)
 
     end
 
+    # Correct raw data reading if necessary
+    for ll = 1:length(raw_data.profiles)
+
+        raw_data.profiles[ll].head.trajectory_dimensions = 2
+
+    end
+
     if output_raw
 
         # return the RawAcquisition data object (missing some corrections but maybe better for some users)
